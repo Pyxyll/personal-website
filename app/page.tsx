@@ -1,103 +1,204 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect } from 'react'
+import TypeWriter from '@/components/TypeWriter'
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showContent, setShowContent] = useState(false)
+  const [bootSequence, setBootSequence] = useState(true)
+  const [bootMessages, setBootMessages] = useState<string[]>([])
+  const [currentBootIndex, setCurrentBootIndex] = useState(0)
+  const [showStatusCommand, setShowStatusCommand] = useState(false)
+  const [showStatusOutput, setShowStatusOutput] = useState(false)
+  const [showContactCommand, setShowContactCommand] = useState(false)
+  const [showContactOutput, setShowContactOutput] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const bootSequenceMessages = [
+    "Loading kernel modules...",
+    "[  OK  ] Started Load Kernel Modules",
+    "[  OK  ] Started Remount Root and Kernel File Systems",
+    "[  OK  ] Started Load/Save Random Seed",
+    "[  OK  ] Started Create System Users",
+    "[  OK  ] Started Create Static Device Nodes in /dev",
+    "[  OK  ] Reached target Local File Systems (Pre)",
+    "[  OK  ] Mounting /tmp...",
+    "[  OK  ] Mounting /var/tmp...",
+    "[  OK  ] Started File System Check on Root Device",
+    "[  OK  ] Started udev Kernel Device Manager",
+    "[  OK  ] Started Network Time Synchronization",
+    "[  OK  ] Started Update UTMP about System Boot/Shutdown",
+    "[  OK  ] Reached target System Time Set",
+    "[  OK  ] Started Create Volatile Files and Directories",
+    "[  OK  ] Started Network Manager",
+    "[  OK  ] Started OpenSSH server daemon",
+    "[  OK  ] Started Authorization Manager",
+    "[  OK  ] Reached target Network",
+    "[  OK  ] Reached target Network is Online",
+    "[  OK  ] Started Docker Application Container Engine",
+    "[  OK  ] Started Portfolio Application Service",
+    "[  OK  ] Reached target Multi-User System",
+    "Portfolio System v2.0.1 ready."
+  ]
+
+  useEffect(() => {
+    if (bootSequence && currentBootIndex < bootSequenceMessages.length) {
+      const delay = currentBootIndex === 0 ? 300 : Math.random() * 100 + 50
+      const timer = setTimeout(() => {
+        setBootMessages(prev => [...prev, bootSequenceMessages[currentBootIndex]])
+        setCurrentBootIndex(prev => prev + 1)
+      }, delay)
+      return () => clearTimeout(timer)
+    } else if (currentBootIndex >= bootSequenceMessages.length) {
+      const finalTimer = setTimeout(() => {
+        setBootSequence(false)
+        setTimeout(() => {
+          setShowContent(true)
+          // Start the command sequence
+          setTimeout(() => {
+            setShowStatusCommand(true)
+          }, 300)
+        }, 100)
+      }, 400)
+      return () => clearTimeout(finalTimer)
+    }
+  }, [bootSequence, currentBootIndex, bootSequenceMessages])
+
+  // Handle sequential command display
+  useEffect(() => {
+    if (showStatusCommand && !showStatusOutput) {
+      const timer = setTimeout(() => {
+        setShowStatusOutput(true)
+        setTimeout(() => {
+          setShowContactCommand(true)
+        }, 1500)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [showStatusCommand, showStatusOutput])
+
+  useEffect(() => {
+    if (showContactCommand && !showContactOutput) {
+      const timer = setTimeout(() => {
+        setShowContactOutput(true)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [showContactCommand, showContactOutput])
+
+  return (
+    <div className="min-h-screen font-mono" style={{ backgroundColor: 'var(--ctp-base)' }}>
+      <div className="h-screen m-4 p-6 border-2 border-solid" style={{ 
+        color: 'var(--ctp-text)',
+        borderColor: 'var(--ctp-surface0)'
+      }}>
+      {bootSequence ? (
+        <div className="space-y-1 text-sm h-full overflow-y-auto">
+          <div className="mb-2" style={{ color: 'var(--ctp-sapphire)' }}>
+            Dylan Collins v5.0.1 (Linux kernel 6.5.0-portfolio)
+          </div>
+          <div className="mb-4" style={{ color: 'var(--ctp-subtext1)' }}>
+            Copyright (c) 2025 Dylan Collins. All rights reserved.
+          </div>
+          
+          {bootMessages.map((message, index) => (
+            <div 
+              key={index} 
+              className="font-mono"
+              style={{ 
+                color: message.includes('[  OK  ]') ? 'var(--ctp-green)' : 
+                       message.includes('Loading') ? 'var(--ctp-yellow)' :
+                       message.includes('ready') ? 'var(--ctp-mauve)' :
+                       'var(--ctp-subtext0)' 
+              }}
+            >
+              {message}
+            </div>
+          ))}
+          
+          {currentBootIndex < bootSequenceMessages.length && (
+            <div className="flex items-center mt-2">
+              <span style={{ color: 'var(--ctp-yellow)' }}>●</span>
+              <span className="ml-2 text-sm" style={{ color: 'var(--ctp-subtext1)' }}>
+                Initializing...
+              </span>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ) : !showContent ? (
+        <div className="flex items-center space-x-2">
+          <span style={{ color: 'var(--ctp-green)' }}>user@portfolio</span>
+          <span style={{ color: 'var(--ctp-text)' }}>:</span>
+          <span style={{ color: 'var(--ctp-blue)' }}>~</span>
+          <span style={{ color: 'var(--ctp-text)' }}>$ </span>
+          <span className="terminal-cursor"></span>
+        </div>
+      ) : (
+        <div className={`transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="mb-2 text-sm" style={{ color: 'var(--ctp-sapphire)' }}>
+            Portfolio OS 2.0.1 LTS (GNU/Linux 6.5.0-portfolio x86_64)
+          </div>
+          <div className="mb-6 text-xs" style={{ color: 'var(--ctp-subtext1)' }}>
+            Last login: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()} from 127.0.0.1
+          </div>
+
+          {showStatusCommand && (
+            <div className="mb-2">
+              <span style={{ color: 'var(--ctp-green)' }}>user@portfolio</span>
+              <span style={{ color: 'var(--ctp-text)' }}>:</span>
+              <span style={{ color: 'var(--ctp-blue)' }}>~</span>
+              <span style={{ color: 'var(--ctp-text)' }}>$ </span>
+              <TypeWriter 
+                text="status" 
+                style={{ color: 'var(--ctp-text)' }}
+                delay={100}
+              />
+            </div>
+          )}
+          
+          {showStatusOutput && (
+            <div className="mb-6 text-sm" style={{ color: 'var(--ctp-mauve)' }}>
+              Something cool is on the way
+            </div>
+          )}
+
+          {showContactCommand && (
+            <div className="mb-2">
+              <span style={{ color: 'var(--ctp-green)' }}>user@portfolio</span>
+              <span style={{ color: 'var(--ctp-text)' }}>:</span>
+              <span style={{ color: 'var(--ctp-blue)' }}>~</span>
+              <span style={{ color: 'var(--ctp-text)' }}>$ </span>
+              <TypeWriter 
+                text="./contact" 
+                style={{ color: 'var(--ctp-text)' }}
+                delay={100}
+              />
+            </div>
+          )}
+          
+          {showContactOutput && (
+            <div className="mb-6 text-sm">
+              <a 
+                href="mailto:dylan@dylancollins.me?subject=Notify me when ready"
+                style={{ color: 'var(--ctp-sapphire)' }}
+                className="hover:underline"
+              >
+                dylan@dylancollins.me
+              </a>
+            </div>
+          )}
+
+          {showContactOutput && (
+            <div className="flex">
+              <span style={{ color: 'var(--ctp-green)' }}>user@portfolio</span>
+              <span style={{ color: 'var(--ctp-text)' }}>:</span>
+              <span style={{ color: 'var(--ctp-blue)' }}>~</span>
+              <span style={{ color: 'var(--ctp-text)' }}>$ </span>
+              <span className="terminal-cursor"></span>
+            </div>
+          )}
+        </div>
+      )}
+      </div>
     </div>
   );
 }
