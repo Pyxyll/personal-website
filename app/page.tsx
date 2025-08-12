@@ -178,7 +178,7 @@ export default function Home() {
           {showContactOutput && (
             <div className="mb-6 text-sm">
               <a 
-                href="mailto:dylan@dylancollins.me?subject=Notify me when ready"
+                href="mailto:dylan@dylancollins.me"
                 style={{ color: 'var(--ctp-sapphire)' }}
                 className="hover:underline"
               >
