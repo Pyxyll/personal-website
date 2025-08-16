@@ -104,6 +104,16 @@ body {
   animation: blink 1s infinite;
 }
 
+.terminal-cursor-small {
+  display: inline-block;
+  width: 0.5px;
+  height: 4px;
+  background: #cba6f7;
+  animation: blink-stable 1s infinite;
+  transform: translateZ(0);
+  will-change: opacity;
+}
+
 .typing-effect {
   overflow: hidden;
   white-space: nowrap;
@@ -118,6 +128,17 @@ body {
 @keyframes blink {
   0%, 50% { opacity: 1 }
   51%, 100% { opacity: 0 }
+}
+
+@keyframes blink-stable {
+  0%, 50% { 
+    opacity: 1;
+    transform: translateZ(0);
+  }
+  51%, 100% { 
+    opacity: 0;
+    transform: translateZ(0);
+  }
 }
 
 .blink {
