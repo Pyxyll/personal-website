@@ -1,9 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import TypeWriter from '@/components/TypeWriter'
-import CRTScreen from '@/components/CRTScreen'
 
 const ComputerScene = dynamic(() => import('@/components/ComputerScene'), { 
   ssr: false,
@@ -11,9 +8,5 @@ const ComputerScene = dynamic(() => import('@/components/ComputerScene'), {
 })
 
 export default function Home() {
-  const handleBootComplete = () => {
-    // Boot sequence now happens on the CRT monitor
-  }
-
-  return <ComputerScene onBootComplete={handleBootComplete} />
+  return <ComputerScene />
 }

@@ -2,14 +2,27 @@
 
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, Box, Cylinder, Plane, Html } from '@react-three/drei'
-import { Suspense, useRef, useState, useEffect } from 'react'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
+import { Suspense, useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import { useSoundEffect } from './SoundEffects'
 
-function CameraController({ targetPosition, targetLookAt, animate, onAnimationComplete, controlsDisabled }) {
+function CameraController({ 
+  targetPosition, 
+  targetLookAt, 
+  animate, 
+  onAnimationComplete, 
+  controlsDisabled 
+}: {
+  targetPosition: THREE.Vector3 | null
+  targetLookAt: THREE.Vector3 | null
+  animate: boolean
+  onAnimationComplete?: () => void
+  controlsDisabled: boolean
+}) {
   const { camera, gl } = useThree()
-  const controlsRef = useRef()
-  const animationRef = useRef()
+  const controlsRef = useRef<OrbitControlsImpl | null>(null)
+  const animationRef = useRef<number | null>(null)
   const isAnimatingRef = useRef(false)
 
   useEffect(() => {
@@ -23,12 +36,12 @@ function CameraController({ targetPosition, targetLookAt, animate, onAnimationCo
       const animationDuration = 2000 // 2 seconds
       const startTime = performance.now()
 
-      const animateCamera = (currentTime) => {
+      const animateCamera = (currentTime: number) => {
         const elapsed = currentTime - startTime
         animationProgress = Math.min(elapsed / animationDuration, 1)
         
         // Smooth easing function
-        const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
+        const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
         const smoothProgress = easeInOutCubic(animationProgress)
         
         // Interpolate camera position
@@ -84,7 +97,8 @@ function CRTMonitor({
   showStatusCommand, 
   showStatusOutput, 
   showContactCommand, 
-  showContactOutput 
+  showContactOutput,
+  onMonitorClick 
 }: { 
   isPoweredOn: boolean,
   showTerminal: boolean,
@@ -95,12 +109,19 @@ function CRTMonitor({
   showStatusCommand: boolean,
   showStatusOutput: boolean,
   showContactCommand: boolean,
-  showContactOutput: boolean
+  showContactOutput: boolean,
+  onMonitorClick?: () => void
 }) {
   return (
     <group position={[0, 1.5, 0]}>
       {/* Monitor case */}
-      <Box args={[2.5, 2, 2]} castShadow>
+      <Box 
+        args={[2.5, 2, 2]} 
+        castShadow
+        onClick={isPoweredOn && onMonitorClick ? onMonitorClick : undefined}
+        onPointerOver={isPoweredOn && onMonitorClick ? (e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' } : undefined}
+        onPointerOut={isPoweredOn && onMonitorClick ? (e) => { e.stopPropagation(); document.body.style.cursor = 'auto' } : undefined}
+      >
         <meshStandardMaterial color="#888888" roughness={0.8} metalness={0.2} />
       </Box>
       
@@ -120,19 +141,19 @@ function CRTMonitor({
       {showTerminal && (
         <Html
           transform
-          position={[0, 0, 1.02]}
+          position={[0, 0, 1.01]}
           occlude="blending"
           style={{
-            width: '100px',
-            height: '75px',
+            width: '85px',
+            height: '65px',
             backgroundColor: 'black',
             color: '#00ff00',
             fontFamily: 'monospace',
-            fontSize: '4px',
-            padding: '4px',
+            fontSize: '2.5px',
+            padding: '2px',
             overflow: 'hidden',
-            border: '0.5px solid #00ff00',
-            boxShadow: '0 0 3px #00ff00',
+            border: '0.3px solid #00ff00',
+            boxShadow: '0 0 2px #00ff00',
             transform: 'scale(1)',
             transformOrigin: 'center',
             imageRendering: 'pixelated',
@@ -144,10 +165,10 @@ function CRTMonitor({
         >
           {bootSequence ? (
             <div style={{ lineHeight: '1' }}>
-              <div style={{ color: '#74c7ec', marginBottom: '2px', fontSize: '4px' }}>
+              <div style={{ color: '#74c7ec', marginBottom: '1px', fontSize: '2.5px' }}>
                 Dylan Collins v5.0.1 (Linux kernel 6.5.0-portfolio)
               </div>
-              <div style={{ color: '#bac2de', marginBottom: '3px', fontSize: '3px' }}>
+              <div style={{ color: '#bac2de', marginBottom: '2px', fontSize: '2px' }}>
                 Copyright (c) 2025 Dylan Collins. All rights reserved.
               </div>
               
@@ -159,8 +180,8 @@ function CRTMonitor({
                            message.includes('Loading') ? '#f9e2af' :
                            message.includes('ready') ? '#cba6f7' :
                            '#a6adc8',
-                    fontSize: '3px',
-                    marginBottom: '0.2px'
+                    fontSize: '2px',
+                    marginBottom: '0.1px'
                   }}
                 >
                   {message}
@@ -169,32 +190,32 @@ function CRTMonitor({
               
               {currentBootIndex < bootMessages.length && (
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '2px' }}>
-                  <span style={{ color: '#f9e2af', fontSize: '3px' }}>●</span>
-                  <span style={{ marginLeft: '2px', fontSize: '3px', color: '#bac2de' }}>
+                  <span style={{ color: '#f9e2af', fontSize: '2px' }}>●</span>
+                  <span style={{ marginLeft: '1px', fontSize: '2px', color: '#bac2de' }}>
                     Initializing...
                   </span>
                 </div>
               )}
             </div>
           ) : !showContent ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1px', fontSize: '3px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5px', fontSize: '2px' }}>
               <span style={{ color: '#a6e3a1' }}>user@portfolio</span>
               <span style={{ color: '#cdd6f4' }}>:</span>
               <span style={{ color: '#89b4fa' }}>~</span>
               <span style={{ color: '#cdd6f4' }}>$ </span>
-              <span style={{ display: 'inline-block', width: '0.5px', height: '4px', backgroundColor: '#cba6f7' }}></span>
+              <span style={{ display: 'inline-block', width: '0.3px', height: '2.5px', backgroundColor: '#cba6f7' }}></span>
             </div>
           ) : (
             <div>
-              <div style={{ marginBottom: '2px', fontSize: '4px', color: '#74c7ec' }}>
+              <div style={{ marginBottom: '1px', fontSize: '2.5px', color: '#74c7ec' }}>
                 Portfolio OS 2.0.1 LTS (GNU/Linux 6.5.0-portfolio x86_64)
               </div>
-              <div style={{ marginBottom: '4px', fontSize: '3px', color: '#bac2de' }}>
+              <div style={{ marginBottom: '2px', fontSize: '2px', color: '#bac2de' }}>
                 Last login: {new Date().toLocaleDateString()} from 127.0.0.1
               </div>
 
               {showStatusCommand && (
-                <div style={{ marginBottom: '2px', fontSize: '3px' }}>
+                <div style={{ marginBottom: '1px', fontSize: '2px' }}>
                   <span style={{ color: '#a6e3a1' }}>user@portfolio</span>
                   <span style={{ color: '#cdd6f4' }}>:</span>
                   <span style={{ color: '#89b4fa' }}>~</span>
@@ -203,13 +224,13 @@ function CRTMonitor({
               )}
               
               {showStatusOutput && (
-                <div style={{ marginBottom: '4px', fontSize: '3px', color: '#cba6f7' }}>
+                <div style={{ marginBottom: '2px', fontSize: '2px', color: '#cba6f7' }}>
                   Something cool is on the way
                 </div>
               )}
 
               {showContactCommand && (
-                <div style={{ marginBottom: '2px', fontSize: '3px' }}>
+                <div style={{ marginBottom: '1px', fontSize: '2px' }}>
                   <span style={{ color: '#a6e3a1' }}>user@portfolio</span>
                   <span style={{ color: '#cdd6f4' }}>:</span>
                   <span style={{ color: '#89b4fa' }}>~</span>
@@ -218,7 +239,7 @@ function CRTMonitor({
               )}
               
               {showContactOutput && (
-                <div style={{ marginBottom: '4px', fontSize: '3px' }}>
+                <div style={{ marginBottom: '2px', fontSize: '2px' }}>
                   <a 
                     href="mailto:dylan@dylancollins.me"
                     style={{ color: '#74c7ec', textDecoration: 'none' }}
@@ -229,12 +250,12 @@ function CRTMonitor({
               )}
 
               {showContactOutput && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1px', fontSize: '3px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5px', fontSize: '2px' }}>
                   <span style={{ color: '#a6e3a1' }}>user@portfolio</span>
                   <span style={{ color: '#cdd6f4' }}>:</span>
                   <span style={{ color: '#89b4fa' }}>~</span>
                   <span style={{ color: '#cdd6f4' }}>$ </span>
-                  <span style={{ display: 'inline-block', width: '0.5px', height: '4px', backgroundColor: '#cba6f7' }}></span>
+                  <span style={{ display: 'inline-block', width: '0.3px', height: '2.5px', backgroundColor: '#cba6f7' }}></span>
                 </div>
               )}
             </div>
@@ -380,7 +401,7 @@ function Room() {
   )
 }
 
-export default function ComputerScene({ onBootComplete }: { onBootComplete: () => void }) {
+export default function ComputerScene() {
   const [isPoweredOn, setIsPoweredOn] = useState(false)
   const [bootSequence, setBootSequence] = useState(false)
   const [bootMessages, setBootMessages] = useState<string[]>([])
@@ -393,8 +414,8 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
   
   // Camera animation state
   const [animateCamera, setAnimateCamera] = useState(false)
-  const [cameraTarget, setCameraTarget] = useState(null)
-  const [cameraLookAt, setCameraLookAt] = useState(null)
+  const [cameraTarget, setCameraTarget] = useState<THREE.Vector3 | null>(null)
+  const [cameraLookAt, setCameraLookAt] = useState<THREE.Vector3 | null>(null)
   const [showTerminal, setShowTerminal] = useState(false)
   const [isTerminalFocused, setIsTerminalFocused] = useState(false)
   const [isZoomingOut, setIsZoomingOut] = useState(false)
@@ -402,7 +423,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
   const { playPowerButtonSound, playCRTHum, playCRTClick } = useSoundEffect()
   const crtHumStopRef = useRef<(() => void) | null>(null)
 
-  const bootSequenceMessages = [
+  const bootSequenceMessages = useMemo(() => [
     "Loading kernel modules...",
     "[  OK  ] Started Load Kernel Modules",
     "[  OK  ] Started Remount Root and Kernel File Systems",
@@ -427,7 +448,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
     "[  OK  ] Started Portfolio Application Service",
     "[  OK  ] Reached target Multi-User System",
     "Portfolio System v2.0.1 ready."
-  ]
+  ], [])
 
   const handlePowerButton = () => {
     playPowerButtonSound()
@@ -478,7 +499,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
       setIsTerminalFocused(false)
       setIsZoomingOut(false)
     } else if (isPoweredOn && !bootSequence && !showTerminal) {
-      // Finished zooming in - start terminal and lock controls
+      // Finished zooming in for first time - start terminal and lock controls
       setShowTerminal(true)
       setIsTerminalFocused(true)
       setTimeout(() => {
@@ -489,14 +510,26 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
         }
         setBootSequence(true)
       }, 500) // Small delay after camera stops
+    } else if (isPoweredOn && showTerminal && !isTerminalFocused) {
+      // Finished zooming back in after ESC - lock controls again
+      setIsTerminalFocused(true)
     }
   }
 
-  const handleEscapeToOverview = () => {
+  const handleEscapeToOverview = useCallback(() => {
     if (isTerminalFocused) {
       setIsZoomingOut(true)
       setCameraTarget(new THREE.Vector3(0, 3, 8))
       setCameraLookAt(new THREE.Vector3(0, 0, 0))
+      setAnimateCamera(true)
+    }
+  }, [isTerminalFocused])
+
+  const handleMonitorClick = () => {
+    if (isPoweredOn && !isTerminalFocused && !animateCamera) {
+      // Zoom back into terminal view
+      setCameraTarget(new THREE.Vector3(0, 1.5, 3))
+      setCameraLookAt(new THREE.Vector3(0, 1.5, 0))
       setAnimateCamera(true)
     }
   }
@@ -548,7 +581,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
 
   // ESC key handler
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         handleEscapeToOverview()
       }
@@ -558,7 +591,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isTerminalFocused])
+  }, [handleEscapeToOverview])
 
   useEffect(() => {
     return () => {
@@ -653,6 +686,7 @@ export default function ComputerScene({ onBootComplete }: { onBootComplete: () =
             showStatusOutput={showStatusOutput}
             showContactCommand={showContactCommand}
             showContactOutput={showContactOutput}
+            onMonitorClick={handleMonitorClick}
           />
           <DesktopComputer 
             onPowerButtonClick={handlePowerButton} 
