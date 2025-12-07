@@ -32,7 +32,7 @@ export interface Project {
   status: 'active' | 'completed' | 'wip' | 'archived';
   github_url: string | null;
   demo_url: string | null;
-  category: string;
+  category: string | null;
   featured: boolean;
   sort_order: number;
   created_at: string;
