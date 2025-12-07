@@ -185,7 +185,7 @@ export function ProjectEditor({ project, isNew = false }: ProjectEditorProps) {
                   <select
                     value={formData.status}
                     onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, status: e.target.value }))
+                      setFormData((prev) => ({ ...prev, status: e.target.value as 'active' | 'completed' | 'wip' | 'archived' }))
                     }
                     className="w-full bg-background border border-border p-2 text-foreground focus:outline-none focus:border-foreground"
                   >
