@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:coolify.io)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
