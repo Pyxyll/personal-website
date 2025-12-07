@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Dependencies (will be installed in container)
+/vendor
+
+# Environment files (use Docker env vars instead)
+.env
+.env.local
+.env.*.local
+
+# Testing
+/tests
+phpunit.xml
+.phpunit.result.cache
+
+# Storage (use volumes instead)
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!/storage/logs/.gitkeep
+!/storage/framework/cache/.gitkeep
+!/storage/framework/sessions/.gitkeep
+!/storage/framework/views/.gitkeep
+
+# Build artifacts
+*.log
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.docker
+
+# Documentation
+README.md
+CHANGELOG.md
