@@ -99,4 +99,10 @@ class ProjectController extends Controller
 
         return response()->json($query->get());
     }
+
+    public function adminShow(string $id): JsonResponse
+    {
+        $project = Project::findOrFail($id);
+        return response()->json($project);
+    }
 }

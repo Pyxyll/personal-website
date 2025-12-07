@@ -81,16 +81,18 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
-          <div className="border border-border bg-card p-6 opacity-60">
-            <h2 className="text-lg text-foreground mb-2">Projects</h2>
-            <AsciiDivider className="mb-3" />
-            <p className="text-muted-foreground text-sm">
-              Projects will be synced from GitHub. Manual management coming soon.
-            </p>
-            <div className="mt-4 text-sm text-muted-foreground">
-              [Coming Soon]
+          <Link href="/admin/projects" className="block">
+            <div className="border border-border bg-card p-6 hover:border-foreground transition-colors">
+              <h2 className="text-lg text-foreground mb-2">Projects</h2>
+              <AsciiDivider className="mb-3" />
+              <p className="text-muted-foreground text-sm">
+                Create, edit, and manage your projects. Control featured status and display order.
+              </p>
+              <div className="mt-4 text-sm text-foreground">
+                [Manage Projects -&gt;]
+              </div>
             </div>
-          </div>
+          </Link>
 
           <div className="border border-border bg-card p-6">
             <h2 className="text-lg text-foreground mb-2">Quick Links</h2>

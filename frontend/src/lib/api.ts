@@ -115,6 +115,11 @@ export const projectsApi = {
     return response.data;
   },
 
+  adminGetById: async (id: number): Promise<Project> => {
+    const response = await api.get(`/admin/projects/${id}`);
+    return response.data;
+  },
+
   create: async (data: Partial<Project>): Promise<Project> => {
     const response = await api.post('/projects', data);
     return response.data;

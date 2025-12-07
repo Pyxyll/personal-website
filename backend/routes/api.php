@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Projects
     Route::get('/admin/projects', [ProjectController::class, 'adminIndex']);
+    Route::get('/admin/projects/{id}', [ProjectController::class, 'adminShow']);
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::put('/projects/{id}', [ProjectController::class, 'update']);
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
