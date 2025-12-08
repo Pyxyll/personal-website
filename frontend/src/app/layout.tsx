@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { AsciiNav, AsciiFooter } from "@/components/ascii";
+import { AsciiNav, AsciiFooter, AdminBar } from "@/components/ascii";
+import { Providers } from "@/components/Providers";
 
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600', '700'],
@@ -107,11 +108,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${ibmPlexMono.variable} antialiased min-h-screen flex flex-col`}>
-        <AsciiNav />
-        <main className="flex-1 max-w-4xl mx-auto px-4 w-full">
-          {children}
-        </main>
-        <AsciiFooter />
+        <Providers>
+          <AdminBar />
+          <AsciiNav />
+          <main className="flex-1 max-w-4xl mx-auto px-4 w-full">
+            {children}
+          </main>
+          <AsciiFooter />
+        </Providers>
       </body>
     </html>
   );
