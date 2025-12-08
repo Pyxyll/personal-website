@@ -1,14 +1,41 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useAchievements } from '@/contexts/AchievementContext';
+
 interface AsciiLogoProps {
   className?: string;
 }
 
 export function AsciiLogo({ className = "" }: AsciiLogoProps) {
+  const [clickCount, setClickCount] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
+  const { unlockAchievement, isUnlocked } = useAchievements();
+
+  useEffect(() => {
+    if (clickCount === 5 && !isUnlocked('trigger-happy')) {
+      unlockAchievement('trigger-happy');
+      setIsShaking(true);
+
+      const timer = setTimeout(() => {
+        setIsShaking(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [clickCount, unlockAchievement, isUnlocked]);
+
+  const handleClick = () => {
+    setClickCount((prev) => prev + 1);
+  };
+
   return (
     <div className={`group relative ${className}`}>
       {/* Main ASCII art */}
-      <pre className="ascii-art select-none transition-colors duration-300 group-hover:text-[var(--gradient-mid)]">
+      <pre
+        onClick={handleClick}
+        className={`ascii-art select-none transition-colors duration-300 group-hover:text-[var(--gradient-mid)] cursor-pointer ${isShaking ? 'shake' : ''}`}
+      >
 {`+---------------------------------------------------------------+
 |                                                               |
 |   ____        _               ____      _ _ _                 |
