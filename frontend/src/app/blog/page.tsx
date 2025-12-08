@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiSection, AsciiBlogCard, AsciiDivider } from "@/components/ascii";
+import { AsciiSection, AsciiBlogCard, AsciiDivider, AsciiCardLoader } from "@/components/ascii";
 import { Badge } from "@/components/ui/badge";
 import { postsApi, BlogPost } from "@/lib/api";
 
@@ -44,8 +44,12 @@ export default function BlogPage() {
       <div className="space-y-8">
         <section className="border border-border p-4 bg-card">
           <h1 className="text-foreground text-xl mb-2">Blog</h1>
-          <p className="text-muted-foreground">Loading posts...</p>
+          <p className="text-muted-foreground">
+            Writing about software development, tools, and things I learn along the way.
+            Mostly technical content with occasional opinions.
+          </p>
         </section>
+        <AsciiCardLoader count={4} />
       </div>
     );
   }

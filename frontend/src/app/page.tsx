@@ -1,35 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiLogo, AsciiSection, AsciiProjectCard, AsciiBlogCard } from "@/components/ascii";
+import { AsciiLogo, AsciiSection, AsciiProjectCard, AsciiBlogCard, AsciiCardLoader } from "@/components/ascii";
 import Link from "next/link";
 import { postsApi, nowApi, projectsApi, BlogPost, NowUpdate, Project } from "@/lib/api";
-
-// Fallback data for when API is unavailable
-const fallbackProjects = [
-  {
-    title: "Project Alpha",
-    description: "A full-stack web application built with Next.js and Laravel. Features real-time updates and a modern UI.",
-    tags: ["nextjs", "laravel", "postgresql"],
-    status: "active" as const,
-    github: "https://github.com/dylancollins/project-alpha",
-    demo: "https://alpha.dylancollins.dev"
-  },
-  {
-    title: "CLI Tool",
-    description: "Command-line utility for automating development workflows. Written in Rust for maximum performance.",
-    tags: ["rust", "cli", "automation"],
-    status: "completed" as const,
-    github: "https://github.com/dylancollins/cli-tool",
-  },
-  {
-    title: "ASCII Generator",
-    description: "Convert images to ASCII art with customizable settings. Supports multiple output formats.",
-    tags: ["python", "image-processing", "ascii"],
-    status: "wip" as const,
-    github: "https://github.com/dylancollins/ascii-gen",
-  }
-];
 
 export default function HomePage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -65,9 +39,6 @@ export default function HomePage() {
     }
   };
 
-  // Use API projects or fallback
-  const displayProjects = projects.length > 0 ? projects : fallbackProjects;
-
   return (
     <div className="space-y-12">
       <section className="text-center py-8">
@@ -97,38 +68,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      <AsciiSection title="Featured Projects">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {displayProjects.map((project) => (
-            <AsciiProjectCard
-              key={project.title}
-              title={project.title}
-              description={project.description}
-              tags={project.tags || []}
-              status={project.status}
-              github={'github_url' in project ? project.github_url || undefined : project.github}
-              demo={'demo_url' in project ? project.demo_url || undefined : project.demo}
-            />
-          ))}
-        </div>
-        <div className="mt-4 text-right">
-          <Link href="/projects" className="text-sm text-muted-foreground hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline">
-            View all projects -&gt;
-          </Link>
-        </div>
-      </AsciiSection>
+      {projects.length > 0 && (
+        <AsciiSection title="Featured Projects">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project) => (
+              <AsciiProjectCard
+                key={project.id}
+                title={project.title}
+                description={project.description}
+                href={`/projects/${project.slug}`}
+                tags={project.tags || []}
+                status={project.status}
+                github={project.github_url || undefined}
+                demo={project.demo_url || undefined}
+              />
+            ))}
+          </div>
+          <div className="mt-4 text-right">
+            <Link href="/projects" className="text-sm text-muted-foreground hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline">
+              View all projects -&gt;
+            </Link>
+          </div>
+        </AsciiSection>
+      )}
 
       <AsciiSection title="Recent Posts">
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="border border-border p-4 bg-card">
-                <div className="h-4 w-3/4 bg-muted shimmer mb-2" />
-                <div className="h-3 w-full bg-muted shimmer mb-1" />
-                <div className="h-3 w-2/3 bg-muted shimmer" />
-              </div>
-            ))}
-          </div>
+          <AsciiCardLoader count={2} />
         ) : posts.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             {posts.map((post) => (

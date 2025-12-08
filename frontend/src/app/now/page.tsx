@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiSection, AsciiBox, AsciiDivider } from "@/components/ascii";
+import { AsciiSection, AsciiBox, AsciiDivider, AsciiPageLoader } from "@/components/ascii";
 import { nowApi, NowUpdate } from "@/lib/api";
 
 export default function NowPage() {
@@ -24,14 +24,7 @@ export default function NowPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <section className="border border-border p-6 bg-card">
-          <h1 className="text-foreground text-xl mb-4">Now</h1>
-          <p className="text-muted-foreground">Loading...</p>
-        </section>
-      </div>
-    );
+    return <AsciiPageLoader text="Loading" />;
   }
 
   if (!nowData) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { AsciiDivider } from "@/components/ascii";
+import { AsciiDivider, AsciiPageLoader } from "@/components/ascii";
 import { Badge } from "@/components/ui/badge";
 import { postsApi, BlogPost } from "@/lib/api";
 
@@ -33,13 +33,7 @@ export default function BlogPostPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <section className="border border-border p-6 bg-card text-center">
-          <p className="text-muted-foreground">Loading post...</p>
-        </section>
-      </div>
-    );
+    return <AsciiPageLoader text="Loading post" />;
   }
 
   if (error || !post) {
