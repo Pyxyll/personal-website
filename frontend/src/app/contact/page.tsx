@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AsciiDivider } from '@/components/ascii';
 
-type FormStep = 'name' | 'email' | 'message' | 'sending' | 'done';
+type FormStep = 'name' | 'email' | 'message' | 'sending' | 'done' | 'already-sent';
+
+const STORAGE_KEY = 'dylan-contact-sent';
 
 export default function ContactPage() {
   const [step, setStep] = useState<FormStep>('name');
@@ -11,6 +13,15 @@ export default function ContactPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [hasSent, setHasSent] = useState(false);
+
+  useEffect(() => {
+    const sent = localStorage.getItem(STORAGE_KEY);
+    if (sent) {
+      setHasSent(true);
+      setStep('already-sent');
+    }
+  }, []);
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,19 +66,13 @@ export default function ContactPage() {
         throw new Error('Failed to send message');
       }
 
+      localStorage.setItem(STORAGE_KEY, new Date().toISOString());
+      setHasSent(true);
       setStep('done');
     } catch {
       setError('Something went wrong. Try again?');
       setStep('message');
     }
-  };
-
-  const handleStartOver = () => {
-    setStep('name');
-    setName('');
-    setEmail('');
-    setMessage('');
-    setError('');
   };
 
   return (
@@ -184,14 +189,21 @@ export default function ContactPage() {
               <p>
                 I&apos;ll get back to you at <span className="text-foreground">{email}</span> as soon as I can.
               </p>
-              <div className="pt-4">
-                <button
-                  onClick={handleStartOver}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  [Send another message]
-                </button>
-              </div>
+            </div>
+          )}
+
+          {/* Already Sent Step */}
+          {step === 'already-sent' && (
+            <div className="space-y-4">
+              <p className="text-foreground">
+                You&apos;ve already sent me a message!
+              </p>
+              <p>
+                I&apos;ll get back to you soon. If it&apos;s urgent, you can email me directly at{' '}
+                <a href="mailto:hello@dylancollins.me" className="text-[var(--gradient-mid)] hover:underline">
+                  hello@dylancollins.me
+                </a>
+              </p>
             </div>
           )}
         </div>
