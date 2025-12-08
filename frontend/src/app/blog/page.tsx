@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiSection, AsciiBlogCard, AsciiDivider, AsciiCardLoader } from "@/components/ascii";
+import { AsciiSection, AsciiBlogCard, AsciiDivider, AsciiLoader } from "@/components/ascii";
 import { Badge } from "@/components/ui/badge";
 import { postsApi, BlogPost } from "@/lib/api";
 
@@ -39,21 +39,6 @@ export default function BlogPage() {
 
   const featuredPosts = posts.filter((p) => p.featured);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <section className="border border-border p-4 bg-card">
-          <h1 className="text-foreground text-xl mb-2">Blog</h1>
-          <p className="text-muted-foreground">
-            Writing about software development, tools, and things I learn along the way.
-            Mostly technical content with occasional opinions.
-          </p>
-        </section>
-        <AsciiCardLoader count={4} />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <section className="border border-border p-4 bg-card">
@@ -63,28 +48,6 @@ export default function BlogPage() {
           Mostly technical content with occasional opinions.
         </p>
       </section>
-
-      {featuredPosts.length > 0 && (
-        <>
-          <AsciiSection title="Featured Posts">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {featuredPosts.map((post) => (
-                <AsciiBlogCard
-                  key={post.slug}
-                  title={post.title}
-                  description={post.description}
-                  date={post.published_at ? new Date(post.published_at).toISOString().split('T')[0] : ''}
-                  tags={post.tags || []}
-                  readTime={post.read_time || undefined}
-                  href={`/blog/${post.slug}`}
-                />
-              ))}
-            </div>
-          </AsciiSection>
-
-          <AsciiDivider />
-        </>
-      )}
 
       <section>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -101,7 +64,7 @@ export default function BlogPage() {
           </div>
         </div>
 
-        {allTags.length > 0 && (
+        {!isLoading && allTags.length > 0 && (
           <div className="mb-6">
             <span className="text-muted-foreground text-sm mr-2">tags:</span>
             <div className="inline-flex flex-wrap gap-1 mt-2">
@@ -131,37 +94,65 @@ export default function BlogPage() {
             </div>
           </div>
         )}
-
-        <div className="text-sm text-muted-foreground mb-4">
-          Showing {filteredPosts.length} of {posts.length} posts
-          {selectedTag && (
-            <span>
-              {" "}
-              tagged with <Badge variant="outline" className="text-xs">#{selectedTag}</Badge>
-            </span>
-          )}
-        </div>
-
-        {filteredPosts.length > 0 ? (
-          <div className="space-y-4">
-            {filteredPosts.map((post) => (
-              <AsciiBlogCard
-                key={post.slug}
-                title={post.title}
-                description={post.description}
-                date={post.published_at ? new Date(post.published_at).toISOString().split('T')[0] : ''}
-                tags={post.tags || []}
-                readTime={post.read_time || undefined}
-                href={`/blog/${post.slug}`}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="border border-border p-8 text-center text-muted-foreground">
-            {posts.length === 0 ? 'No posts yet.' : 'No posts found matching your search.'}
-          </div>
-        )}
       </section>
+
+      {isLoading ? (
+        <AsciiLoader text="Loading posts" />
+      ) : (
+        <>
+          {featuredPosts.length > 0 && (
+            <>
+              <AsciiSection title="Featured Posts">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {featuredPosts.map((post) => (
+                    <AsciiBlogCard
+                      key={post.slug}
+                      title={post.title}
+                      description={post.description}
+                      date={post.published_at ? new Date(post.published_at).toISOString().split('T')[0] : ''}
+                      tags={post.tags || []}
+                      readTime={post.read_time || undefined}
+                      href={`/blog/${post.slug}`}
+                    />
+                  ))}
+                </div>
+              </AsciiSection>
+
+              <AsciiDivider />
+            </>
+          )}
+
+          <div className="text-sm text-muted-foreground mb-4">
+            Showing {filteredPosts.length} of {posts.length} posts
+            {selectedTag && (
+              <span>
+                {" "}
+                tagged with <Badge variant="outline" className="text-xs">#{selectedTag}</Badge>
+              </span>
+            )}
+          </div>
+
+          {filteredPosts.length > 0 ? (
+            <div className="space-y-4">
+              {filteredPosts.map((post) => (
+                <AsciiBlogCard
+                  key={post.slug}
+                  title={post.title}
+                  description={post.description}
+                  date={post.published_at ? new Date(post.published_at).toISOString().split('T')[0] : ''}
+                  tags={post.tags || []}
+                  readTime={post.read_time || undefined}
+                  href={`/blog/${post.slug}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="border border-border p-8 text-center text-muted-foreground">
+              {posts.length === 0 ? 'No posts yet.' : 'No posts found matching your search.'}
+            </div>
+          )}
+        </>
+      )}
 
       <section className="border border-border p-4 bg-card">
         <div className="flex items-center justify-between">

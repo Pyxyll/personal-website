@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiLogo, AsciiSection, AsciiProjectCard, AsciiBlogCard, AsciiCardLoader } from "@/components/ascii";
+import { AsciiLogo, AsciiSection, AsciiProjectCard, AsciiBlogCard, AsciiLoader } from "@/components/ascii";
 import Link from "next/link";
 import { postsApi, nowApi, projectsApi, BlogPost, NowUpdate, Project } from "@/lib/api";
 
@@ -94,7 +94,7 @@ export default function HomePage() {
 
       <AsciiSection title="Recent Posts">
         {isLoading ? (
-          <AsciiCardLoader count={2} />
+          <AsciiLoader text="Loading posts" />
         ) : posts.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             {posts.map((post) => (

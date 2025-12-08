@@ -181,6 +181,8 @@
   line-height: 1;
   white-space: pre;
   color: var(--foreground);
+  background: transparent;
+  border: none;
 }
 
 .ascii-box {

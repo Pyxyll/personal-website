@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AsciiSection, AsciiProjectCard, AsciiDivider, AsciiCardLoader } from "@/components/ascii";
+import { AsciiSection, AsciiProjectCard, AsciiDivider, AsciiLoader } from "@/components/ascii";
 import { projectsApi, Project } from '@/lib/api';
 
 const categories = [
@@ -48,21 +48,6 @@ export default function ProjectsPage() {
 
   const featuredProjects = projects.filter((p) => p.featured);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <section className="border border-border p-4 bg-card">
-          <h1 className="text-foreground text-xl mb-2">Projects</h1>
-          <p className="text-muted-foreground">
-            A collection of my open source projects, side projects, and experiments.
-            Most are available on GitHub.
-          </p>
-        </section>
-        <AsciiCardLoader count={6} />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <section className="border border-border p-4 bg-card">
@@ -72,28 +57,6 @@ export default function ProjectsPage() {
           Most are available on GitHub.
         </p>
       </section>
-
-      {featuredProjects.length > 0 && (
-        <>
-          <AsciiSection title="Featured">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {featuredProjects.map((project) => (
-                <AsciiProjectCard
-                  key={project.id}
-                  title={project.title}
-                  description={project.description}
-                  href={`/projects/${project.slug}`}
-                  tags={project.tags || []}
-                  status={project.status}
-                  github={project.github_url || undefined}
-                  demo={project.demo_url || undefined}
-                />
-              ))}
-            </div>
-          </AsciiSection>
-          <AsciiDivider />
-        </>
-      )}
 
       <section>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -134,34 +97,62 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-
-        <div className="text-sm text-muted-foreground mb-4">
-          Showing {filteredProjects.length} of {projects.length} projects
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {filteredProjects.map((project) => (
-            <AsciiProjectCard
-              key={project.id}
-              title={project.title}
-              description={project.description}
-              href={`/projects/${project.slug}`}
-              tags={project.tags || []}
-              status={project.status}
-              github={project.github_url || undefined}
-              demo={project.demo_url || undefined}
-            />
-          ))}
-        </div>
-
-        {filteredProjects.length === 0 && (
-          <div className="border border-border p-8 text-center text-muted-foreground">
-            {projects.length === 0
-              ? "No projects yet. Check back soon!"
-              : "No projects found matching the selected filters."}
-          </div>
-        )}
       </section>
+
+      {isLoading ? (
+        <AsciiLoader text="Loading projects" />
+      ) : (
+        <>
+          {featuredProjects.length > 0 && (
+            <>
+              <AsciiSection title="Featured">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {featuredProjects.map((project) => (
+                    <AsciiProjectCard
+                      key={project.id}
+                      title={project.title}
+                      description={project.description}
+                      href={`/projects/${project.slug}`}
+                      tags={project.tags || []}
+                      status={project.status}
+                      github={project.github_url || undefined}
+                      demo={project.demo_url || undefined}
+                    />
+                  ))}
+                </div>
+              </AsciiSection>
+              <AsciiDivider />
+            </>
+          )}
+
+          <div className="text-sm text-muted-foreground mb-4">
+            Showing {filteredProjects.length} of {projects.length} projects
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {filteredProjects.map((project) => (
+              <AsciiProjectCard
+                key={project.id}
+                title={project.title}
+                description={project.description}
+                href={`/projects/${project.slug}`}
+                tags={project.tags || []}
+                status={project.status}
+                github={project.github_url || undefined}
+                demo={project.demo_url || undefined}
+              />
+            ))}
+          </div>
+
+          {filteredProjects.length === 0 && (
+            <div className="border border-border p-8 text-center text-muted-foreground">
+              {projects.length === 0
+                ? "No projects yet. Check back soon!"
+                : "No projects found matching the selected filters."}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
