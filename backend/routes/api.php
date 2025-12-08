@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\BlogPostController;
 use App\Http\Controllers\Api\NowUpdateController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ContactController;
 
 // Public API routes
 Route::prefix('v1')->group(function () {
@@ -27,6 +28,9 @@ Route::prefix('v1')->group(function () {
     // Now Updates
     Route::get('/now', [NowUpdateController::class, 'current']);
     Route::get('/now/history', [NowUpdateController::class, 'index']);
+
+    // Contact Form (public submission)
+    Route::post('/contact', [ContactController::class, 'store']);
 });
 
 // Protected API routes (for admin)
@@ -50,4 +54,12 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/now', [NowUpdateController::class, 'store']);
     Route::put('/now/{id}', [NowUpdateController::class, 'update']);
     Route::delete('/now/{id}', [NowUpdateController::class, 'destroy']);
+
+    // Contact Submissions
+    Route::get('/admin/contact', [ContactController::class, 'index']);
+    Route::get('/admin/contact/unread-count', [ContactController::class, 'unreadCount']);
+    Route::get('/admin/contact/{id}', [ContactController::class, 'show']);
+    Route::patch('/admin/contact/{id}/read', [ContactController::class, 'markRead']);
+    Route::patch('/admin/contact/{id}/unread', [ContactController::class, 'markUnread']);
+    Route::delete('/admin/contact/{id}', [ContactController::class, 'destroy']);
 });

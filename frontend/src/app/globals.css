@@ -330,7 +330,6 @@
   border-color: var(--gradient-mid);
   color: var(--gradient-mid);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
 }
 
 /* Floating animation */

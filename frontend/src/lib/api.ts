@@ -68,6 +68,16 @@ export interface NowUpdate {
   updated_at: string;
 }
 
+export interface ContactSubmission {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Auth API
 export const authApi = {
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
@@ -212,6 +222,38 @@ export const nowApi = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/now/${id}`);
+  },
+};
+
+// Contact Submissions API (Admin only)
+export const contactApi = {
+  getAll: async (params?: { unread?: boolean }): Promise<ContactSubmission[]> => {
+    const response = await api.get('/admin/contact', { params });
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<ContactSubmission> => {
+    const response = await api.get(`/admin/contact/${id}`);
+    return response.data;
+  },
+
+  getUnreadCount: async (): Promise<{ count: number }> => {
+    const response = await api.get('/admin/contact/unread-count');
+    return response.data;
+  },
+
+  markRead: async (id: number): Promise<ContactSubmission> => {
+    const response = await api.patch(`/admin/contact/${id}/read`);
+    return response.data;
+  },
+
+  markUnread: async (id: number): Promise<ContactSubmission> => {
+    const response = await api.patch(`/admin/contact/${id}/unread`);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/admin/contact/${id}`);
   },
 };
 

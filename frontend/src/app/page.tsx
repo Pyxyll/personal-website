@@ -46,8 +46,7 @@ export default function HomePage() {
           <AsciiLogo />
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Welcome to my corner of the internet. I build things, write about technology,
-          and share what I learn along the way.
+          Welcome to my corner of the internet. Part builder, part tinkerer, full-time curious.
         </p>
       </section>
 
@@ -56,10 +55,7 @@ export default function HomePage() {
           <span className="text-[var(--gradient-mid)]">&gt;</span> About
         </h3>
         <div className="text-muted-foreground">
-          <p>Software developer passionate about clean code and elegant solutions.</p>
-          <p className="mt-2">
-            Currently focused on full-stack development, open source, and developer tools.
-          </p>
+          <p>When I'm not at a keyboard, I'm building one. Or a PC. Or printing something that didn't need to exist. Lego, anime, Pokémon cards, and zero self-control round out the chaos.</p>
         </div>
         <div className="mt-4 text-sm">
           <Link href="/about" className="text-muted-foreground hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline">
@@ -153,14 +149,14 @@ export default function HomePage() {
 
       <section className="text-center border border-border p-8 bg-card card-hover">
         <p className="text-muted-foreground mb-4">
-          Have a question or want to work together?
+          Questions? Random thoughts? Just saying hi?
         </p>
-        <a
-          href="mailto:hello@dylancollins.dev"
+        <Link
+          href="/contact"
           className="btn-modern inline-block px-6 py-2 text-foreground no-underline"
         >
           [Send me a message]
-        </a>
+        </Link>
       </section>
     </div>
   );
