@@ -76,7 +76,7 @@ export default function CVPage() {
             <p className="text-muted-foreground">Senior Software Developer</p>
           </div>
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>hello@dylancollins.dev</p>
+            <p>hello@dylancollins.me</p>
             <p>github.com/dylancollins</p>
             <p>linkedin.com/in/dylancollins</p>
           </div>

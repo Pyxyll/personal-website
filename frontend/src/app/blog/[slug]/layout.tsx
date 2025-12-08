@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.dev";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.me";
   const postUrl = `${siteUrl}/blog/${slug}`;
 
   return {
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function BlogPostLayout({ params, children }: Props) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.dev";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.me";
 
   // JSON-LD for blog post (Article schema)
   const jsonLd = post

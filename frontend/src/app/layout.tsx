@@ -10,7 +10,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-mono",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.dev";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dylancollins.me";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -75,7 +75,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Dylan Collins",
-  url: "https://dylancollins.dev",
+  url: "https://dylancollins.me",
   jobTitle: "Software Developer",
   description: "Software developer passionate about clean code, full-stack development, and open source.",
   sameAs: [

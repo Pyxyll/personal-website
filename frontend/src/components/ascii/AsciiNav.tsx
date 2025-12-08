@@ -169,7 +169,7 @@ export function AsciiFooter() {
               [linkedin]
             </a>
             <a
-              href="mailto:hello@dylancollins.dev"
+              href="mailto:hello@dylancollins.me"
               className="hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline"
             >
               [email]

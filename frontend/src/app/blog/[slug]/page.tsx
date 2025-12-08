@@ -161,7 +161,7 @@ export default function BlogPostPage() {
         <div className="text-sm text-muted-foreground">
           Share:{" "}
           <a
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://dylancollins.dev/blog/${slug}`)}`}
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://dylancollins.me/blog/${slug}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-foreground hover:underline"

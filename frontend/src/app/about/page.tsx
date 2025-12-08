@@ -139,7 +139,7 @@ export default function AboutPage() {
         <div className="text-muted-foreground space-y-2 text-sm">
           <p>
             <span className="text-foreground">Email:</span>{" "}
-            <a href="mailto:hello@dylancollins.dev">hello@dylancollins.dev</a>
+            <a href="mailto:hello@dylancollins.me">hello@dylancollins.me</a>
           </p>
           <p>
             <span className="text-foreground">GitHub:</span>{" "}
