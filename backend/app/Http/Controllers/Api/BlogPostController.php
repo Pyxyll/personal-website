@@ -11,6 +11,13 @@ class BlogPostController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        // Validate query parameters
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+            'tag' => 'nullable|string|max:50',
+            'featured' => 'nullable|boolean',
+        ]);
+
         $query = BlogPost::query()->published()->orderBy('published_at', 'desc');
 
         if ($request->has('featured')) {
@@ -96,6 +103,11 @@ class BlogPostController extends Controller
     // Admin methods - includes drafts
     public function adminIndex(Request $request): JsonResponse
     {
+        // Validate query parameters
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+        ]);
+
         $query = BlogPost::query()->orderBy('created_at', 'desc');
 
         if ($request->has('search')) {

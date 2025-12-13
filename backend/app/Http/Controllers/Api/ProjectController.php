@@ -11,6 +11,13 @@ class ProjectController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        // Validate query parameters
+        $request->validate([
+            'category' => 'nullable|string|max:50',
+            'status' => 'nullable|in:active,completed,wip,archived',
+            'featured' => 'nullable|boolean',
+        ]);
+
         $query = Project::query()->orderBy('sort_order')->orderBy('created_at', 'desc');
 
         if ($request->has('featured')) {
@@ -87,6 +94,11 @@ class ProjectController extends Controller
     // Admin methods
     public function adminIndex(Request $request): JsonResponse
     {
+        // Validate query parameters
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+        ]);
+
         $query = Project::query()->orderBy('sort_order')->orderBy('created_at', 'desc');
 
         if ($request->has('search')) {

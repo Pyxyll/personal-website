@@ -10,8 +10,9 @@ use App\Http\Controllers\Api\ContactController;
 
 // Public API routes
 Route::prefix('v1')->group(function () {
-    // Auth routes
-    Route::post('/auth/login', [AuthController::class, 'login']);
+    // Auth routes - rate limited to prevent brute force
+    Route::post('/auth/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1'); // 5 attempts per minute
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
@@ -29,8 +30,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/now', [NowUpdateController::class, 'current']);
     Route::get('/now/history', [NowUpdateController::class, 'index']);
 
-    // Contact Form (public submission)
-    Route::post('/contact', [ContactController::class, 'store']);
+    // Contact Form (public submission) - rate limited to prevent spam
+    Route::post('/contact', [ContactController::class, 'store'])
+        ->middleware('throttle:3,1'); // 3 submissions per minute
 });
 
 // Protected API routes (for admin)
