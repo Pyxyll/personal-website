@@ -143,8 +143,8 @@ export default function AboutPage() {
           </p>
           <p>
             <span className="text-foreground">GitHub:</span>{" "}
-            <a href="https://github.com/dylancollins" target="_blank" rel="noopener noreferrer">
-              github.com/dylancollins
+            <a href="https://github.com/Pyxyll" target="_blank" rel="noopener noreferrer">
+              github.com/Pyxyll
             </a>
           </p>
           <p>

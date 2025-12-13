@@ -79,7 +79,7 @@ const jsonLd = {
   jobTitle: "Software Developer",
   description: "Software developer passionate about clean code, full-stack development, and open source.",
   sameAs: [
-    "https://github.com/dylancollins",
+    "https://github.com/Pyxyll",
     "https://www.linkedin.com/in/dylan-c-collins/",
     "https://twitter.com/dylancollins",
   ],

@@ -153,7 +153,7 @@ export function AsciiFooter() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/dylancollins"
+              href="https://github.com/Pyxyll"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline"
