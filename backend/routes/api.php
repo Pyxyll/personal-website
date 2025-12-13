@@ -17,18 +17,22 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
     });
-    // Projects
-    Route::get('/projects', [ProjectController::class, 'index']);
-    Route::get('/projects/{slug}', [ProjectController::class, 'show']);
 
-    // Blog Posts
-    Route::get('/posts', [BlogPostController::class, 'index']);
-    Route::get('/posts/tags', [BlogPostController::class, 'tags']);
-    Route::get('/posts/{slug}', [BlogPostController::class, 'show']);
+    // Public read endpoints - rate limited to prevent scraping/DoS
+    Route::middleware('throttle:60,1')->group(function () {
+        // Projects
+        Route::get('/projects', [ProjectController::class, 'index']);
+        Route::get('/projects/{slug}', [ProjectController::class, 'show']);
 
-    // Now Updates
-    Route::get('/now', [NowUpdateController::class, 'current']);
-    Route::get('/now/history', [NowUpdateController::class, 'index']);
+        // Blog Posts
+        Route::get('/posts', [BlogPostController::class, 'index']);
+        Route::get('/posts/tags', [BlogPostController::class, 'tags']);
+        Route::get('/posts/{slug}', [BlogPostController::class, 'show']);
+
+        // Now Updates
+        Route::get('/now', [NowUpdateController::class, 'current']);
+        Route::get('/now/history', [NowUpdateController::class, 'index']);
+    });
 
     // Contact Form (public submission) - rate limited to prevent spam
     Route::post('/contact', [ContactController::class, 'store'])

@@ -20,7 +20,12 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        // Always run Hash::check() to prevent timing attacks that could enumerate valid emails
+        // Use a dummy hash when user doesn't exist to maintain constant time
+        $dummyHash = '$2y$12$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+        $passwordValid = Hash::check($request->password, $user?->password ?? $dummyHash);
+
+        if (!$user || !$passwordValid) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
