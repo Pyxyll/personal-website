@@ -66,9 +66,9 @@
 
   /* Modern accent colors */
   --gradient-start: #6366f1;
-  --gradient-mid: #8b5cf6;
+  --gradient-mid: #a78bfa;
   --gradient-end: #d946ef;
-  --glow-color: rgba(139, 92, 246, 0.3);
+  --glow-color: rgba(167, 139, 250, 0.3);
 
   --chart-1: #e5e5e5;
   --chart-2: #a3a3a3;
@@ -435,6 +435,7 @@
 /* Expand line animation */
 .expand-line {
   transform: scaleX(0);
+  transform-origin: left;
   animation: expandLine 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
@@ -489,7 +490,7 @@
 input:focus, textarea:focus {
   outline: none;
   border-color: var(--gradient-mid) !important;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
 }
 
 /* Badge with accent */
@@ -502,8 +503,10 @@ input:focus, textarea:focus {
 
 /* Section divider */
 .divider-accent {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gradient-mid), transparent);
+  height: 2px;
+  background-image: radial-gradient(circle, var(--gradient-mid) 1px, transparent 1px);
+  background-size: 8px 2px;
+  background-repeat: repeat-x;
 }
 
 /* Matrix rain animation */

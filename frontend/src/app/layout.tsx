@@ -80,7 +80,7 @@ const jsonLd = {
   description: "Software developer passionate about clean code, full-stack development, and open source.",
   sameAs: [
     "https://github.com/dylancollins",
-    "https://linkedin.com/in/dylancollins",
+    "https://www.linkedin.com/in/dylan-c-collins/",
     "https://twitter.com/dylancollins",
   ],
   knowsAbout: [

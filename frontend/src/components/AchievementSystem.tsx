@@ -37,8 +37,8 @@ function AchievementIcon() {
       className="fixed bottom-4 left-4 w-12 h-12 bg-card border border-border hover:border-[var(--gradient-mid)] transition-colors flex items-center justify-center z-40 group"
       aria-label="View achievements"
     >
-      <span className="text-lg group-hover:text-[var(--gradient-mid)] transition-colors">★</span>
-      <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--gradient-mid)] text-white text-xs flex items-center justify-center">
+      <span className="text-lg group-hover:text-[var(--gradient-mid)] transition-colors" aria-hidden="true">★</span>
+      <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--gradient-mid)] text-white text-xs flex items-center justify-center" aria-hidden="true">
         {unlockedAchievements.length}
       </span>
     </button>
@@ -76,9 +76,9 @@ function AchievementSidebar() {
           <button
             onClick={() => setSidebarOpen(false)}
             className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Close"
+            aria-label="Close achievements"
           >
-            [x]
+            <span aria-hidden="true">[x]</span>
           </button>
         </div>
 

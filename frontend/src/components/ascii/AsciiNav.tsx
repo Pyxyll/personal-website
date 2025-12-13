@@ -78,7 +78,7 @@ export function AsciiNav() {
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
             >
-              <pre className="text-sm leading-none font-mono">
+              <pre className="text-sm leading-none font-mono" aria-hidden="true">
                 {isMenuOpen ? '[x]' : '[=]'}
               </pre>
             </button>
@@ -111,7 +111,7 @@ export function AsciiNav() {
             className="text-muted-foreground hover:text-[var(--gradient-mid)] transition-colors duration-300"
             aria-label="Close menu"
           >
-            <pre className="text-sm leading-none font-mono">[x]</pre>
+            <pre className="text-sm leading-none font-mono" aria-hidden="true">[x]</pre>
           </button>
         </div>
         <nav className="p-4">
@@ -161,7 +161,7 @@ export function AsciiFooter() {
               [github]
             </a>
             <a
-              href="https://linkedin.com/in/dylancollins"
+              href="https://www.linkedin.com/in/dylan-c-collins/"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[var(--gradient-mid)] transition-colors duration-300 hover-underline"

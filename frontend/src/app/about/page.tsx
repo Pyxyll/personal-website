@@ -149,8 +149,8 @@ export default function AboutPage() {
           </p>
           <p>
             <span className="text-foreground">LinkedIn:</span>{" "}
-            <a href="https://linkedin.com/in/dylancollins" target="_blank" rel="noopener noreferrer">
-              linkedin.com/in/dylancollins
+            <a href="https://www.linkedin.com/in/dylan-c-collins/" target="_blank" rel="noopener noreferrer">
+              linkedin.com/in/dylan-c-collins
             </a>
           </p>
         </div>
