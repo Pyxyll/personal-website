@@ -15,7 +15,7 @@ class ProjectController extends Controller
         $request->validate([
             'category' => 'nullable|string|max:50',
             'status' => 'nullable|in:active,completed,wip,archived',
-            'featured' => 'nullable|boolean',
+            'featured' => 'nullable|in:true,false,1,0',
         ]);
 
         $query = Project::query()->orderBy('sort_order')->orderBy('created_at', 'desc');

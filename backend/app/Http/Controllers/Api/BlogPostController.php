@@ -15,7 +15,7 @@ class BlogPostController extends Controller
         $request->validate([
             'search' => 'nullable|string|max:100',
             'tag' => 'nullable|string|max:50',
-            'featured' => 'nullable|boolean',
+            'featured' => 'nullable|in:true,false,1,0',
         ]);
 
         $query = BlogPost::query()->published()->orderBy('published_at', 'desc');
