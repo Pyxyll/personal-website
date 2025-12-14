@@ -4,15 +4,19 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   RefreshControl,
   Alert,
   Modal,
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 import { contactApi } from '../api';
 import { ContactSubmission } from '../types';
+import { colors, spacing, typography } from '../theme';
+import { FadeIn, AnimatedCard } from '../components/Animated';
+import { Divider, EmptyState } from '../components/UI';
 
 export default function ContactsScreen() {
   const navigation = useNavigation();
@@ -73,142 +77,293 @@ export default function ContactsScreen() {
     ]);
   };
 
-  const renderContact = ({ item }: { item: ContactSubmission }) => (
-    <TouchableOpacity style={styles.card} onPress={() => handleView(item)}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardTitleRow}>
-          {!item.read ? <View style={styles.unreadDot} /> : null}
-          <Text style={[styles.cardTitle, !item.read ? styles.unreadText : null]} numberOfLines={1}>
-            {item.name}
-          </Text>
+  const renderContact = ({ item, index }: { item: ContactSubmission; index: number }) => (
+    <FadeIn delay={index * 50}>
+      <AnimatedCard style={styles.card} onPress={() => handleView(item)}>
+        <View style={styles.cardContent}>
+          <View style={[styles.cardIndicator, !item.read && styles.cardIndicatorUnread]} />
+          <View style={styles.cardBody}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardTitleRow}>
+                {!item.read && <View style={styles.unreadDot} />}
+                <Text style={[styles.cardTitle, !item.read && styles.unreadText]} numberOfLines={1}>
+                  {item.name}
+                </Text>
+              </View>
+              <Text style={styles.date}>[{new Date(item.created_at).toLocaleDateString()}]</Text>
+            </View>
+            <Text style={styles.email}>{item.email}</Text>
+            <Text style={styles.preview} numberOfLines={2}>{item.message}</Text>
+          </View>
         </View>
-        <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString()}</Text>
-      </View>
-      <Text style={styles.email}>{item.email}</Text>
-      <Text style={styles.preview} numberOfLines={2}>{item.message}</Text>
-    </TouchableOpacity>
+      </AnimatedCard>
+    </FadeIn>
   );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>[Back]</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>// Messages</Text>
-        <View style={{ width: 50 }} />
-      </View>
+      <StatusBar style="light" />
+
+      <FadeIn>
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+            <Text style={styles.backText}>{'<'} back</Text>
+          </Pressable>
+          <Text style={styles.title}>// messages</Text>
+          <View style={{ width: 50 }} />
+        </View>
+      </FadeIn>
 
       <FlatList
         data={contacts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderContact}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#a78bfa" />}
-        ListEmptyComponent={<Text style={styles.emptyText}>{isLoading ? 'Loading...' : 'No messages'}</Text>}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.accent}
+            colors={[colors.accent]}
+          />
+        }
+        ListEmptyComponent={
+          <FadeIn delay={100}>
+            <EmptyState
+              icon="@:"
+              title={isLoading ? 'loading...' : 'no messages'}
+              description={isLoading ? undefined : 'Messages from your contact form will appear here'}
+            />
+          </FadeIn>
+        }
+        showsVerticalScrollIndicator={false}
       />
 
       <Modal
         visible={selectedContact !== null}
         animationType="slide"
-        transparent={true}
+        transparent
         onRequestClose={() => setSelectedContact(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <Pressable style={styles.modalOverlay} onPress={() => setSelectedContact(null)}>
+          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Message</Text>
-              <TouchableOpacity onPress={() => setSelectedContact(null)}>
-                <Text style={styles.closeButton}>[X]</Text>
-              </TouchableOpacity>
+              <Text style={styles.modalTitle}>// message</Text>
+              <Pressable onPress={() => setSelectedContact(null)} hitSlop={8}>
+                <Text style={styles.closeButton}>[x]</Text>
+              </Pressable>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               <View style={styles.field}>
-                <Text style={styles.fieldLabel}>From</Text>
+                <Text style={styles.fieldLabel}>
+                  <Text style={styles.labelAccent}>$</Text> from
+                </Text>
                 <Text style={styles.fieldValue}>{selectedContact?.name}</Text>
               </View>
+
               <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Email</Text>
-                <Text style={styles.fieldValue}>{selectedContact?.email}</Text>
+                <Text style={styles.fieldLabel}>
+                  <Text style={styles.labelAccent}>$</Text> email
+                </Text>
+                <Text style={[styles.fieldValue, styles.emailValue]}>{selectedContact?.email}</Text>
               </View>
+
               <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Date</Text>
+                <Text style={styles.fieldLabel}>
+                  <Text style={styles.labelAccent}>$</Text> date
+                </Text>
                 <Text style={styles.fieldValue}>
                   {selectedContact ? new Date(selectedContact.created_at).toLocaleString() : ''}
                 </Text>
               </View>
+
+              <Divider />
+
               <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Message</Text>
-                <Text style={styles.messageText}>{selectedContact?.message}</Text>
+                <Text style={styles.fieldLabel}>
+                  <Text style={styles.labelAccent}>$</Text> message
+                </Text>
+                <View style={styles.messageContainer}>
+                  <Text style={styles.messageText}>{selectedContact?.message}</Text>
+                </View>
               </View>
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => selectedContact && handleDelete(selectedContact)}>
-                <Text style={styles.deleteButtonText}>[Delete]</Text>
-              </TouchableOpacity>
+              <Pressable
+                style={styles.deleteButton}
+                onPress={() => selectedContact && handleDelete(selectedContact)}
+              >
+                <Text style={styles.deleteButtonText}>[delete message]</Text>
+              </Pressable>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 60,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: colors.border,
   },
-  backText: { color: '#a78bfa', fontSize: 14 },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#e5e5e5' },
-  list: { padding: 16 },
+  backText: {
+    color: colors.accent,
+    fontSize: typography.base,
+  },
+  title: {
+    fontSize: typography.lg,
+    fontWeight: typography.bold,
+    color: colors.text,
+  },
+  list: {
+    padding: spacing.lg,
+  },
   card: {
-    backgroundColor: '#141414',
-    borderWidth: 1,
-    borderColor: '#333333',
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    padding: 0,
+    overflow: 'hidden',
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitleRow: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#a78bfa', marginRight: 8 },
-  cardTitle: { fontSize: 16, color: '#737373' },
-  unreadText: { color: '#e5e5e5', fontWeight: '600' },
-  date: { fontSize: 12, color: '#525252' },
-  email: { fontSize: 12, color: '#a78bfa', marginTop: 4 },
-  preview: { fontSize: 14, color: '#737373', marginTop: 8 },
-  emptyText: { color: '#737373', textAlign: 'center', marginTop: 32 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#141414', borderTopWidth: 1, borderTopColor: '#333333', maxHeight: '80%' },
+  cardContent: {
+    flexDirection: 'row',
+  },
+  cardIndicator: {
+    width: 4,
+    backgroundColor: colors.border,
+  },
+  cardIndicatorUnread: {
+    backgroundColor: colors.accent,
+  },
+  cardBody: {
+    flex: 1,
+    padding: spacing.lg,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    backgroundColor: colors.accent,
+    marginRight: spacing.sm,
+  },
+  cardTitle: {
+    fontSize: typography.md,
+    color: colors.textMuted,
+  },
+  unreadText: {
+    color: colors.text,
+    fontWeight: typography.semibold,
+  },
+  date: {
+    fontSize: typography.xs,
+    color: colors.textDisabled,
+  },
+  email: {
+    fontSize: typography.sm,
+    color: colors.accent,
+    marginTop: spacing.xs,
+  },
+  preview: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    marginTop: spacing.sm,
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    maxHeight: '85%',
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: colors.border,
   },
-  modalTitle: { fontSize: 18, fontWeight: '600', color: '#e5e5e5' },
-  closeButton: { fontSize: 16, color: '#737373' },
-  modalBody: { padding: 16 },
-  field: { marginBottom: 16 },
-  fieldLabel: { fontSize: 12, color: '#737373', marginBottom: 4 },
-  fieldValue: { fontSize: 14, color: '#e5e5e5' },
-  messageText: { fontSize: 14, color: '#e5e5e5', lineHeight: 22 },
+  modalTitle: {
+    fontSize: typography.lg,
+    fontWeight: typography.bold,
+    color: colors.accent,
+  },
+  closeButton: {
+    fontSize: typography.md,
+    color: colors.textMuted,
+  },
+  modalBody: {
+    padding: spacing.lg,
+  },
+  field: {
+    marginBottom: spacing.lg,
+  },
+  fieldLabel: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+  },
+  labelAccent: {
+    color: colors.accent,
+  },
+  fieldValue: {
+    fontSize: typography.base,
+    color: colors.text,
+  },
+  emailValue: {
+    color: colors.accent,
+  },
+  messageContainer: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  messageText: {
+    fontSize: typography.base,
+    color: colors.text,
+    lineHeight: 24,
+  },
   modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 16,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#333333',
+    borderTopColor: colors.border,
   },
-  deleteButtonText: { color: '#dc2626', fontSize: 14 },
+  deleteButton: {
+    alignItems: 'center',
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.destructive,
+  },
+  deleteButtonText: {
+    color: colors.destructive,
+    fontSize: typography.base,
+  },
 });

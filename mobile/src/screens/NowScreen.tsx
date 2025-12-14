@@ -4,14 +4,45 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   RefreshControl,
   Alert,
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 import { nowApi } from '../api';
 import { NowUpdate } from '../types';
+import { colors, spacing, typography } from '../theme';
+import { FadeIn, StaggeredList } from '../components/Animated';
+import { Divider } from '../components/UI';
+
+interface NowField {
+  key: keyof typeof defaultEdit;
+  label: string;
+  icon: string;
+  multiline: boolean;
+}
+
+const defaultEdit = {
+  status: '',
+  location: '',
+  working_on: '',
+  learning: '',
+  reading: '',
+  watching: '',
+  goals: '',
+};
+
+const fields: NowField[] = [
+  { key: 'status', label: 'status', icon: '~$', multiline: false },
+  { key: 'location', label: 'location', icon: '@:', multiline: false },
+  { key: 'working_on', label: 'working_on', icon: '>_', multiline: true },
+  { key: 'learning', label: 'learning', icon: '++', multiline: true },
+  { key: 'reading', label: 'reading', icon: '[]', multiline: true },
+  { key: 'watching', label: 'watching', icon: '<>', multiline: true },
+  { key: 'goals', label: 'goals', icon: '**', multiline: true },
+];
 
 export default function NowScreen() {
   const navigation = useNavigation();
@@ -19,15 +50,8 @@ export default function NowScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
-    status: '',
-    location: '',
-    working_on: '',
-    learning: '',
-    reading: '',
-    watching: '',
-    goals: '',
-  });
+  const [editData, setEditData] = useState(defaultEdit);
+  const [saving, setSaving] = useState(false);
 
   const fetchCurrent = async () => {
     try {
@@ -62,6 +86,7 @@ export default function NowScreen() {
   };
 
   const handleSave = async () => {
+    setSaving(true);
     try {
       const updateData = {
         status: editData.status,
@@ -84,204 +109,238 @@ export default function NowScreen() {
       Alert.alert('Success', 'Now page updated');
     } catch {
       Alert.alert('Error', 'Failed to save');
+    } finally {
+      setSaving(false);
     }
   };
 
+  const getFieldValue = (key: string): string | string[] | null => {
+    if (!current) return null;
+    return (current as any)[key];
+  };
+
+  const renderFieldValue = (key: string) => {
+    const value = getFieldValue(key);
+    if (!value) return <Text style={styles.emptyValue}>not set</Text>;
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return <Text style={styles.emptyValue}>empty</Text>;
+      return (
+        <View style={styles.listContainer}>
+          {value.map((item, i) => (
+            <View key={i} style={styles.listItem}>
+              <Text style={styles.listBullet}>{'>'}</Text>
+              <Text style={styles.listText}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
+    return <Text style={styles.fieldValue}>{value}</Text>;
+  };
+
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#a78bfa" />}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>[Back]</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>// Now</Text>
-        <TouchableOpacity onPress={() => (isEditing ? handleSave() : setIsEditing(true))}>
-          <Text style={styles.editButton}>{isEditing ? '[Save]' : '[Edit]'}</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <StatusBar style="light" />
 
-      {isEditing ? (
-        <TouchableOpacity style={styles.cancelRow} onPress={() => setIsEditing(false)}>
-          <Text style={styles.cancelText}>[Cancel]</Text>
-        </TouchableOpacity>
-      ) : null}
+      <FadeIn>
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+            <Text style={styles.backText}>{'<'} back</Text>
+          </Pressable>
+          <Text style={styles.title}>// now</Text>
+          <Pressable
+            onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
+            disabled={saving}
+            hitSlop={8}
+          >
+            <Text style={[styles.actionButton, saving && styles.disabled]}>
+              {saving ? 'saving...' : isEditing ? '[save]' : '[edit]'}
+            </Text>
+          </Pressable>
+        </View>
+      </FadeIn>
 
-      {isLoading ? (
-        <Text style={styles.loadingText}>Loading...</Text>
-      ) : (
-        <>
-          <View style={styles.section}>
-            <Text style={styles.label}>Status</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.input}
-                value={editData.status}
-                onChangeText={(t) => setEditData({ ...editData, status: t })}
-                placeholder="Status"
-                placeholderTextColor="#737373"
-              />
-            ) : (
-              <Text style={styles.value}>{current?.status || 'Not set'}</Text>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Location</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.input}
-                value={editData.location}
-                onChangeText={(t) => setEditData({ ...editData, location: t })}
-                placeholder="Location"
-                placeholderTextColor="#737373"
-              />
-            ) : (
-              <Text style={styles.value}>{current?.location || 'Not set'}</Text>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Working On</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                value={editData.working_on}
-                onChangeText={(t) => setEditData({ ...editData, working_on: t })}
-                placeholder="One per line"
-                placeholderTextColor="#737373"
-                multiline={true}
-                numberOfLines={4}
-              />
-            ) : (
-              <View>
-                {current?.working_on?.map((item, i) => (
-                  <Text key={i} style={styles.listItem}>- {item}</Text>
-                )) || <Text style={styles.value}>Nothing</Text>}
-              </View>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Learning</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                value={editData.learning}
-                onChangeText={(t) => setEditData({ ...editData, learning: t })}
-                placeholder="One per line"
-                placeholderTextColor="#737373"
-                multiline={true}
-                numberOfLines={4}
-              />
-            ) : (
-              <View>
-                {current?.learning?.map((item, i) => (
-                  <Text key={i} style={styles.listItem}>- {item}</Text>
-                )) || <Text style={styles.value}>Nothing</Text>}
-              </View>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Reading</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                value={editData.reading}
-                onChangeText={(t) => setEditData({ ...editData, reading: t })}
-                placeholder="One per line"
-                placeholderTextColor="#737373"
-                multiline={true}
-                numberOfLines={4}
-              />
-            ) : (
-              <View>
-                {current?.reading?.map((item, i) => (
-                  <Text key={i} style={styles.listItem}>- {item}</Text>
-                )) || <Text style={styles.value}>Nothing</Text>}
-              </View>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Watching</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                value={editData.watching}
-                onChangeText={(t) => setEditData({ ...editData, watching: t })}
-                placeholder="One per line"
-                placeholderTextColor="#737373"
-                multiline={true}
-                numberOfLines={4}
-              />
-            ) : (
-              <View>
-                {current?.watching?.map((item, i) => (
-                  <Text key={i} style={styles.listItem}>- {item}</Text>
-                )) || <Text style={styles.value}>Nothing</Text>}
-              </View>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>Goals</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                value={editData.goals}
-                onChangeText={(t) => setEditData({ ...editData, goals: t })}
-                placeholder="One per line"
-                placeholderTextColor="#737373"
-                multiline={true}
-                numberOfLines={4}
-              />
-            ) : (
-              <View>
-                {current?.goals?.map((item, i) => (
-                  <Text key={i} style={styles.listItem}>- {item}</Text>
-                )) || <Text style={styles.value}>Nothing</Text>}
-              </View>
-            )}
-          </View>
-        </>
+      {isEditing && (
+        <FadeIn>
+          <Pressable style={styles.cancelRow} onPress={() => setIsEditing(false)}>
+            <Text style={styles.cancelText}>[cancel editing]</Text>
+          </Pressable>
+        </FadeIn>
       )}
 
-      <View style={{ height: 32 }} />
-    </ScrollView>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.accent}
+            colors={[colors.accent]}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {isLoading ? (
+          <FadeIn>
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>loading</Text>
+              <Text style={styles.loadingCursor}>_</Text>
+            </View>
+          </FadeIn>
+        ) : (
+          <StaggeredList staggerDelay={60}>
+            {fields.map((field) => (
+              <View key={field.key} style={styles.fieldCard}>
+                <View style={styles.fieldHeader}>
+                  <Text style={styles.fieldIcon}>{field.icon}</Text>
+                  <Text style={styles.fieldLabel}>{field.label}</Text>
+                </View>
+                <Divider />
+                {isEditing ? (
+                  <TextInput
+                    style={[styles.input, field.multiline && styles.multilineInput]}
+                    value={editData[field.key]}
+                    onChangeText={(t) => setEditData({ ...editData, [field.key]: t })}
+                    placeholder={field.multiline ? 'One item per line' : `Enter ${field.label}`}
+                    placeholderTextColor={colors.textDisabled}
+                    multiline={field.multiline}
+                    numberOfLines={field.multiline ? 4 : 1}
+                  />
+                ) : (
+                  renderFieldValue(field.key)
+                )}
+              </View>
+            ))}
+          </StaggeredList>
+        )}
+
+        <View style={{ height: 32 }} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 60,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: colors.border,
   },
-  backText: { color: '#a78bfa', fontSize: 14 },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#e5e5e5' },
-  editButton: { color: '#e5e5e5', fontSize: 14 },
-  cancelRow: { padding: 16, paddingBottom: 0 },
-  cancelText: { color: '#737373', fontSize: 14 },
-  loadingText: { color: '#737373', textAlign: 'center', marginTop: 32 },
-  section: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
-  label: { fontSize: 14, color: '#e5e5e5', marginBottom: 8 },
-  value: { fontSize: 14, color: '#737373' },
-  input: {
-    backgroundColor: '#1a1a1a',
+  backText: {
+    color: colors.accent,
+    fontSize: typography.base,
+  },
+  title: {
+    fontSize: typography.lg,
+    fontWeight: typography.bold,
+    color: colors.text,
+  },
+  actionButton: {
+    color: colors.success,
+    fontSize: typography.base,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  cancelRow: {
+    padding: spacing.lg,
+    paddingBottom: 0,
+  },
+  cancelText: {
+    color: colors.textMuted,
+    fontSize: typography.sm,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: spacing.lg,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.xxl,
+  },
+  loadingText: {
+    fontSize: typography.lg,
+    color: colors.textMuted,
+  },
+  loadingCursor: {
+    fontSize: typography.lg,
+    color: colors.accent,
+  },
+  fieldCard: {
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#333333',
-    padding: 12,
-    color: '#e5e5e5',
-    fontSize: 14,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
   },
-  multiline: { minHeight: 100, textAlignVertical: 'top' },
-  listItem: { fontSize: 14, color: '#737373', marginBottom: 4 },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fieldIcon: {
+    fontSize: typography.md,
+    color: colors.accent,
+    fontWeight: typography.bold,
+    marginRight: spacing.sm,
+  },
+  fieldLabel: {
+    fontSize: typography.base,
+    color: colors.text,
+    fontWeight: typography.medium,
+  },
+  fieldValue: {
+    fontSize: typography.base,
+    color: colors.textSecondary,
+  },
+  emptyValue: {
+    fontSize: typography.base,
+    color: colors.textMuted,
+    fontStyle: 'italic',
+  },
+  listContainer: {
+    gap: spacing.sm,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  listBullet: {
+    color: colors.accent,
+    fontSize: typography.base,
+    marginRight: spacing.sm,
+    width: 16,
+  },
+  listText: {
+    fontSize: typography.base,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  input: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    color: colors.text,
+    fontSize: typography.base,
+  },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
 });

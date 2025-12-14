@@ -1,20 +1,25 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   RefreshControl,
   Alert,
   TextInput,
   Modal,
   ScrollView,
   Switch,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 import { postsApi } from '../api';
 import { BlogPost } from '../types';
+import { colors, spacing, typography } from '../theme';
+import { FadeIn, AnimatedCard } from '../components/Animated';
+import { Badge, Divider, EmptyState } from '../components/UI';
 
 const emptyPost = {
   title: '',
@@ -36,6 +41,20 @@ export default function PostsScreen() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [formData, setFormData] = useState(emptyPost);
   const [saving, setSaving] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  const cursorOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const blink = Animated.loop(
+      Animated.sequence([
+        Animated.timing(cursorOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.timing(cursorOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ])
+    );
+    blink.start();
+    return () => blink.stop();
+  }, []);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -86,7 +105,6 @@ export default function PostsScreen() {
 
     setSaving(true);
     try {
-      // Only set published_at when newly publishing (not already published)
       const shouldSetPublishDate = formData.published && (!editingPost || !editingPost.published_at);
 
       const data = {
@@ -134,142 +152,222 @@ export default function PostsScreen() {
     ]);
   };
 
-  const renderPost = ({ item }: { item: BlogPost }) => (
-    <TouchableOpacity style={styles.card} onPress={() => openEdit(item)}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-        <View style={styles.badges}>
-          {item.featured ? <View style={styles.featuredBadge}><Text style={styles.badgeText}>Featured</Text></View> : null}
-          <View style={[styles.badge, item.published ? styles.published : styles.draft]}>
-            <Text style={styles.badgeText}>{item.published ? 'Published' : 'Draft'}</Text>
+  const renderPost = ({ item, index }: { item: BlogPost; index: number }) => (
+    <FadeIn delay={index * 50}>
+      <AnimatedCard style={styles.card} onPress={() => openEdit(item)}>
+        <View style={styles.cardContent}>
+          <View style={styles.cardIcon}>
+            <Text style={styles.cardIconText}>{'>_'}</Text>
+          </View>
+          <View style={styles.cardBody}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+            </View>
+            <View style={styles.badgeRow}>
+              {item.featured && <Badge variant="accent">featured</Badge>}
+              <Badge variant={item.published ? 'success' : 'outline'}>
+                {item.published ? 'published' : 'draft'}
+              </Badge>
+            </View>
+            <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+            <Divider />
+            <View style={styles.actions}>
+              <Pressable onPress={() => openEdit(item)} hitSlop={8}>
+                <Text style={styles.actionText}>[edit]</Text>
+              </Pressable>
+              <Pressable onPress={() => handleDelete(item)} hitSlop={8}>
+                <Text style={styles.deleteText}>[delete]</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
-      <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => openEdit(item)}>
-          <Text style={styles.actionText}>[Edit]</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDelete(item)}>
-          <Text style={[styles.actionText, styles.deleteText]}>[Delete]</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+      </AnimatedCard>
+    </FadeIn>
   );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>[Back]</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>// Posts</Text>
-        <TouchableOpacity onPress={openCreate}>
-          <Text style={styles.addText}>[+ New]</Text>
-        </TouchableOpacity>
-      </View>
+      <StatusBar style="light" />
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          placeholderTextColor="#737373"
-          value={search}
-          onChangeText={setSearch}
-          onSubmitEditing={fetchPosts}
-        />
-      </View>
+      {/* Header */}
+      <FadeIn>
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+            <Text style={styles.backText}>{'<'} back</Text>
+          </Pressable>
+          <Text style={styles.title}>// posts</Text>
+          <Pressable onPress={openCreate} hitSlop={8}>
+            <Text style={styles.addText}>[+ new]</Text>
+          </Pressable>
+        </View>
+      </FadeIn>
 
+      {/* Search */}
+      <FadeIn delay={50}>
+        <View style={styles.searchContainer}>
+          <View style={[styles.searchInputContainer, searchFocused && styles.searchInputFocused]}>
+            <Text style={styles.searchPrefix}>$</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="search posts..."
+              placeholderTextColor={colors.textDisabled}
+              value={search}
+              onChangeText={setSearch}
+              onSubmitEditing={fetchPosts}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+            />
+            {searchFocused && (
+              <Animated.Text style={[styles.cursor, { opacity: cursorOpacity }]}>_</Animated.Text>
+            )}
+          </View>
+        </View>
+      </FadeIn>
+
+      {/* List */}
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderPost}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#a78bfa" />}
-        ListEmptyComponent={<Text style={styles.emptyText}>{isLoading ? 'Loading...' : 'No posts'}</Text>}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.accent}
+            colors={[colors.accent]}
+          />
+        }
+        ListEmptyComponent={
+          <FadeIn delay={100}>
+            <EmptyState
+              icon=">_"
+              title={isLoading ? 'loading...' : 'no posts found'}
+              description={isLoading ? undefined : 'Create your first post to get started'}
+            />
+          </FadeIn>
+        }
+        showsVerticalScrollIndicator={false}
       />
 
+      {/* Editor Modal */}
       <Modal visible={showEditor} animationType="slide" onRequestClose={() => setShowEditor(false)}>
         <View style={styles.modalContainer}>
+          <StatusBar style="light" />
+
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowEditor(false)}>
-              <Text style={styles.backText}>[Cancel]</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>{editingPost ? 'Edit Post' : 'New Post'}</Text>
-            <TouchableOpacity onPress={handleSave} disabled={saving}>
-              <Text style={[styles.addText, saving ? styles.disabled : null]}>[Save]</Text>
-            </TouchableOpacity>
+            <Pressable onPress={() => setShowEditor(false)} hitSlop={8}>
+              <Text style={styles.backText}>[cancel]</Text>
+            </Pressable>
+            <Text style={styles.modalTitle}>
+              // {editingPost ? 'edit_post' : 'new_post'}
+            </Text>
+            <Pressable onPress={handleSave} disabled={saving} hitSlop={8}>
+              <Text style={[styles.saveText, saving && styles.disabled]}>
+                {saving ? 'saving...' : '[save]'}
+              </Text>
+            </Pressable>
           </View>
 
-          <ScrollView style={styles.form}>
-            <Text style={styles.label}>Title *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.title}
-              onChangeText={(t) => setFormData({ ...formData, title: t })}
-              placeholder="Post title"
-              placeholderTextColor="#737373"
-            />
-
-            <Text style={styles.label}>Slug</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.slug}
-              onChangeText={(t) => setFormData({ ...formData, slug: t })}
-              placeholder="auto-generated-from-title"
-              placeholderTextColor="#737373"
-              autoCapitalize="none"
-            />
-
-            <Text style={styles.label}>Description</Text>
-            <TextInput
-              style={[styles.input, styles.multiline]}
-              value={formData.description}
-              onChangeText={(t) => setFormData({ ...formData, description: t })}
-              placeholder="Brief description"
-              placeholderTextColor="#737373"
-              multiline={true}
-              numberOfLines={3}
-            />
-
-            <Text style={styles.label}>Content</Text>
-            <TextInput
-              style={[styles.input, styles.contentInput]}
-              value={formData.content}
-              onChangeText={(t) => setFormData({ ...formData, content: t })}
-              placeholder="Write your post content here (Markdown supported)"
-              placeholderTextColor="#737373"
-              multiline={true}
-              numberOfLines={10}
-            />
-
-            <Text style={styles.label}>Tags (comma separated)</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.tags}
-              onChangeText={(t) => setFormData({ ...formData, tags: t })}
-              placeholder="react, typescript, web"
-              placeholderTextColor="#737373"
-            />
-
-            <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Featured</Text>
-              <Switch
-                value={formData.featured}
-                onValueChange={(v) => setFormData({ ...formData, featured: v })}
-                trackColor={{ false: '#333333', true: '#a78bfa' }}
-                thumbColor={formData.featured ? '#ffffff' : '#737373'}
+          <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> title <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                style={styles.input}
+                value={formData.title}
+                onChangeText={(t) => setFormData({ ...formData, title: t })}
+                placeholder="Post title"
+                placeholderTextColor={colors.textDisabled}
               />
             </View>
 
-            <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Published</Text>
-              <Switch
-                value={formData.published}
-                onValueChange={(v) => setFormData({ ...formData, published: v })}
-                trackColor={{ false: '#333333', true: '#22c55e' }}
-                thumbColor={formData.published ? '#ffffff' : '#737373'}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> slug
+              </Text>
+              <TextInput
+                style={styles.input}
+                value={formData.slug}
+                onChangeText={(t) => setFormData({ ...formData, slug: t })}
+                placeholder="auto-generated-from-title"
+                placeholderTextColor={colors.textDisabled}
+                autoCapitalize="none"
               />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> description
+              </Text>
+              <TextInput
+                style={[styles.input, styles.multiline]}
+                value={formData.description}
+                onChangeText={(t) => setFormData({ ...formData, description: t })}
+                placeholder="Brief description"
+                placeholderTextColor={colors.textDisabled}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> content
+              </Text>
+              <TextInput
+                style={[styles.input, styles.contentInput]}
+                value={formData.content}
+                onChangeText={(t) => setFormData({ ...formData, content: t })}
+                placeholder="Write your post content (Markdown supported)"
+                placeholderTextColor={colors.textDisabled}
+                multiline
+                numberOfLines={10}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> tags
+              </Text>
+              <TextInput
+                style={styles.input}
+                value={formData.tags}
+                onChangeText={(t) => setFormData({ ...formData, tags: t })}
+                placeholder="react, typescript, web"
+                placeholderTextColor={colors.textDisabled}
+              />
+            </View>
+
+            <View style={styles.switchContainer}>
+              <View style={styles.switchRow}>
+                <View>
+                  <Text style={styles.switchLabel}>Featured</Text>
+                  <Text style={styles.switchDescription}>Show on homepage</Text>
+                </View>
+                <Switch
+                  value={formData.featured}
+                  onValueChange={(v) => setFormData({ ...formData, featured: v })}
+                  trackColor={{ false: colors.border, true: colors.accent }}
+                  thumbColor={colors.text}
+                />
+              </View>
+
+              <Divider />
+
+              <View style={styles.switchRow}>
+                <View>
+                  <Text style={styles.switchLabel}>Published</Text>
+                  <Text style={styles.switchDescription}>Make visible to public</Text>
+                </View>
+                <Switch
+                  value={formData.published}
+                  onValueChange={(v) => setFormData({ ...formData, published: v })}
+                  trackColor={{ false: colors.border, true: colors.success }}
+                  thumbColor={colors.text}
+                />
+              </View>
             </View>
 
             <View style={{ height: 50 }} />
@@ -281,86 +379,212 @@ export default function PostsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 60,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: colors.border,
   },
-  backText: { color: '#a78bfa', fontSize: 14 },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#e5e5e5' },
-  addText: { color: '#22c55e', fontSize: 14 },
-  disabled: { opacity: 0.5 },
-  searchContainer: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
+  backText: {
+    color: colors.accent,
+    fontSize: typography.base,
+  },
+  title: {
+    fontSize: typography.lg,
+    fontWeight: typography.bold,
+    color: colors.text,
+  },
+  addText: {
+    color: colors.success,
+    fontSize: typography.base,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+
+  // Search
+  searchContainer: {
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+  },
+  searchInputFocused: {
+    borderColor: colors.accent,
+  },
+  searchPrefix: {
+    color: colors.accent,
+    fontSize: typography.base,
+    marginRight: spacing.sm,
+  },
   searchInput: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#333333',
-    padding: 12,
-    color: '#e5e5e5',
-    fontSize: 14,
+    flex: 1,
+    paddingVertical: spacing.md,
+    color: colors.text,
+    fontSize: typography.base,
   },
-  list: { padding: 16 },
+  cursor: {
+    color: colors.accent,
+    fontSize: typography.base,
+  },
+
+  // List
+  list: {
+    padding: spacing.lg,
+  },
   card: {
-    backgroundColor: '#141414',
-    borderWidth: 1,
-    borderColor: '#333333',
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    padding: 0,
+    overflow: 'hidden',
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: '#e5e5e5', flex: 1, marginRight: 8 },
-  badges: { flexDirection: 'row' },
-  badge: { paddingHorizontal: 6, paddingVertical: 2, marginLeft: 4 },
-  featuredBadge: { backgroundColor: '#a78bfa', paddingHorizontal: 6, paddingVertical: 2 },
-  published: { backgroundColor: '#22c55e' },
-  draft: { backgroundColor: '#737373' },
-  badgeText: { color: '#ffffff', fontSize: 10, fontWeight: '600' },
-  description: { fontSize: 14, color: '#737373', marginTop: 8 },
+  cardContent: {
+    flexDirection: 'row',
+  },
+  cardIcon: {
+    width: 48,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRightWidth: 1,
+    borderRightColor: colors.border,
+  },
+  cardIconText: {
+    color: colors.accent,
+    fontSize: typography.base,
+    fontWeight: typography.bold,
+  },
+  cardBody: {
+    flex: 1,
+    padding: spacing.md,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  cardTitle: {
+    fontSize: typography.md,
+    fontWeight: typography.semibold,
+    color: colors.text,
+    flex: 1,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  description: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    marginTop: spacing.sm,
+  },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#333333',
+    gap: spacing.lg,
   },
-  actionText: { color: '#a78bfa', fontSize: 14, marginLeft: 16 },
-  deleteText: { color: '#dc2626' },
-  emptyText: { color: '#737373', textAlign: 'center', marginTop: 32 },
-  modalContainer: { flex: 1, backgroundColor: '#0a0a0a' },
+  actionText: {
+    color: colors.text,
+    fontSize: typography.sm,
+  },
+  deleteText: {
+    color: colors.destructive,
+    fontSize: typography.sm,
+  },
+
+  // Modal
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 60,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: colors.border,
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#e5e5e5' },
-  form: { padding: 16 },
-  label: { fontSize: 14, color: '#e5e5e5', marginBottom: 4, marginTop: 16 },
+  modalTitle: {
+    fontSize: typography.lg,
+    fontWeight: typography.bold,
+    color: colors.accent,
+  },
+  saveText: {
+    color: colors.success,
+    fontSize: typography.base,
+  },
+
+  // Form
+  form: {
+    padding: spacing.lg,
+  },
+  formGroup: {
+    marginBottom: spacing.lg,
+  },
+  label: {
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  labelAccent: {
+    color: colors.accent,
+  },
+  required: {
+    color: colors.destructive,
+  },
   input: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#333333',
-    padding: 12,
-    color: '#e5e5e5',
-    fontSize: 14,
+    borderColor: colors.border,
+    padding: spacing.md,
+    color: colors.text,
+    fontSize: typography.base,
   },
-  multiline: { minHeight: 80, textAlignVertical: 'top' },
-  contentInput: { minHeight: 200, textAlignVertical: 'top' },
+  multiline: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  contentInput: {
+    minHeight: 200,
+    textAlignVertical: 'top',
+  },
+  switchContainer: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginTop: spacing.md,
+  },
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
-    paddingVertical: 8,
   },
-  switchLabel: { fontSize: 14, color: '#e5e5e5' },
+  switchLabel: {
+    fontSize: typography.base,
+    color: colors.text,
+  },
+  switchDescription: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
 });

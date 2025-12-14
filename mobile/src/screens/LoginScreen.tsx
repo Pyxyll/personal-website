@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Animated,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../contexts/AuthContext';
+import { colors, spacing, typography } from '../theme';
+import { FadeIn } from '../components/Animated';
 
 export default function LoginScreen() {
   const {
@@ -25,6 +28,30 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  // Cursor blink animation
+  const cursorOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const blink = Animated.loop(
+      Animated.sequence([
+        Animated.timing(cursorOpacity, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(cursorOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    blink.start();
+    return () => blink.stop();
+  }, []);
 
   useEffect(() => {
     if (biometricsEnabled) {
@@ -59,7 +86,6 @@ export default function LoginScreen() {
     try {
       await login(email, password);
 
-      // After successful login, offer to enable biometrics if available
       if (biometricsAvailable && !biometricsEnabled) {
         Alert.alert(
           'Enable Biometrics',
@@ -88,65 +114,139 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="light" />
+
       <View style={styles.content}>
-        <Text style={styles.title}>// Admin Login</Text>
-        <Text style={styles.subtitle}>dylancollins.me</Text>
-
-        {biometricsEnabled && (
-          <TouchableOpacity
-            style={styles.biometricButton}
-            onPress={handleBiometricLogin}
-            disabled={isLoading}
-          >
-            <Text style={styles.biometricIcon}>&#128274;</Text>
-            <Text style={styles.biometricText}>Tap to use biometrics</Text>
-          </TouchableOpacity>
-        )}
-
-        {biometricsEnabled && (
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or use password</Text>
-            <View style={styles.dividerLine} />
+        {/* Logo/Brand Section */}
+        <FadeIn delay={0}>
+          <View style={styles.brandSection}>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoText}>D</Text>
+            </View>
+            <Text style={styles.title}>// admin_login</Text>
+            <Text style={styles.subtitle}>dylancollins.me</Text>
           </View>
+        </FadeIn>
+
+        {/* Biometric Button */}
+        {biometricsEnabled && (
+          <FadeIn delay={100}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.biometricButton,
+                pressed && styles.biometricButtonPressed,
+              ]}
+              onPress={handleBiometricLogin}
+              disabled={isLoading}
+            >
+              <View style={styles.biometricIconContainer}>
+                <Text style={styles.biometricIcon}>*</Text>
+              </View>
+              <Text style={styles.biometricText}>authenticate with biometrics</Text>
+              <Text style={styles.biometricAction}>[scan]</Text>
+            </Pressable>
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+          </FadeIn>
         )}
 
-        <View>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="admin@example.com"
-            placeholderTextColor="#737373"
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
+        {/* Login Form */}
+        <FadeIn delay={biometricsEnabled ? 200 : 100}>
+          <View style={styles.formSection}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> email
+              </Text>
+              <View style={[
+                styles.inputContainer,
+                emailFocused && styles.inputContainerFocused,
+              ]}>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="admin@example.com"
+                  placeholderTextColor={colors.textDisabled}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                />
+                {emailFocused && (
+                  <Animated.Text style={[styles.cursor, { opacity: cursorOpacity }]}>
+                    _
+                  </Animated.Text>
+                )}
+              </View>
+            </View>
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="password"
-            placeholderTextColor="#737373"
-            secureTextEntry={true}
-          />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>
+                <Text style={styles.labelAccent}>$</Text> password
+              </Text>
+              <View style={[
+                styles.inputContainer,
+                passwordFocused && styles.inputContainerFocused,
+              ]}>
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.textDisabled}
+                  secureTextEntry={true}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
+                />
+                {passwordFocused && (
+                  <Animated.Text style={[styles.cursor, { opacity: cursorOpacity }]}>
+                    _
+                  </Animated.Text>
+                )}
+              </View>
+            </View>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? (
+              <FadeIn slideFrom="none">
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorPrefix}>error:</Text>
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              </FadeIn>
+            ) : null}
 
-          <TouchableOpacity
-            style={[styles.button, isLoading ? styles.buttonDisabled : null]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#0a0a0a" />
-            ) : (
-              <Text style={styles.buttonText}>[Login]</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.buttonPressed,
+                isLoading && styles.buttonDisabled,
+              ]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator color={colors.background} size="small" />
+                  <Text style={styles.buttonTextLoading}>authenticating...</Text>
+                </View>
+              ) : (
+                <Text style={styles.buttonText}>[submit]</Text>
+              )}
+            </Pressable>
+          </View>
+        </FadeIn>
+
+        {/* Footer */}
+        <FadeIn delay={300}>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              <Text style={styles.footerAccent}>{'>'}</Text> secure connection
+            </Text>
+          </View>
+        </FadeIn>
       </View>
     </KeyboardAvoidingView>
   );
@@ -155,86 +255,196 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.xl,
+  },
+
+  // Brand Section
+  brandSection: {
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
+  },
+  logoContainer: {
+    width: 80,
+    height: 80,
+    backgroundColor: colors.card,
+    borderWidth: 2,
+    borderColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  logoText: {
+    fontSize: 48,
+    fontWeight: typography.bold,
+    color: colors.text,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#a78bfa',
-    marginBottom: 4,
+    fontSize: typography.xl,
+    fontWeight: typography.bold,
+    color: colors.accent,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#737373',
-    marginBottom: 32,
+    fontSize: typography.sm,
+    color: colors.textMuted,
   },
+
+  // Biometric Button
   biometricButton: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#a78bfa',
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  biometricIcon: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  biometricText: {
-    color: '#a78bfa',
-    fontSize: 16,
-  },
-  divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  biometricButtonPressed: {
+    borderColor: colors.accent,
+    backgroundColor: colors.cardHover,
+  },
+  biometricIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  biometricIcon: {
+    fontSize: typography.xl,
+    color: colors.accent,
+  },
+  biometricText: {
+    flex: 1,
+    fontSize: typography.base,
+    color: colors.text,
+  },
+  biometricAction: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+  },
+
+  // Divider
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#333333',
+    backgroundColor: colors.border,
   },
   dividerText: {
-    color: '#737373',
-    paddingHorizontal: 12,
-    fontSize: 12,
+    color: colors.textMuted,
+    paddingHorizontal: spacing.md,
+    fontSize: typography.sm,
+  },
+
+  // Form
+  formSection: {
+    marginBottom: spacing.xl,
+  },
+  inputGroup: {
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: 14,
-    color: '#e5e5e5',
-    marginBottom: 4,
-    marginTop: 12,
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  labelAccent: {
+    color: colors.accent,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+  },
+  inputContainerFocused: {
+    borderColor: colors.accent,
   },
   input: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#333333',
-    padding: 12,
-    color: '#e5e5e5',
-    fontSize: 16,
+    flex: 1,
+    paddingVertical: spacing.md,
+    color: colors.text,
+    fontSize: typography.md,
   },
-  button: {
-    backgroundColor: '#e5e5e5',
-    padding: 14,
+  cursor: {
+    color: colors.accent,
+    fontSize: typography.md,
+    marginLeft: 2,
+  },
+
+  // Error
+  errorContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 24,
+    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+    borderWidth: 1,
+    borderColor: colors.destructive,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  errorPrefix: {
+    color: colors.destructive,
+    fontSize: typography.sm,
+    fontWeight: typography.semibold,
+    marginRight: spacing.sm,
+  },
+  errorText: {
+    color: colors.text,
+    fontSize: typography.sm,
+    flex: 1,
+  },
+
+  // Button
+  button: {
+    backgroundColor: colors.text,
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  buttonPressed: {
+    backgroundColor: colors.textSecondary,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
-    color: '#0a0a0a',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.background,
+    fontSize: typography.md,
+    fontWeight: typography.semibold,
   },
-  error: {
-    color: '#dc2626',
-    fontSize: 14,
-    marginTop: 12,
+  buttonTextLoading: {
+    color: colors.background,
+    fontSize: typography.md,
+    marginLeft: spacing.sm,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  // Footer
+  footer: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+  },
+  footerAccent: {
+    color: colors.accent,
   },
 });
