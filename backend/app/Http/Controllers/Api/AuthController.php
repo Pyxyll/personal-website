@@ -31,10 +31,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Revoke existing tokens
-        $user->tokens()->delete();
-
-        // Create new token
+        // Create new token (allow multiple sessions for different devices)
         $token = $user->createToken('admin-token')->plainTextToken;
 
         return response()->json([
