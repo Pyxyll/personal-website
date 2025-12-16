@@ -41,20 +41,11 @@ export const metadata: Metadata = {
     siteName: "Dylan Collins",
     title: "Dylan Collins | Software Developer",
     description: "Software developer passionate about clean code, full-stack development, and open source. Building modern web applications with React, Next.js, and Laravel.",
-    images: [
-      {
-        url: `${siteUrl}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: "Dylan Collins - Software Developer",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Dylan Collins | Software Developer",
     description: "Software developer passionate about clean code, full-stack development, and open source.",
-    images: [`${siteUrl}/og-image.png`],
     creator: "@dylancollins",
   },
   alternates: {
