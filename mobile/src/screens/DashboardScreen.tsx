@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   ScrollView,
   RefreshControl,
   Pressable,
+  Switch,
+  Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +17,11 @@ import { contactApi } from '../api';
 import { colors, spacing, typography } from '../theme';
 import { FadeIn, StaggeredList, AnimatedCard } from '../components/Animated';
 import { Header, Badge, Divider, Muted } from '../components/UI';
+import {
+  areNotificationsEnabled,
+  setNotificationsEnabled,
+  requestNotificationPermissions,
+} from '../services/notifications';
 import type { RootStackParamList } from '../../App';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -32,6 +39,7 @@ export default function DashboardScreen() {
   const { user, logout, biometricsEnabled, disableBiometrics } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
 
   const fetchUnreadCount = async () => {
     try {
@@ -42,9 +50,38 @@ export default function DashboardScreen() {
     }
   };
 
+  const loadNotificationStatus = async () => {
+    const enabled = await areNotificationsEnabled();
+    setNotificationsEnabledState(enabled);
+  };
+
+  // Refresh unread count when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadCount();
+      loadNotificationStatus();
+    }, [])
+  );
+
   useEffect(() => {
     fetchUnreadCount();
+    loadNotificationStatus();
   }, []);
+
+  const handleToggleNotifications = async (enabled: boolean) => {
+    if (enabled) {
+      const hasPermission = await requestNotificationPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Required',
+          'Please enable notifications in your device settings to receive message alerts.'
+        );
+        return;
+      }
+    }
+    await setNotificationsEnabled(enabled);
+    setNotificationsEnabledState(enabled);
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -174,29 +211,50 @@ export default function DashboardScreen() {
                 </Text>
               </View>
               <View style={styles.statCard}>
-                <Text style={styles.statIcon}>~$</Text>
-                <Text style={styles.statLabel}>biometrics</Text>
-                <Text style={styles.statValue}>{biometricsEnabled ? 'on' : 'off'}</Text>
+                <Text style={styles.statIcon}>!!</Text>
+                <Text style={styles.statLabel}>notify</Text>
+                <Text style={[styles.statValue, notificationsEnabled && styles.statValueAccent]}>
+                  {notificationsEnabled ? 'on' : 'off'}
+                </Text>
               </View>
             </View>
           </View>
         </FadeIn>
 
         {/* Settings Section */}
-        {biometricsEnabled && (
-          <FadeIn delay={600}>
-            <View style={styles.settingsSection}>
-              <Text style={styles.sectionTitle}>// settings</Text>
-              <Pressable
-                style={styles.settingItem}
-                onPress={disableBiometrics}
-              >
-                <Text style={styles.settingText}>Disable biometric login</Text>
-                <Text style={styles.settingAction}>[disable]</Text>
-              </Pressable>
+        <FadeIn delay={600}>
+          <View style={styles.settingsSection}>
+            <Text style={styles.sectionTitle}>// settings</Text>
+
+            <View style={styles.settingItemWithSwitch}>
+              <View>
+                <Text style={styles.settingText}>Message notifications</Text>
+                <Text style={styles.settingDescription}>
+                  Get notified when someone contacts you
+                </Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={handleToggleNotifications}
+                trackColor={{ false: colors.border, true: colors.accent }}
+                thumbColor={colors.text}
+              />
             </View>
-          </FadeIn>
-        )}
+
+            {biometricsEnabled && (
+              <>
+                <Divider />
+                <Pressable
+                  style={styles.settingItem}
+                  onPress={disableBiometrics}
+                >
+                  <Text style={styles.settingText}>Disable biometric login</Text>
+                  <Text style={styles.settingAction}>[disable]</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </FadeIn>
 
         {/* Footer */}
         <FadeIn delay={700}>
@@ -351,7 +409,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginTop: spacing.xl,
   },
-  settingItem: {
+  settingItemWithSwitch: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -360,9 +418,20 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.lg,
   },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
   settingText: {
     fontSize: typography.base,
     color: colors.text,
+  },
+  settingDescription: {
+    fontSize: typography.sm,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   settingAction: {
     fontSize: typography.base,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,14 @@ import {
   Modal,
   ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { contactApi } from '../api';
 import { ContactSubmission } from '../types';
 import { colors, spacing, typography } from '../theme';
 import { FadeIn, AnimatedCard } from '../components/Animated';
 import { Divider, EmptyState } from '../components/UI';
+import { resetLastCount } from '../services/notifications';
 
 export default function ContactsScreen() {
   const navigation = useNavigation();
@@ -29,12 +30,22 @@ export default function ContactsScreen() {
     try {
       const data = await contactApi.getAll();
       setContacts(data);
+      // Reset the notification count to current unread count
+      const unreadCount = data.filter(c => !c.read).length;
+      await resetLastCount(unreadCount);
     } catch {
       Alert.alert('Error', 'Failed to load');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Refresh contacts when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchContacts();
+    }, [])
+  );
 
   useEffect(() => {
     fetchContacts();
