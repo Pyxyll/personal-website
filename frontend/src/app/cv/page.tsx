@@ -5,65 +5,72 @@ import { Badge } from "@/components/ui/badge";
 
 const experience = [
   {
-    title: "Senior Software Developer",
-    company: "Tech Company",
-    period: "2023 - Present",
-    location: "Remote",
+    title: "Software Developer",
+    company: "The B!G Idea",
+    period: "July 2024 - Present",
+    location: "Ireland",
     description: [
-      "Lead development of full-stack applications using React, Next.js, and Node.js",
-      "Architected and implemented microservices infrastructure serving 100k+ users",
-      "Mentored junior developers and conducted code reviews",
-      "Reduced deployment time by 60% through CI/CD pipeline optimization"
+      "Developing and maintaining the platform built on WordPress",
+      "Built custom tooling and functionality beyond WordPress core capabilities",
+      "Creating custom themes and plugins to extend functionality",
+      "Collaborating with team members on project delivery"
     ],
-    technologies: ["React", "Next.js", "Node.js", "PostgreSQL", "AWS"]
+    technologies: ["WordPress", "PHP", "JavaScript", "CSS", "MySQL"]
   },
   {
-    title: "Full-Stack Developer",
-    company: "Startup Inc",
-    period: "2021 - 2023",
+    title: "College At Home Advisor",
+    company: "Apple Inc.",
+    period: "July 2023 - October 2023",
     location: "Remote",
     description: [
-      "Built and maintained web applications using Vue.js and Laravel",
-      "Implemented RESTful APIs and integrated third-party services",
-      "Collaborated with design team to implement responsive UI/UX",
-      "Improved application performance by 40% through caching strategies"
+      "Provided remote technical support for iOS devices",
+      "Engaged in regular training sessions achieving 90+% scores",
+      "Developed strong problem-solving and communication skills"
     ],
-    technologies: ["Vue.js", "Laravel", "MySQL", "Redis", "Docker"]
+    technologies: ["Technical Support", "iOS", "Customer Service"]
   },
   {
-    title: "Junior Developer",
-    company: "Agency XYZ",
-    period: "2020 - 2021",
-    location: "On-site",
+    title: "Freelance Web Development & SysAdmin",
+    company: "Self-employed",
+    period: "Sept 2014 - July 2023",
+    location: "Remote",
     description: [
-      "Developed client websites using WordPress and custom PHP solutions",
-      "Created responsive landing pages and marketing websites",
-      "Participated in agile development process and daily standups",
-      "Learned best practices for version control and code documentation"
+      "Built and deployed websites for various clients",
+      "Managed servers, networks, and system configurations",
+      "Ensured optimal performance and security for client projects",
+      "Handled client communication and project management"
     ],
-    technologies: ["PHP", "WordPress", "JavaScript", "CSS", "Git"]
+    technologies: ["Node.js", "PHP", "Docker", "AWS", "Linux", "BASH"]
+  },
+  {
+    title: "Web Services Admin / IT Support",
+    company: "Panoptic IT Solutions",
+    period: "June 2018 - Sept 2020",
+    location: "Ireland",
+    description: [
+      "Liaised with clients about web development requirements",
+      "Created in-depth design documents for projects",
+      "Implemented projects with design and development team",
+      "Provided troubleshooting and technical support"
+    ],
+    technologies: ["Web Development", "Documentation", "IT Support", "Client Relations"]
   }
 ];
 
 const education = [
   {
-    degree: "Bachelor of Science in Computer Science",
-    school: "University of Technology",
-    period: "2016 - 2020",
-    details: "Specialized in Software Engineering. Graduated with honors."
+    degree: "BSc in Multimedia Applications Development",
+    school: "SETU Waterford",
+    period: "2022 - 2025",
+    details: "Graduated with 1.1 GPA. Key modules included JavaScript (100%), Front-end Web Development (98%), UX Design (96%), Web Application Development (90%), and System Administration (80%)."
   }
 ];
 
-const certifications = [
-  { name: "AWS Certified Solutions Architect", year: "2023" },
-  { name: "Docker Certified Associate", year: "2022" },
-  { name: "MongoDB Certified Developer", year: "2022" }
-];
-
 const skills = {
-  expert: ["JavaScript", "TypeScript", "React", "Next.js", "Node.js"],
-  proficient: ["Python", "Laravel", "PostgreSQL", "Docker", "AWS"],
-  familiar: ["Rust", "Go", "Kubernetes", "GraphQL", "MongoDB"]
+  languages: ["JavaScript", "TypeScript", "PHP", "SQL", "BASH", "HTML", "CSS"],
+  frontend: ["React", "Next.js", "Svelte", "Astro", "Tailwind CSS", "Bootstrap"],
+  backend: ["Node.js", "Express.js", "Laravel", "WordPress", "GraphQL"],
+  tools: ["Docker", "AWS EC2", "Git", "Linux", "MySQL", "PostgreSQL"]
 };
 
 export default function CVPage() {
@@ -73,18 +80,21 @@ export default function CVPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl text-foreground font-bold">Dylan Collins</h1>
-            <p className="text-muted-foreground">Senior Software Developer</p>
+            <p className="text-muted-foreground">Software Developer</p>
           </div>
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>hello@dylancollins.me</p>
+            <p>dylan@dylancollins.me</p>
             <p>github.com/Pyxyll</p>
             <p>linkedin.com/in/dylan-c-collins</p>
           </div>
         </div>
         <AsciiDivider className="my-4" />
         <p className="text-muted-foreground">
-          Full-stack developer with 4+ years of experience building scalable web applications.
-          Passionate about clean code, developer experience, and open source.
+          Software developer with 10+ years of experience building websites and managing systems.
+          A self-starter with a keen attention to detail and a love for tackling interesting challenges.
+          Recently graduated with a BSc in Multimedia Applications Development, combining years of
+          hands-on industry experience with formal education. Strong communicator with a friendly,
+          down-to-earth approach.
         </p>
         <div className="mt-4">
           <a
@@ -113,7 +123,7 @@ export default function CVPage() {
               <ul className="text-muted-foreground text-sm space-y-1 mb-3">
                 {job.description.map((item, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-muted-foreground">-</span>
+                    <span className="text-[var(--gradient-mid)]">-</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -130,37 +140,26 @@ export default function CVPage() {
         </div>
       </AsciiSection>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <AsciiSection title="Education">
-          {education.map((edu, index) => (
-            <div key={index} className="border border-border p-4 bg-card">
-              <h3 className="text-foreground font-bold">{edu.degree}</h3>
-              <p className="text-muted-foreground">{edu.school}</p>
+      <AsciiSection title="Education">
+        {education.map((edu, index) => (
+          <div key={index} className="border border-border p-4 bg-card">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
+              <div>
+                <h3 className="text-foreground font-bold">{edu.degree}</h3>
+                <p className="text-muted-foreground">{edu.school}</p>
+              </div>
               <p className="text-muted-foreground text-sm">{edu.period}</p>
-              <p className="text-muted-foreground text-sm mt-2">{edu.details}</p>
             </div>
-          ))}
-        </AsciiSection>
-
-        <AsciiSection title="Certifications">
-          <div className="border border-border p-4 bg-card">
-            <ul className="space-y-2">
-              {certifications.map((cert) => (
-                <li key={cert.name} className="flex justify-between items-center">
-                  <span className="text-muted-foreground text-sm">{cert.name}</span>
-                  <span className="text-muted-foreground text-xs">[{cert.year}]</span>
-                </li>
-              ))}
-            </ul>
+            <p className="text-muted-foreground text-sm">{edu.details}</p>
           </div>
-        </AsciiSection>
-      </div>
+        ))}
+      </AsciiSection>
 
       <AsciiSection title="Technical Skills">
-        <div className="grid gap-4 md:grid-cols-3">
-          <AsciiBox title="Expert">
+        <div className="grid gap-4 md:grid-cols-2">
+          <AsciiBox title="Languages">
             <div className="flex flex-wrap gap-1">
-              {skills.expert.map((skill) => (
+              {skills.languages.map((skill) => (
                 <Badge key={skill} variant="outline" className="text-xs border-border text-muted-foreground">
                   {skill}
                 </Badge>
@@ -168,9 +167,9 @@ export default function CVPage() {
             </div>
           </AsciiBox>
 
-          <AsciiBox title="Proficient">
+          <AsciiBox title="Frontend">
             <div className="flex flex-wrap gap-1">
-              {skills.proficient.map((skill) => (
+              {skills.frontend.map((skill) => (
                 <Badge key={skill} variant="outline" className="text-xs border-border text-muted-foreground">
                   {skill}
                 </Badge>
@@ -178,9 +177,19 @@ export default function CVPage() {
             </div>
           </AsciiBox>
 
-          <AsciiBox title="Familiar">
+          <AsciiBox title="Backend">
             <div className="flex flex-wrap gap-1">
-              {skills.familiar.map((skill) => (
+              {skills.backend.map((skill) => (
+                <Badge key={skill} variant="outline" className="text-xs border-border text-muted-foreground">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </AsciiBox>
+
+          <AsciiBox title="Tools & Infrastructure">
+            <div className="flex flex-wrap gap-1">
+              {skills.tools.map((skill) => (
                 <Badge key={skill} variant="outline" className="text-xs border-border text-muted-foreground">
                   {skill}
                 </Badge>

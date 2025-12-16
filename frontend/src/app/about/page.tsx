@@ -2,36 +2,23 @@
 
 import { AsciiSection, AsciiBox, AsciiDivider } from "@/components/ascii";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-const skills = {
-  languages: ["TypeScript", "JavaScript", "Python", "Rust", "Go", "PHP", "SQL"],
-  frontend: ["React", "Next.js", "Vue.js", "Tailwind CSS", "HTML/CSS"],
-  backend: ["Node.js", "Laravel", "Express", "FastAPI", "PostgreSQL", "Redis"],
-  tools: ["Git", "Docker", "Linux", "AWS", "Vercel", "Nginx"],
-  interests: ["System Design", "DevOps", "Open Source", "CLI Tools"]
-};
+const techIUse = [
+  "JavaScript", "TypeScript", "PHP", "React", "Next.js", "Laravel",
+  "WordPress", "Node.js", "Tailwind CSS", "Docker", "Linux"
+];
 
-const timeline = [
-  {
-    year: "2024",
-    title: "Current Focus",
-    description: "Building full-stack applications and contributing to open source. Exploring Rust and systems programming."
-  },
-  {
-    year: "2023",
-    title: "Full-Stack Development",
-    description: "Worked on various web applications using React, Next.js, and Laravel. Started learning cloud architecture."
-  },
-  {
-    year: "2022",
-    title: "Web Development Journey",
-    description: "Deepened expertise in JavaScript/TypeScript. Built several personal projects and started blogging."
-  },
-  {
-    year: "2021",
-    title: "Started Programming",
-    description: "Discovered programming and fell in love with building things. Started with Python and web basics."
-  }
+const thingsILove = [
+  "Video Games",
+  "Anime",
+  "Building PCs",
+  "Custom Keyboards",
+  "Cats",
+  "Lego",
+  "Pokémon Cards",
+  "3D Printing",
+  "Little Adventures"
 ];
 
 export default function AboutPage() {
@@ -42,104 +29,99 @@ export default function AboutPage() {
         <AsciiDivider className="my-4" />
         <div className="space-y-4 text-muted-foreground">
           <p>
-            Hey there! I&apos;m <span className="text-foreground">Dylan Collins</span>, a software developer
-            who loves building things that live on the internet.
+            Hey! I&apos;m <span className="text-foreground">Dylan</span> - part builder,
+            part tinkerer, full-time curious.
           </p>
           <p>
-            I believe in writing clean, maintainable code and creating user experiences that
-            feel natural and intuitive. When I&apos;m not coding, you&apos;ll find me exploring
-            new technologies, contributing to open source, or tinkering with side projects.
+            I&apos;ve been building things on the internet for over 10 years now. What started
+            as messing around with websites turned into a proper career, and I recently
+            went back to college as a mature student to get a degree in Multimedia Applications
+            Development (graduated 2025 with a 1.1 GPA - pretty chuffed about that).
           </p>
           <p>
-            This website serves as my digital garden - a place where I share my work, thoughts,
-            and learnings. It&apos;s intentionally designed with a minimalist ASCII aesthetic,
-            reminding us that simplicity often trumps complexity.
+            When I&apos;m not at a keyboard, I&apos;m probably building one. Or a PC. Or 3D printing
+            something that absolutely didn&apos;t need to exist. I have zero self-control when it
+            comes to hobbies - my desk is proof of that.
+          </p>
+          <p>
+            I&apos;ve always had an <span className="text-foreground">&quot;I&apos;ll build it myself&quot;</span> attitude.
+            Something exists but doesn&apos;t work the way I want? Cool, I&apos;ll just make my own version.
           </p>
         </div>
       </section>
 
-      <AsciiSection title="Skills & Technologies">
-        <div className="grid gap-4 md:grid-cols-2">
-          <AsciiBox title="Languages">
-            <div className="flex flex-wrap gap-2">
-              {skills.languages.map((skill) => (
-                <Badge key={skill} variant="outline" className="border-border text-muted-foreground">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </AsciiBox>
-
-          <AsciiBox title="Frontend">
-            <div className="flex flex-wrap gap-2">
-              {skills.frontend.map((skill) => (
-                <Badge key={skill} variant="outline" className="border-border text-muted-foreground">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </AsciiBox>
-
-          <AsciiBox title="Backend">
-            <div className="flex flex-wrap gap-2">
-              {skills.backend.map((skill) => (
-                <Badge key={skill} variant="outline" className="border-border text-muted-foreground">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </AsciiBox>
-
-          <AsciiBox title="Tools & DevOps">
-            <div className="flex flex-wrap gap-2">
-              {skills.tools.map((skill) => (
-                <Badge key={skill} variant="outline" className="border-border text-muted-foreground">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </AsciiBox>
+      <AsciiSection title="The Fun Stuff">
+        <div className="border border-border p-4 bg-card space-y-4 text-muted-foreground">
+          <p>
+            I&apos;m a big <span className="text-foreground">video game</span> nerd and love
+            chatting about games - what I&apos;m playing, what&apos;s coming out, hot takes, all of it.
+            Same goes for <span className="text-foreground">anime</span>. Always happy to swap
+            recommendations or argue about which season was actually the best.
+          </p>
+          <p>
+            <span className="text-foreground">Cats</span> are the best. I&apos;m a massive animal
+            lover in general, but cats just hit different. If you have cat pictures, I want to see them.
+          </p>
+          <p>
+            I love little <span className="text-foreground">adventures</span> - exploring new places,
+            finding weird shops, stumbling onto something unexpected. Life&apos;s more fun when you
+            say yes to random detours.
+          </p>
+          <p>
+            Oh, and <span className="text-foreground">Lego</span> and <span className="text-foreground">Pokémon cards</span>?
+            Don&apos;t get me started. My wallet wishes I had different hobbies.
+          </p>
         </div>
       </AsciiSection>
 
-      <AsciiSection title="Timeline">
-        <div className="space-y-4">
-          {timeline.map((item, index) => (
-            <div key={item.year} className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <span className="text-foreground font-bold">{item.year}</span>
-                {index < timeline.length - 1 && (
-                  <div className="w-px h-full bg-border mt-2"></div>
-                )}
-              </div>
-              <div className="pb-4">
-                <h4 className="text-foreground font-medium">{item.title}</h4>
-                <p className="text-muted-foreground text-sm mt-1">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </AsciiSection>
-
-      <AsciiSection title="Interests">
+      <AsciiSection title="Things I Love">
         <div className="flex flex-wrap gap-2">
-          {skills.interests.map((interest) => (
+          {thingsILove.map((thing) => (
             <span
-              key={interest}
+              key={thing}
               className="px-3 py-1 border border-border text-muted-foreground text-sm"
             >
-              {interest}
+              {thing}
             </span>
           ))}
         </div>
       </AsciiSection>
 
+      <AsciiSection title="The Work Stuff">
+        <div className="border border-border p-4 bg-card space-y-4 text-muted-foreground">
+          <p>
+            I currently work as a Software Developer at <span className="text-foreground">The B!G Idea</span>,
+            building and maintaining their WordPress-based platform. Before that, I spent years doing
+            freelance web development and sysadmin work, had a stint at Apple doing tech support,
+            and worked at a local IT company.
+          </p>
+          <p>
+            I genuinely love <span className="text-foreground">programming</span> and <span className="text-foreground">building things</span>.
+            There&apos;s something satisfying about taking an idea and turning it into something real -
+            whether that&apos;s a website, an app, or a weird side project that only I will ever use.
+          </p>
+          <p>
+            For the full professional rundown, check out my <Link href="/cv" className="text-[var(--gradient-mid)] hover-underline">CV</Link>.
+          </p>
+        </div>
+      </AsciiSection>
+
+      <AsciiSection title="Tech I Use">
+        <div className="flex flex-wrap gap-2">
+          {techIUse.map((tech) => (
+            <Badge key={tech} variant="outline" className="border-border text-muted-foreground">
+              {tech}
+            </Badge>
+          ))}
+        </div>
+      </AsciiSection>
+
       <section className="border border-border p-4 bg-card">
-        <h3 className="text-foreground mb-4">Contact</h3>
+        <h3 className="text-foreground mb-4">Say Hello</h3>
         <div className="text-muted-foreground space-y-2 text-sm">
           <p>
             <span className="text-foreground">Email:</span>{" "}
-            <a href="mailto:hello@dylancollins.me">hello@dylancollins.me</a>
+            <a href="mailto:dylan@dylancollins.me">dylan@dylancollins.me</a>
           </p>
           <p>
             <span className="text-foreground">GitHub:</span>{" "}

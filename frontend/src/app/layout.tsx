@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     default: "Dylan Collins | Software Developer",
     template: "%s | Dylan Collins",
   },
-  description: "Software developer passionate about clean code, full-stack development, and open source. Building modern web applications with React, Next.js, and Laravel.",
+  description: "Welcome to my corner of the internet. Part builder, part tinkerer, full-time curious.",
   keywords: ["software developer", "full-stack developer", "web development", "React", "Next.js", "Laravel", "TypeScript", "open source", "portfolio"],
   authors: [{ name: "Dylan Collins", url: siteUrl }],
   creator: "Dylan Collins",
@@ -40,13 +40,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Dylan Collins",
     title: "Dylan Collins | Software Developer",
-    description: "Software developer passionate about clean code, full-stack development, and open source. Building modern web applications with React, Next.js, and Laravel.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Dylan Collins | Software Developer",
-    description: "Software developer passionate about clean code, full-stack development, and open source.",
-    creator: "@dylancollins",
+    description: "Welcome to my corner of the internet. Part builder, part tinkerer, full-time curious.",
   },
   alternates: {
     canonical: siteUrl,
@@ -68,11 +62,10 @@ const jsonLd = {
   name: "Dylan Collins",
   url: "https://dylancollins.me",
   jobTitle: "Software Developer",
-  description: "Software developer passionate about clean code, full-stack development, and open source.",
+  description: "Welcome to my corner of the internet. Part builder, part tinkerer, full-time curious.",
   sameAs: [
     "https://github.com/Pyxyll",
     "https://www.linkedin.com/in/dylan-c-collins/",
-    "https://twitter.com/dylancollins",
   ],
   knowsAbout: [
     "React",
