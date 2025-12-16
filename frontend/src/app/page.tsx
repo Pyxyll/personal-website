@@ -46,7 +46,7 @@ export default function HomePage() {
           <AsciiLogo />
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Welcome to my corner of the internet. Part builder, part tinkerer, full-time curious.
+          Welcome to my corner of the internet.
         </p>
       </section>
 
