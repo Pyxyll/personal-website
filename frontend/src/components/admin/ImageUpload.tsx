@@ -102,28 +102,49 @@ export function ImageUpload({
 
       {preview ? (
         <div className="relative border border-border bg-background p-2">
-          <img
-            src={preview}
-            alt="Preview"
-            className={`object-cover ${type === 'featured' ? 'w-32 h-32' : 'max-w-full max-h-48'}`}
-          />
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-xs text-muted-foreground hover:text-foreground"
-              disabled={isUploading}
-            >
-              [Change]
-            </button>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="text-xs text-red-400 hover:text-red-300"
-              disabled={isUploading}
-            >
-              [Remove]
-            </button>
+          <div className="relative">
+            <img
+              src={preview}
+              alt="Preview"
+              className={`object-cover ${type === 'featured' ? 'w-32 h-32' : 'max-w-full max-h-48'} ${isUploading ? 'opacity-50' : ''}`}
+            />
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/70">
+                <div className="text-center">
+                  <div className="inline-block animate-pulse text-foreground mb-1">
+                    [processing...]
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Uploading & converting to WebP
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            {isUploading ? (
+              <span className="text-xs text-muted-foreground animate-pulse">
+                Please wait...
+              </span>
+            ) : (
+              <>
+                <span className="text-xs text-green-400">[uploaded]</span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  [Change]
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  [Remove]
+                </button>
+              </>
+            )}
           </div>
         </div>
       ) : (

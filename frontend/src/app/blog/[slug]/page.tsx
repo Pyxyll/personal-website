@@ -52,8 +52,60 @@ export default function BlogPostPage() {
     );
   }
 
+  const renderInlineContent = (text: string) => {
+    // Handle inline images and other markdown within text
+    const parts: (string | JSX.Element)[] = [];
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = imageRegex.exec(text)) !== null) {
+      // Add text before the image
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      // Add the image
+      const [, alt, src] = match;
+      parts.push(
+        <img
+          key={`img-${match.index}`}
+          src={src}
+          alt={alt || 'Blog image'}
+          className="max-w-full h-auto my-2 border border-border"
+        />
+      );
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
   const renderContent = (content: string) => {
     return content.split('\n\n').map((paragraph, index) => {
+      // Check if paragraph is just an image
+      const imageOnlyMatch = paragraph.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (imageOnlyMatch) {
+        const [, alt, src] = imageOnlyMatch;
+        return (
+          <figure key={index} className="my-6">
+            <img
+              src={src}
+              alt={alt || 'Blog image'}
+              className="max-w-full h-auto border border-border"
+            />
+            {alt && (
+              <figcaption className="text-xs text-muted-foreground mt-2 text-center">
+                {alt}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
       if (paragraph.startsWith('## ')) {
         return (
           <h2 key={index} className="text-xl text-foreground font-bold mt-8 mb-4 first:mt-0">
@@ -101,6 +153,14 @@ export default function BlogPostPage() {
               </li>
             ))}
           </ol>
+        );
+      }
+      // Check if paragraph contains images mixed with text
+      if (paragraph.includes('![')) {
+        return (
+          <div key={index} className="text-muted-foreground my-4 leading-relaxed">
+            {renderInlineContent(paragraph)}
+          </div>
         );
       }
       return (
