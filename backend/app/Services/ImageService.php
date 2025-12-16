@@ -35,8 +35,10 @@ class ImageService
         return $this->saveImage($image, 'content');
     }
 
-    public function deleteImage(string $path): bool
+    public function deleteImage(string $url): bool
     {
+        // Extract the path from full URL or relative path
+        $path = parse_url($url, PHP_URL_PATH) ?? $url;
         $storagePath = str_replace('/storage/', 'public/', $path);
 
         if (Storage::exists($storagePath)) {
@@ -75,13 +77,13 @@ class ImageService
         $jpegEncoded = $image->toJpeg(self::QUALITY);
         Storage::put($jpegPath, (string) $jpegEncoded);
 
-        $publicWebpPath = str_replace('public/', '/storage/', $webpPath);
-        $publicJpegPath = str_replace('public/', '/storage/', $jpegPath);
+        $relativePath = '/storage/images/posts/' . $filename;
+        $baseUrl = rtrim(config('app.url'), '/');
 
         return [
-            'webp' => $publicWebpPath,
-            'jpeg' => $publicJpegPath,
-            'url' => $publicWebpPath,
+            'webp' => $baseUrl . $relativePath . '.webp',
+            'jpeg' => $baseUrl . $relativePath . '.jpg',
+            'url' => $baseUrl . $relativePath . '.webp',
         ];
     }
 }
