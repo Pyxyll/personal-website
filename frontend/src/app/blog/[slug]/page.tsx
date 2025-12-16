@@ -123,6 +123,16 @@ export default function BlogPostPage() {
         <h1 className="text-2xl text-foreground font-bold mb-2">{post.title}</h1>
         <p className="text-muted-foreground mb-4">{post.description}</p>
 
+        {post.featured_image && (
+          <div className="mb-4 overflow-hidden border border-border">
+            <img
+              src={post.featured_image}
+              alt={post.featured_image_alt || post.title}
+              className="w-full max-h-64 object-cover"
+            />
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-4 text-sm">
           {post.published_at && (
             <span className="text-muted-foreground">

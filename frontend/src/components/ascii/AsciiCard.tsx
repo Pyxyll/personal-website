@@ -152,9 +152,13 @@ export function AsciiBlogCard({
   href,
   tags,
   date,
-  readTime
+  readTime,
+  image,
+  imageAlt
 }: AsciiCardProps & {
   readTime?: string;
+  image?: string | null;
+  imageAlt?: string | null;
 }) {
   return (
     <AsciiCard
@@ -164,6 +168,15 @@ export function AsciiBlogCard({
       tags={tags}
       date={date}
     >
+      {image && (
+        <div className="mt-3 mb-2 overflow-hidden border border-border">
+          <img
+            src={image}
+            alt={imageAlt || title}
+            className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+      )}
       {readTime && (
         <div className="text-xs text-muted-foreground mt-2">
           ~ {readTime} read

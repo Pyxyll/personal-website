@@ -113,6 +113,8 @@ export default function BlogPage() {
                       tags={post.tags || []}
                       readTime={post.read_time || undefined}
                       href={`/blog/${post.slug}`}
+                      image={post.featured_image}
+                      imageAlt={post.featured_image_alt}
                     />
                   ))}
                 </div>
@@ -143,6 +145,8 @@ export default function BlogPage() {
                   tags={post.tags || []}
                   readTime={post.read_time || undefined}
                   href={`/blog/${post.slug}`}
+                  image={post.featured_image}
+                  imageAlt={post.featured_image_alt}
                 />
               ))}
             </div>
