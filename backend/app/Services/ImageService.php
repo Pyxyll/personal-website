@@ -13,7 +13,8 @@ class ImageService
     private const FEATURED_SIZE = 500;
     private const CONTENT_MAX_WIDTH = 1200;
     private const QUALITY = 85;
-    private const STORAGE_PATH = 'public/images/posts';
+    private const STORAGE_PATH = 'images/posts';
+    private const DISK = 'public';
 
     public function uploadFeaturedImage(UploadedFile $file): array
     {
@@ -39,10 +40,11 @@ class ImageService
     {
         // Extract the path from full URL or relative path
         $path = parse_url($url, PHP_URL_PATH) ?? $url;
-        $storagePath = str_replace('/storage/', 'public/', $path);
+        // Remove /storage/ prefix to get the path relative to the public disk
+        $storagePath = preg_replace('#^/storage/#', '', $path);
 
-        if (Storage::exists($storagePath)) {
-            return Storage::delete($storagePath);
+        if (Storage::disk(self::DISK)->exists($storagePath)) {
+            return Storage::disk(self::DISK)->delete($storagePath);
         }
 
         return false;
@@ -66,18 +68,18 @@ class ImageService
     {
         $filename = $prefix . '_' . Str::random(16);
 
-        Storage::makeDirectory(self::STORAGE_PATH);
+        Storage::disk(self::DISK)->makeDirectory(self::STORAGE_PATH);
 
         $webpPath = self::STORAGE_PATH . '/' . $filename . '.webp';
         $jpegPath = self::STORAGE_PATH . '/' . $filename . '.jpg';
 
         $webpEncoded = $image->toWebp(self::QUALITY);
-        Storage::put($webpPath, (string) $webpEncoded);
+        Storage::disk(self::DISK)->put($webpPath, (string) $webpEncoded);
 
         $jpegEncoded = $image->toJpeg(self::QUALITY);
-        Storage::put($jpegPath, (string) $jpegEncoded);
+        Storage::disk(self::DISK)->put($jpegPath, (string) $jpegEncoded);
 
-        $relativePath = '/storage/images/posts/' . $filename;
+        $relativePath = '/storage/' . self::STORAGE_PATH . '/' . $filename;
         $baseUrl = rtrim(config('app.url'), '/');
 
         return [
