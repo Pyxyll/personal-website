@@ -1,4 +1,5 @@
 'use client';
+// CI/CD build trigger v1
 
 import { useState, useEffect } from 'react';
 import { AsciiLogo, AsciiSection, AsciiProjectCard, AsciiBlogCard, AsciiLoader } from "@/components/ascii";

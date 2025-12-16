@@ -1,6 +1,6 @@
 <?php
 
-// CI/CD build trigger v3
+// CI/CD build trigger v4
 return [
 
     /*
