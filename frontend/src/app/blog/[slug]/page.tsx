@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { AsciiDivider, AsciiPageLoader } from "@/components/ascii";
@@ -54,7 +54,7 @@ export default function BlogPostPage() {
 
   const renderInlineContent = (text: string) => {
     // Handle inline images and other markdown within text
-    const parts: (string | JSX.Element)[] = [];
+    const parts: (string | React.ReactElement)[] = [];
     const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
     let lastIndex = 0;
     let match;
