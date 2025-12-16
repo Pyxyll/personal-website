@@ -30,16 +30,25 @@ echo "Database is ready!"
 echo "Running migrations..."
 php artisan migrate --force || echo "Migration failed but continuing..."
 
+# Create storage symlink for serving uploaded files
+echo "Creating storage symlink..."
+php artisan storage:link --force || true
+
 # Clear and cache config
 echo "Optimizing application..."
 php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
 
+# Create upload directories
+echo "Creating upload directories..."
+mkdir -p /var/www/html/storage/app/public/images/posts
+
 # Set permissions (use numeric IDs for compatibility)
 echo "Setting permissions..."
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage
 
 echo "=== Starting supervisord ==="
 exec "$@"
