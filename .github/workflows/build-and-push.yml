@@ -143,12 +143,14 @@ jobs:
         if: needs.build-backend.result == 'success'
         run: |
           if [ -n "${{ secrets.COOLIFY_BACKEND_WEBHOOK }}" ]; then
-            curl -X POST "${{ secrets.COOLIFY_BACKEND_WEBHOOK }}" || true
+            curl -X GET "${{ secrets.COOLIFY_BACKEND_WEBHOOK }}" \
+              -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" || true
           fi
 
       - name: Trigger Coolify deployment (Frontend)
         if: needs.build-frontend.result == 'success'
         run: |
           if [ -n "${{ secrets.COOLIFY_FRONTEND_WEBHOOK }}" ]; then
-            curl -X POST "${{ secrets.COOLIFY_FRONTEND_WEBHOOK }}" || true
+            curl -X GET "${{ secrets.COOLIFY_FRONTEND_WEBHOOK }}" \
+              -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" || true
           fi
