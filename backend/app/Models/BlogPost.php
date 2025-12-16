@@ -14,11 +14,15 @@ class BlogPost extends Model
         'slug',
         'description',
         'content',
+        'featured_image',
+        'featured_image_alt',
         'tags',
         'read_time',
         'featured',
         'published',
         'published_at',
+        'post_to_linkedin',
+        'linkedin_post_id',
     ];
 
     protected $casts = [
@@ -26,6 +30,7 @@ class BlogPost extends Model
         'featured' => 'boolean',
         'published' => 'boolean',
         'published_at' => 'datetime',
+        'post_to_linkedin' => 'boolean',
     ];
 
     public function scopePublished($query)

@@ -45,11 +45,15 @@ export interface BlogPost {
   slug: string;
   description: string;
   content: string;
+  featured_image: string | null;
+  featured_image_alt: string | null;
   tags: string[];
   read_time: string | null;
   featured: boolean;
   published: boolean;
   published_at: string | null;
+  post_to_linkedin: boolean;
+  linkedin_post_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -76,6 +80,26 @@ export interface ContactSubmission {
   read: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ImageUploadResponse {
+  webp: string;
+  jpeg: string;
+  url: string;
+}
+
+export interface LinkedInStatus {
+  connected: boolean;
+}
+
+export interface LinkedInAuthUrl {
+  url: string;
+}
+
+export interface LinkedInPostResponse {
+  success: boolean;
+  linkedin_post_id?: string;
+  message?: string;
 }
 
 // Auth API
@@ -189,6 +213,48 @@ export const postsApi = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/posts/${id}`);
+  },
+};
+
+// Images API
+export const imagesApi = {
+  upload: async (file: File, type: 'featured' | 'content' = 'content'): Promise<ImageUploadResponse> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('type', type);
+
+    const response = await api.post('/admin/images/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  delete: async (filename: string): Promise<void> => {
+    await api.delete(`/admin/images/${filename}`);
+  },
+};
+
+// LinkedIn API
+export const linkedinApi = {
+  getStatus: async (): Promise<LinkedInStatus> => {
+    const response = await api.get('/admin/linkedin/status');
+    return response.data;
+  },
+
+  getAuthUrl: async (): Promise<LinkedInAuthUrl> => {
+    const response = await api.get('/admin/linkedin/auth');
+    return response.data;
+  },
+
+  disconnect: async (): Promise<void> => {
+    await api.post('/admin/linkedin/disconnect');
+  },
+
+  post: async (postId: number, content: string): Promise<LinkedInPostResponse> => {
+    const response = await api.post('/admin/linkedin/post', { post_id: postId, content });
+    return response.data;
   },
 };
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { postsApi, BlogPost } from '@/lib/api';
+import { postsApi, imagesApi, linkedinApi, BlogPost } from '@/lib/api';
 import { AsciiDivider } from '@/components/ascii';
+import { ImageUpload } from './ImageUpload';
 
 interface PostEditorProps {
   post?: BlogPost;
@@ -15,12 +16,17 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [isDraggingContent, setIsDraggingContent] = useState(false);
+  const [linkedInConnected, setLinkedInConnected] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
     slug: post?.slug || '',
     description: post?.description || '',
     content: post?.content || '',
+    featured_image: post?.featured_image || '',
+    featured_image_alt: post?.featured_image_alt || '',
     tags: post?.tags?.join(', ') || '',
     read_time: post?.read_time || '',
     featured: post?.featured || false,
@@ -28,7 +34,20 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
     published_at: post?.published_at
       ? new Date(post.published_at).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0],
+    post_to_linkedin: post?.post_to_linkedin || false,
   });
+
+  useEffect(() => {
+    const checkLinkedInStatus = async () => {
+      try {
+        const status = await linkedinApi.getStatus();
+        setLinkedInConnected(status.connected);
+      } catch {
+        setLinkedInConnected(false);
+      }
+    };
+    checkLinkedInStatus();
+  }, []);
 
   const generateSlug = (title: string) => {
     return title
@@ -46,6 +65,46 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
     }));
   };
 
+  const handleContentDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingContent(false);
+
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) {
+      return;
+    }
+
+    const textarea = contentRef.current;
+    if (!textarea) return;
+
+    const cursorPos = textarea.selectionStart;
+
+    try {
+      const response = await imagesApi.upload(file, 'content');
+      const markdownImage = '![](' + response.url + ')';
+
+      setFormData((prev) => {
+        const before = prev.content.substring(0, cursorPos);
+        const after = prev.content.substring(cursorPos);
+        return { ...prev, content: before + markdownImage + '\n' + after };
+      });
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+    }
+  }, []);
+
+  const handleContentDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDraggingContent(true);
+    }
+  }, []);
+
+  const handleContentDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingContent(false);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -57,6 +116,8 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
         slug: formData.slug,
         description: formData.description,
         content: formData.content,
+        featured_image: formData.featured_image || null,
+        featured_image_alt: formData.featured_image_alt || null,
         tags: formData.tags
           .split(',')
           .map((t) => t.trim())
@@ -65,6 +126,7 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
         featured: formData.featured,
         published: formData.published,
         published_at: formData.published ? formData.published_at : null,
+        post_to_linkedin: linkedInConnected ? formData.post_to_linkedin : false,
       };
 
       if (isNew) {
@@ -200,22 +262,71 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
           </div>
 
           <div className="border border-border bg-card p-4">
+            <h2 className="text-foreground mb-3">Featured Image</h2>
+            <AsciiDivider className="mb-4" />
+
+            <div className="space-y-4">
+              <ImageUpload
+                currentImage={formData.featured_image}
+                onUpload={(url) =>
+                  setFormData((prev) => ({ ...prev, featured_image: url }))
+                }
+                type="featured"
+                label="Featured Image (500x500)"
+              />
+
+              {formData.featured_image && (
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1">
+                    Alt Text
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.featured_image_alt}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        featured_image_alt: e.target.value,
+                      }))
+                    }
+                    placeholder="Describe the image for accessibility"
+                    className="w-full bg-background border border-border p-2 text-foreground focus:outline-none focus:border-foreground"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="border border-border bg-card p-4">
             <h2 className="text-foreground mb-3">Content</h2>
             <AsciiDivider className="mb-4" />
 
             <div>
               <label className="block text-sm text-muted-foreground mb-1">
-                Content (Markdown) *
+                Content (Markdown) * - Drag images to embed
               </label>
               <textarea
+                ref={contentRef}
                 value={formData.content}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, content: e.target.value }))
                 }
+                onDrop={handleContentDrop}
+                onDragOver={handleContentDragOver}
+                onDragLeave={handleContentDragLeave}
                 rows={20}
-                className="w-full bg-background border border-border p-2 text-foreground focus:outline-none focus:border-foreground font-mono text-sm resize-y"
+                className={`w-full bg-background border p-2 text-foreground focus:outline-none font-mono text-sm resize-y transition-colors ${
+                  isDraggingContent
+                    ? 'border-foreground bg-foreground/5'
+                    : 'border-border focus:border-foreground'
+                }`}
                 required
               />
+              {isDraggingContent && (
+                <div className="text-sm text-muted-foreground mt-1">
+                  Drop image to embed at cursor position
+                </div>
+              )}
             </div>
           </div>
 
@@ -254,7 +365,30 @@ export function PostEditor({ post, isNew = false }: PostEditorProps) {
                   />
                   <span className="text-muted-foreground">Featured</span>
                 </label>
+
+                {linkedInConnected && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.post_to_linkedin}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          post_to_linkedin: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 accent-foreground"
+                    />
+                    <span className="text-muted-foreground">Post to LinkedIn</span>
+                  </label>
+                )}
               </div>
+
+              {linkedInConnected && formData.post_to_linkedin && (
+                <p className="text-xs text-muted-foreground">
+                  A preview will be shown before posting to LinkedIn when published.
+                </p>
+              )}
 
               {formData.published && (
                 <div>

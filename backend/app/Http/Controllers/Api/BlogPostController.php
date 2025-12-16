@@ -46,11 +46,14 @@ class BlogPostController extends Controller
             'slug' => 'required|string|unique:blog_posts',
             'description' => 'required|string',
             'content' => 'required|string',
+            'featured_image' => 'nullable|string',
+            'featured_image_alt' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'read_time' => 'nullable|string',
             'featured' => 'nullable|boolean',
             'published' => 'nullable|boolean',
             'published_at' => 'nullable|date',
+            'post_to_linkedin' => 'nullable|boolean',
         ]);
 
         $post = BlogPost::create($validated);
@@ -73,11 +76,14 @@ class BlogPostController extends Controller
             'slug' => 'sometimes|string|unique:blog_posts,slug,' . $id,
             'description' => 'sometimes|string',
             'content' => 'sometimes|string',
+            'featured_image' => 'nullable|string',
+            'featured_image_alt' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'read_time' => 'nullable|string',
             'featured' => 'nullable|boolean',
             'published' => 'nullable|boolean',
             'published_at' => 'nullable|date',
+            'post_to_linkedin' => 'nullable|boolean',
         ]);
 
         $post->update($validated);
