@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { linkedinApi } from '@/lib/api';
 import { AsciiDivider } from '@/components/ascii';
 
-export default function SettingsPage() {
+function SettingsContent() {
   const searchParams = useSearchParams();
   const [linkedInConnected, setLinkedInConnected] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -134,5 +134,13 @@ LINKEDIN_REDIRECT_URI=your_api_url/api/v1/linkedin/callback
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-4 md:p-8"><div className="max-w-4xl mx-auto text-muted-foreground">Loading settings...</div></div>}>
+      <SettingsContent />
+    </Suspense>
   );
 }
