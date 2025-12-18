@@ -262,7 +262,7 @@ export default function DashboardScreen() {
             <Text style={styles.footerText}>
               dylancollins.me <Text style={styles.footerAccent}>admin</Text>
             </Text>
-            <Text style={styles.footerVersion}>v1.0.0</Text>
+            <Text style={styles.footerVersion}>v1.0.1 (OTA Test)</Text>
           </View>
         </FadeIn>
       </ScrollView>

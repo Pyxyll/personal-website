@@ -15,11 +15,13 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { postsApi } from '../api';
+import { postsApi, imagesApi } from '../api';
 import { BlogPost } from '../types';
 import { colors, spacing, typography } from '../theme';
 import { FadeIn, AnimatedCard } from '../components/Animated';
 import { Badge, Divider, EmptyState } from '../components/UI';
+import ImagePickerField from '../components/ImagePickerField';
+import * as ImagePicker from 'expo-image-picker';
 
 const emptyPost = {
   title: '',
@@ -27,6 +29,8 @@ const emptyPost = {
   description: '',
   content: '',
   tags: '',
+  featured_image: null as string | null,
+  featured_image_alt: '',
   featured: false,
   published: false,
 };
@@ -42,6 +46,7 @@ export default function PostsScreen() {
   const [formData, setFormData] = useState(emptyPost);
   const [saving, setSaving] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [insertingImage, setInsertingImage] = useState(false);
 
   const cursorOpacity = useRef(new Animated.Value(1)).current;
 
@@ -91,6 +96,8 @@ export default function PostsScreen() {
       description: post.description,
       content: post.content,
       tags: post.tags.join(', '),
+      featured_image: post.featured_image,
+      featured_image_alt: post.featured_image_alt || '',
       featured: post.featured,
       published: post.published,
     });
@@ -113,6 +120,8 @@ export default function PostsScreen() {
         description: formData.description,
         content: formData.content,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        featured_image: formData.featured_image,
+        featured_image_alt: formData.featured_image_alt || null,
         featured: formData.featured,
         published: formData.published,
         published_at: shouldSetPublishDate ? new Date().toISOString() : (formData.published ? editingPost?.published_at : null),
@@ -150,6 +159,35 @@ export default function PostsScreen() {
         },
       },
     ]);
+  };
+
+  const insertContentImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please allow access to your photo library.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setInsertingImage(true);
+      try {
+        const response = await imagesApi.upload(result.assets[0].uri, 'content');
+        const markdown = `\n![](${response.url})\n`;
+        setFormData((prev) => ({
+          ...prev,
+          content: prev.content + markdown,
+        }));
+      } catch (error) {
+        Alert.alert('Upload Failed', 'Failed to upload image. Please try again.');
+      } finally {
+        setInsertingImage(false);
+      }
+    }
   };
 
   const renderPost = ({ item, index }: { item: BlogPost; index: number }) => (
@@ -312,10 +350,43 @@ export default function PostsScreen() {
               />
             </View>
 
+            <ImagePickerField
+              value={formData.featured_image}
+              onChange={(url) => setFormData({ ...formData, featured_image: url })}
+              label="$ featured_image"
+              type="featured"
+            />
+
+            {formData.featured_image && (
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>
+                  <Text style={styles.labelAccent}>$</Text> image_alt_text
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  value={formData.featured_image_alt}
+                  onChangeText={(t) => setFormData({ ...formData, featured_image_alt: t })}
+                  placeholder="Describe the image for accessibility"
+                  placeholderTextColor={colors.textDisabled}
+                />
+              </View>
+            )}
+
             <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                <Text style={styles.labelAccent}>$</Text> content
-              </Text>
+              <View style={styles.contentHeader}>
+                <Text style={[styles.label, { marginBottom: 0 }]}>
+                  <Text style={styles.labelAccent}>$</Text> content
+                </Text>
+                <Pressable
+                  style={styles.insertImageButton}
+                  onPress={insertContentImage}
+                  disabled={insertingImage}
+                >
+                  <Text style={[styles.insertImageText, insertingImage && styles.disabled]}>
+                    {insertingImage ? 'uploading...' : '[+ image]'}
+                  </Text>
+                </Pressable>
+              </View>
               <TextInput
                 style={[styles.input, styles.contentInput]}
                 value={formData.content}
@@ -586,5 +657,20 @@ const styles = StyleSheet.create({
     fontSize: typography.sm,
     color: colors.textMuted,
     marginTop: 2,
+  },
+
+  // Content header with insert image button
+  contentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  insertImageButton: {
+    padding: spacing.xs,
+  },
+  insertImageText: {
+    color: colors.accent,
+    fontSize: typography.sm,
   },
 });

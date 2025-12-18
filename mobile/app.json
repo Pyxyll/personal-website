@@ -7,6 +7,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "dylancollins-admin",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/b0e0e8a2-c952-45be-b1ad-67b10361f01d"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -27,9 +36,16 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-secure-store"],
+    "plugins": [
+      "expo-secure-store",
+      "expo-updates"
+    ],
     "extra": {
-      "apiUrl": "https://api.dylancollins.me/api/v1"
-    }
+      "apiUrl": "https://api.dylancollins.me/api/v1",
+      "eas": {
+        "projectId": "b0e0e8a2-c952-45be-b1ad-67b10361f01d"
+      }
+    },
+    "owner": "pyxyll"
   }
 }

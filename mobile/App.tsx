@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Notifications from 'expo-notifications';
+import * as Updates from 'expo-updates';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import {
   LoginScreen,
@@ -24,6 +25,32 @@ import {
 
 // Define the background task at module level (required by expo-task-manager)
 defineBackgroundTask();
+
+// Check for OTA updates
+async function checkForUpdates() {
+  if (__DEV__) {
+    // Updates don't work in development mode
+    return;
+  }
+
+  try {
+    const update = await Updates.checkForUpdateAsync();
+    if (update.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      Alert.alert(
+        'Update Available',
+        'A new version has been downloaded. Restart to apply the update.',
+        [
+          { text: 'Later', style: 'cancel' },
+          { text: 'Restart Now', onPress: () => Updates.reloadAsync() },
+        ]
+      );
+    }
+  } catch (error) {
+    // Silently fail - updates are best-effort
+    console.log('Error checking for updates:', error);
+  }
+}
 
 export type RootStackParamList = {
   Dashboard: undefined;
@@ -128,6 +155,10 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => {
+    checkForUpdates();
+  }, []);
+
   return (
     <AuthProvider>
       <StatusBar style="light" />

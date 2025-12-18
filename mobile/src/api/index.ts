@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { User, Project, BlogPost, NowUpdate, ContactSubmission } from '../types';
+import { User, Project, BlogPost, NowUpdate, ContactSubmission, ImageUploadResponse } from '../types';
 
 // Update this to your API URL
 const API_BASE_URL = 'https://api.dylancollins.me/api/v1';
@@ -149,6 +149,39 @@ export const contactApi = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/admin/contact/${id}`);
+  },
+};
+
+// Images API
+export const imagesApi = {
+  upload: async (
+    uri: string,
+    type: 'featured' | 'content' = 'content'
+  ): Promise<ImageUploadResponse> => {
+    const formData = new FormData();
+
+    // Get the file extension and create proper file object
+    const filename = uri.split('/').pop() || 'image.jpg';
+    const match = /\.(\w+)$/.exec(filename);
+    const fileType = match ? `image/${match[1]}` : 'image/jpeg';
+
+    formData.append('image', {
+      uri,
+      name: filename,
+      type: fileType,
+    } as unknown as Blob);
+    formData.append('type', type);
+
+    const response = await api.post('/admin/images/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  delete: async (filename: string): Promise<void> => {
+    await api.delete(`/admin/images/${encodeURIComponent(filename)}`);
   },
 };
 
