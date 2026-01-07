@@ -40,7 +40,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
       name: 'New Messages',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#a78bfa',
+      lightColor: '#da2862',
     });
   }
 

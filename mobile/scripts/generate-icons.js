@@ -17,7 +17,7 @@ const svgAdaptive = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 43
 // Splash icon (larger D, no border)
 const svgSplash = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <rect width="200" height="200" fill="#0a0a0a"/>
-  <text x="100" y="145" font-family="monospace" font-size="140" font-weight="bold" fill="#a78bfa" text-anchor="middle">D</text>
+  <text x="100" y="145" font-family="monospace" font-size="140" font-weight="bold" fill="#da2862" text-anchor="middle">D</text>
 </svg>`;
 
 async function generateIcons() {

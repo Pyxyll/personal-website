@@ -64,11 +64,11 @@
   --input: #1a1a1a;
   --ring: #e5e5e5;
 
-  /* Modern accent colors */
-  --gradient-start: #6366f1;
-  --gradient-mid: #a78bfa;
-  --gradient-end: #d946ef;
-  --glow-color: rgba(167, 139, 250, 0.3);
+  /* Modern accent colors - Pink theme */
+  --gradient-start: #9f1239;
+  --gradient-mid: #da2862;
+  --gradient-end: #f472b6;
+  --glow-color: rgba(218, 40, 98, 0.3);
 
   --chart-1: #e5e5e5;
   --chart-2: #a3a3a3;
@@ -193,7 +193,7 @@
 
 /* ===== MODERN DESIGN ELEMENTS ===== */
 
-/* Purple accent color */
+/* Pink accent color */
 .accent-text {
   color: var(--gradient-mid);
 }
@@ -317,7 +317,7 @@
   50% { opacity: 0.5; }
 }
 
-/* Modern button with purple accent */
+/* Modern button with pink accent */
 .btn-modern {
   position: relative;
   overflow: hidden;
@@ -490,7 +490,7 @@
 input:focus, textarea:focus {
   outline: none;
   border-color: var(--gradient-mid) !important;
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+  box-shadow: 0 0 0 3px rgba(218, 40, 98, 0.1);
 }
 
 /* Badge with accent */

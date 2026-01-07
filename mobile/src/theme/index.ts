@@ -1,4 +1,4 @@
-// Design System Constants - Terminal/Hacker Aesthetic with Purple Accent
+// Design System Constants - Terminal/Hacker Aesthetic with Pink Accent
 
 export const colors = {
   // Base colors
@@ -13,18 +13,18 @@ export const colors = {
   textMuted: '#737373',
   textDisabled: '#525252',
 
-  // Accent colors (purple gradient)
-  accent: '#a78bfa',
-  accentLight: '#c4b5fd',
-  accentDark: '#7c3aed',
-  gradientStart: '#6366f1',
-  gradientMid: '#a78bfa',
-  gradientEnd: '#d946ef',
+  // Accent colors (pink gradient)
+  accent: '#da2862',
+  accentLight: '#f472b6',
+  accentDark: '#9f1239',
+  gradientStart: '#9f1239',
+  gradientMid: '#da2862',
+  gradientEnd: '#f472b6',
 
   // UI colors
   border: '#333333',
   borderLight: '#404040',
-  borderAccent: '#a78bfa',
+  borderAccent: '#da2862',
 
   // Status colors
   success: '#22c55e',

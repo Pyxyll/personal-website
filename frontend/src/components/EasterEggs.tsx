@@ -53,7 +53,7 @@ export function ConsoleEasterEgg() {
     ╚══════════════════════════════════════════════════════════════╝
 
 `;
-    console.log(asciiArt, 'color: #a855f7; font-family: monospace;');
+    console.log(asciiArt, 'color: #da2862; font-family: monospace;');
     console.log('%cLooking for bugs? Or just curious? Either way, welcome!', 'color: #6b7280; font-style: italic;');
   }, []);
 

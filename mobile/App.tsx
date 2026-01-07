@@ -141,7 +141,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#a78bfa" />
+        <ActivityIndicator size="large" color="#da2862" />
         <StatusBar style="light" />
       </View>
     );

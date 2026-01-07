@@ -71,9 +71,9 @@ export default async function Image() {
           }}
         >
           <span style={{ color: '#888888' }}>Developer</span>
-          <span style={{ color: '#6366f1', margin: '0 16px' }}>/</span>
+          <span style={{ color: '#da2862', margin: '0 16px' }}>/</span>
           <span style={{ color: '#888888' }}>Creator</span>
-          <span style={{ color: '#6366f1', margin: '0 16px' }}>/</span>
+          <span style={{ color: '#da2862', margin: '0 16px' }}>/</span>
           <span style={{ color: '#888888' }}>Builder</span>
         </div>
 
@@ -82,7 +82,7 @@ export default async function Image() {
           style={{
             position: 'absolute',
             bottom: '40px',
-            color: '#6366f1',
+            color: '#da2862',
             fontSize: '22px',
             letterSpacing: '0.05em',
           }}
