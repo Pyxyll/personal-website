@@ -1,0 +1,101 @@
+---
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import { getCollection } from "astro:content";
+import { blogSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+
+const entries = (await getCollection("writing", ({ data }) => !data.draft)).sort(
+  (a, b) => +b.data.publishedAt - +a.data.publishedAt
+);
+
+const dateLong = new Intl.DateTimeFormat("en-IE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+// Group by year for the brutalist year-headers
+const byYear = entries.reduce<Record<string, typeof entries>>((acc, entry) => {
+  const y = String(entry.data.publishedAt.getFullYear());
+  (acc[y] ||= []).push(entry);
+  return acc;
+}, {});
+const years = Object.keys(byYear).sort((a, b) => +b - +a);
+
+const pageUrl = new URL("/writing/", site.url).toString();
+---
+
+<Base
+  title="Writing — Dylan Collins"
+  description="Notes on what I'm building, things I've learned, and the occasional rant."
+>
+  <Schema
+    slot="head"
+    data={[
+      blogSchema({ url: pageUrl }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Writing", url: pageUrl },
+      ]),
+    ]}
+  />
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-16 lg:mb-24">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">002 / Writing</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          Writing<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
+          Mostly notes from work. Sometimes a long thought, sometimes a one-pager.
+          <a href="/rss.xml" class="link">Grab the RSS feed</a>.
+        </p>
+      </div>
+    </header>
+
+    {entries.length === 0 && (
+      <p class="text-ink-dim">No posts yet.</p>
+    )}
+
+    {years.map((year) => (
+      <section class="mb-12" data-reveal>
+        <div class="grid grid-cols-12 gap-6 lg:gap-10 mb-4 items-baseline">
+          <h2 class="col-span-12 lg:col-span-2 font-mono text-xs uppercase tracking-widest text-ink-faint font-normal m-0">
+            {year}
+          </h2>
+          <div class="col-span-12 lg:col-span-10 rule"></div>
+        </div>
+        <ul class="grid grid-cols-12 gap-6 lg:gap-10">
+          <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>
+          <li class="col-span-12 lg:col-span-10">
+            <ul class="divide-y divide-rule">
+              {byYear[year].map((entry) => (
+                <li>
+                  <a
+                    href={`/writing/${entry.id}/`}
+                    class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 items-baseline hover:bg-paper-2 transition-colors px-2 -mx-2"
+                  >
+                    <time
+                      datetime={entry.data.publishedAt.toISOString().split("T")[0]}
+                      class="col-span-6 sm:col-span-2 font-mono text-xs text-ink-faint tracking-widest uppercase"
+                    >
+                      {dateLong.format(entry.data.publishedAt).split(" ").slice(0, 2).join(" ")}
+                    </time>
+                    <span class="col-span-6 sm:col-span-3 sm:col-start-10 text-right font-mono text-xs text-ink-faint tracking-widest uppercase">
+                      {entry.data.tags.slice(0, 2).join(" · ")}
+                    </span>
+                    <span class="col-span-12 sm:col-span-7 sm:col-start-3 sm:row-start-1 text-[clamp(1.125rem,2.5vw,1.5rem)] tracking-tight">
+                      {entry.data.title}
+                      <span class="ml-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ul>
+      </section>
+    ))}
+  </section>
+</Base>

@@ -1,0 +1,96 @@
+---
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+
+const updatedDate = new Date("2026-05-20");
+const updated = new Intl.DateTimeFormat("en-IE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}).format(updatedDate);
+const isoUpdated = updatedDate.toISOString().split("T")[0];
+
+const pageUrl = new URL("/now/", site.url).toString();
+---
+
+<Base
+  title="Now — Dylan Collins"
+  description="What I'm focused on right now."
+>
+  <Schema
+    slot="head"
+    data={[
+      webPageSchema({
+        url: pageUrl,
+        name: "Now — Dylan Collins",
+        description: "What I'm focused on right now.",
+      }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Now", url: pageUrl },
+      ]),
+    ]}
+  />
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-16 lg:mb-24">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">003 / Now</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          Now<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
+          A <a href="https://nownownow.com/about" class="link" target="_blank" rel="noopener">/now</a> page.
+          What I'm actually working on this month, not what I want you to think I'm working on.
+        </p>
+        <div class="font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
+          Last updated · <time datetime={isoUpdated}>{updated}</time>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Work</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          Finishing a freelance build for a small product team — Laravel
+          backend, Next.js admin, a React Native companion app. Wrapping in
+          June, slot opens after.
+        </p>
+        <p>
+          Quietly available for short-engagement freelance work from May 2026.
+          Best fit: web apps where someone has shipped the first version and
+          needs an engineer who can pick up the whole stack without much
+          hand-holding.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Side</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          <a href="https://pyxyll.com" target="_blank" rel="noopener">pyxyll.com</a> is
+          where I let myself be silly — current target is a tiny indie-web
+          experiment around shared bookmarks. Expect rough edges.
+        </p>
+        <p>Re-learning Rust by porting one of my old Go services. Going slow on purpose.</p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Off</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          Mostly: building keyboards, printing things that don't need to exist,
+          and trying not to buy more Pokémon cards.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

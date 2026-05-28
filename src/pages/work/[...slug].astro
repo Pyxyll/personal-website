@@ -1,0 +1,82 @@
+---
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import { getCollection, render } from "astro:content";
+import { creativeWorkSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("work");
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const pageUrl = new URL(`/work/${entry.id}/`, site.url).toString();
+const ogImage = `/og/work/${entry.id}.png`;
+---
+
+<Base
+  title={`${entry.data.title} — Work — Dylan Collins`}
+  description={entry.data.summary}
+  ogImage={ogImage}
+>
+  <Schema
+    slot="head"
+    data={[
+      creativeWorkSchema({
+        url: pageUrl,
+        title: entry.data.title,
+        description: entry.data.summary,
+        year: entry.data.year,
+        role: entry.data.role,
+        stack: entry.data.stack,
+        externalUrl: entry.data.url,
+        repoUrl: entry.data.repo,
+      }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Work", url: site.url + "/work/" },
+        { name: entry.data.title, url: pageUrl },
+      ]),
+    ]}
+  />
+  <article class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-12 lg:mb-20">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">Work / {entry.data.year}</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.25rem,6vw,3.75rem)] lift lift-1">{entry.data.title}</h1>
+        <p class="text-lg sm:text-xl text-ink-dim max-w-2xl lift lift-2">{entry.data.summary}</p>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
+          {entry.data.role && <span>{entry.data.role}</span>}
+          {entry.data.stack.length > 0 && <span>{entry.data.stack.join(" · ")}</span>}
+          {entry.data.url && (
+            <a href={entry.data.url} target="_blank" rel="noopener" class="link text-ink-dim">Visit ↗</a>
+          )}
+          {entry.data.repo && (
+            <a href={entry.data.repo} target="_blank" rel="noopener" class="link text-ink-dim">Code ↗</a>
+          )}
+        </div>
+      </div>
+    </header>
+
+    <div class="rule mb-12 lg:mb-16 lift lift-3" />
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10 lift lift-4">
+      <aside class="hidden lg:block lg:col-span-2">
+        <div class="sticky top-10 font-mono text-xs uppercase tracking-widest text-ink-faint">
+          <a href="/work/" class="link">← All work</a>
+        </div>
+      </aside>
+      <div class="col-span-12 lg:col-span-9">
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>

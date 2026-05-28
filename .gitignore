@@ -1,4 +1,4 @@
-# Environment files
+# Env
 .env
 .env.local
 .env.*.local
@@ -13,44 +13,17 @@
 .DS_Store
 Thumbs.db
 
-# Backend (Laravel)
-backend/vendor/
-backend/node_modules/
-backend/.env
-backend/storage/*.key
-backend/storage/logs/*
-backend/storage/framework/cache/*
-backend/storage/framework/sessions/*
-backend/storage/framework/views/*
-backend/bootstrap/cache/*
-!backend/storage/.gitkeep
-!backend/storage/logs/.gitkeep
-!backend/storage/framework/.gitkeep
-!backend/storage/framework/cache/.gitkeep
-!backend/storage/framework/sessions/.gitkeep
-!backend/storage/framework/views/.gitkeep
-!backend/bootstrap/cache/.gitkeep
+# Astro
+node_modules/
+dist/
+.astro/
+.cache/
 
-# Frontend (Next.js)
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/.env
-frontend/.env.local
-
-# Docker
+# Logs
 *.log
 
 # Claude Code
 .claude/
 
-# Mobile (React Native / Expo)
-mobile/node_modules/
-mobile/.expo/
-mobile/dist/
-mobile/android/
-mobile/ios/
-mobile/*.apk
-mobile/*.aab
-mobile/*.ipa
+# Drafts
 drafts/

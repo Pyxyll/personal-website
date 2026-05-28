@@ -1,0 +1,178 @@
+---
+const { pathname } = Astro.url;
+const items = [
+  { num: "001", href: "/work/", label: "Work" },
+  { num: "002", href: "/writing/", label: "Writing" },
+  { num: "003", href: "/now/", label: "Now" },
+  { num: "004", href: "/contact/", label: "Contact" },
+];
+const isActive = (href: string) =>
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
+---
+
+<nav class="relative border-b border-rule" aria-label="Primary">
+  <div class="mx-auto max-w-6xl px-6 lg:px-10">
+    <div class="flex items-center justify-between py-5">
+      <a
+        href="/"
+        class="font-mono text-xs tracking-widest uppercase text-ink hover:text-accent transition-colors"
+      >
+        Dylan Collins
+      </a>
+
+      {/* Desktop nav */}
+      <ul class="hidden sm:flex items-center gap-6 md:gap-10">
+        {items.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class:list={[
+                "group inline-flex items-baseline gap-2 text-sm",
+                isActive(item.href) ? "text-ink" : "text-ink-dim hover:text-ink",
+              ]}
+            >
+              <span class="font-mono text-[10px] tracking-[0.18em] text-ink-faint group-hover:text-accent transition-colors">
+                {item.num}
+              </span>
+              <span class="relative">
+                {item.label}
+                {isActive(item.href) && (
+                  <span class="absolute -bottom-[6px] left-0 right-0 h-px bg-accent" />
+                )}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      {/* Mobile trigger */}
+      <button
+        id="nav-toggle"
+        type="button"
+        class="sm:hidden font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-1 -mr-2"
+        aria-expanded="false"
+        aria-controls="nav-overlay"
+        aria-label="Open menu"
+      >
+        Menu
+      </button>
+    </div>
+  </div>
+
+  {/* Mobile overlay */}
+  <div
+    id="nav-overlay"
+    class="fixed inset-0 z-50 bg-paper text-ink sm:hidden flex flex-col"
+    aria-hidden="true"
+    data-open="false"
+    style="visibility: hidden; opacity: 0; transition: opacity 0.25s ease, visibility 0s linear 0.25s;"
+  >
+    <div class="flex items-center justify-between px-6 py-5 border-b border-rule">
+      <a
+        href="/"
+        class="font-mono text-xs tracking-widest uppercase text-ink"
+        data-nav-link
+      >
+        Dylan Collins
+      </a>
+      <button
+        id="nav-close"
+        type="button"
+        class="font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-1 -mr-2"
+        aria-label="Close menu"
+      >
+        Close
+      </button>
+    </div>
+
+    <ul class="flex-1 flex flex-col justify-center gap-2 px-6 py-12">
+      {items.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            data-nav-link
+            class:list={[
+              "group flex items-baseline gap-4 py-4 border-b border-rule",
+              isActive(item.href) ? "text-ink" : "text-ink-dim",
+            ]}
+          >
+            <span class="font-mono text-xs tracking-[0.18em] text-ink-faint group-hover:text-accent transition-colors">
+              {item.num}
+            </span>
+            <span class="text-3xl tracking-tight font-medium">
+              {item.label}
+            </span>
+            {isActive(item.href) && (
+              <span class="ml-auto h-1 w-1 rounded-full bg-accent self-center" />
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <footer class="px-6 py-6 border-t border-rule flex justify-between font-mono text-xs uppercase tracking-widest text-ink-faint">
+      <a href="mailto:hello@dylancollins.me" data-nav-link class="hover:text-ink transition-colors">Email</a>
+      <a href="/rss.xml" data-nav-link class="hover:text-ink transition-colors">RSS</a>
+    </footer>
+  </div>
+</nav>
+
+<script>
+  // Mobile nav overlay. Vanilla JS — no React island needed.
+  const toggle = document.getElementById("nav-toggle");
+  const overlay = document.getElementById("nav-overlay");
+  const close = document.getElementById("nav-close");
+
+  if (toggle && overlay && close) {
+    let lastFocused: HTMLElement | null = null;
+
+    const open = () => {
+      lastFocused = document.activeElement as HTMLElement;
+      overlay.dataset.open = "true";
+      overlay.style.visibility = "visible";
+      overlay.style.opacity = "1";
+      overlay.style.transition = "opacity 0.25s ease";
+      overlay.setAttribute("aria-hidden", "false");
+      toggle.setAttribute("aria-expanded", "true");
+      document.documentElement.style.overflow = "hidden";
+      // Move focus to close button after the fade
+      window.setTimeout(() => close.focus(), 50);
+    };
+
+    const closeMenu = () => {
+      overlay.dataset.open = "false";
+      overlay.style.opacity = "0";
+      overlay.style.transition = "opacity 0.25s ease, visibility 0s linear 0.25s";
+      window.setTimeout(() => {
+        overlay.style.visibility = "hidden";
+      }, 250);
+      overlay.setAttribute("aria-hidden", "true");
+      toggle.setAttribute("aria-expanded", "false");
+      document.documentElement.style.overflow = "";
+      lastFocused?.focus();
+    };
+
+    toggle.addEventListener("click", () => {
+      if (overlay.dataset.open === "true") closeMenu();
+      else open();
+    });
+    close.addEventListener("click", closeMenu);
+
+    // Close on link click (any nav link within the overlay)
+    overlay.querySelectorAll<HTMLAnchorElement>("[data-nav-link]").forEach((a) => {
+      a.addEventListener("click", () => closeMenu());
+    });
+
+    // ESC to close
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.dataset.open === "true") closeMenu();
+    });
+
+    // If the viewport widens past sm (~640px), ensure overlay is closed and body is scrollable.
+    const mq = window.matchMedia("(min-width: 640px)");
+    const onChange = () => {
+      if (mq.matches && overlay.dataset.open === "true") closeMenu();
+    };
+    if ("addEventListener" in mq) mq.addEventListener("change", onChange);
+  }
+</script>

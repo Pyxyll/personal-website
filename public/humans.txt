@@ -1,0 +1,19 @@
+/* TEAM */
+  Built and maintained by: Dylan Collins
+  Site: https://dylancollins.me
+  Email: hello@dylancollins.me
+  GitHub: pyxyll
+  From: Ireland
+
+/* THANKS */
+  Astro, for being the right level of framework.
+  Paper Design's shaders, for the hero.
+  Vercel's Geist font, for the typography.
+
+/* SITE */
+  Last update: 2026/05
+  Language: English (Ireland)
+  Doctype: HTML5
+  Standards: HTML5, CSS3, ES2022
+  Components: Astro, Tailwind v4, React 19, MDX
+  Hosting: VPS via Coolify

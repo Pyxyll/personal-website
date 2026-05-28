@@ -1,0 +1,14 @@
+---
+// Emit a JSON-LD <script> block. Pass any schema.org-valid object as `data`.
+// Multiple schemas can be stacked by rendering this component multiple times,
+// or by passing an array.
+interface Props {
+  data: object | object[];
+}
+const { data } = Astro.props;
+const items = Array.isArray(data) ? data : [data];
+---
+
+{items.map((d) => (
+  <script type="application/ld+json" set:html={JSON.stringify(d)} />
+))}

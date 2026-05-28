@@ -1,0 +1,21 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-32 border-t border-rule">
+  <div class="mx-auto max-w-6xl px-6 lg:px-10 py-10">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 items-end">
+      <div class="font-mono text-xs text-ink-faint tracking-widest uppercase">
+        © {year} Dylan Collins
+      </div>
+      <div class="sm:text-center">
+        <a href="/rss.xml" class="link font-mono text-xs text-ink-dim tracking-widest uppercase">RSS</a>
+      </div>
+      <ul class="flex gap-6 sm:justify-end font-mono text-xs uppercase tracking-widest">
+        <li><a href="https://github.com/pyxyll" class="link text-ink-dim" target="_blank" rel="me noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/dylan-c-collins/" class="link text-ink-dim" target="_blank" rel="me noopener">LinkedIn</a></li>
+        <li><a href="mailto:hello@dylancollins.me" class="link text-ink-dim" rel="author">Email</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

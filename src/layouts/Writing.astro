@@ -1,0 +1,90 @@
+---
+import Base from "./Base.astro";
+import Schema from "../components/Schema.astro";
+import { articleSchema, breadcrumbSchema } from "../lib/schema";
+import { site } from "../lib/site";
+
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags?: string[];
+}
+
+const { slug, title, description, publishedAt, updatedAt, tags = [] } = Astro.props;
+
+const dateFmt = new Intl.DateTimeFormat("en-IE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const pageUrl = new URL(`/writing/${slug}/`, site.url).toString();
+const ogImage = `/og/writing/${slug}.png`;
+const isoPublished = publishedAt.toISOString().split("T")[0];
+const isoUpdated = updatedAt?.toISOString().split("T")[0];
+---
+
+<Base
+  title={`${title} — Dylan Collins`}
+  description={description}
+  ogImage={ogImage}
+  ogType="article"
+  publishedTime={publishedAt}
+  modifiedTime={updatedAt}
+  articleTags={tags}
+>
+  <Schema
+    slot="head"
+    data={[
+      articleSchema({
+        url: pageUrl,
+        title,
+        description,
+        publishedAt,
+        updatedAt,
+        tags,
+        image: new URL(ogImage, site.url).toString(),
+      }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Writing", url: site.url + "/writing/" },
+        { name: title, url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <article class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-12 lg:mb-20">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">Writing</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="text-[clamp(2.25rem,6vw,3.75rem)] font-bold tracking-tight leading-[0.95] lift lift-1">{title}</h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">{description}</p>
+        <div class="flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
+          <time datetime={isoPublished}>{dateFmt.format(publishedAt)}</time>
+          {updatedAt && (
+            <span>Updated · <time datetime={isoUpdated}>{dateFmt.format(updatedAt)}</time></span>
+          )}
+          {tags.length > 0 && <span>{tags.join(" · ")}</span>}
+        </div>
+      </div>
+    </header>
+
+    <div class="rule mb-12 lg:mb-16 lift lift-3" />
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10 lift lift-4">
+      <aside class="hidden lg:block lg:col-span-2">
+        <div class="sticky top-10 font-mono text-xs uppercase tracking-widest text-ink-faint">
+          <a href="/writing/" class="link">← Back to writing</a>
+        </div>
+      </aside>
+      <div class="col-span-12 lg:col-span-9">
+        <div class="prose">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>

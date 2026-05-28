@@ -1,0 +1,14 @@
+node_modules
+dist
+.astro
+.cache
+.git
+.github
+.env
+.env.*
+*.log
+.vscode
+.idea
+.claude
+README.md
+DEPLOYMENT.md

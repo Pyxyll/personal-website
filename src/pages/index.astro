@@ -1,0 +1,185 @@
+---
+import Base from "../layouts/Base.astro";
+import HeroShader from "../components/HeroShader";
+import SectionHeader from "../components/SectionHeader.astro";
+import Schema from "../components/Schema.astro";
+import { getCollection } from "astro:content";
+import { personSchema, websiteSchema } from "../lib/schema";
+
+const writingEntries = (await getCollection("writing", ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt)
+  .slice(0, 3);
+
+const workEntries = (await getCollection("work"))
+  .sort((a, b) => a.data.order - b.data.order || b.data.year - a.data.year)
+  .slice(0, 4);
+
+const dateShort = new Intl.DateTimeFormat("en-IE", {
+  month: "short",
+  year: "numeric",
+});
+---
+
+<Base>
+  <Schema slot="head" data={[personSchema(), websiteSchema()]} />
+  {/* ── HERO ───────────────────────────────────────────────────────── */}
+  <section class="relative isolate min-h-[88vh] flex flex-col justify-end overflow-hidden">
+    <HeroShader client:load />
+
+    <div class="relative z-10 mx-auto w-full max-w-6xl px-6 lg:px-10 pb-16 sm:pb-24">
+      <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
+        <div class="hidden lg:block lg:col-span-2 section-num lift">000 / Index</div>
+
+        <div class="col-span-12 lg:col-span-10 flex flex-col gap-8 sm:gap-10">
+          <h1 class="display text-[clamp(3.5rem,13vw,10.5rem)] lift lift-1">
+            <span class="block">Dylan</span>
+            <span class="block">Collins<span class="text-accent">.</span></span>
+          </h1>
+
+          <div class="flex flex-col gap-6 max-w-2xl">
+            <p class="text-lg sm:text-xl text-ink-dim lift lift-2">
+              Engineer, builder, curious.
+            </p>
+
+            <div class="flex flex-wrap items-baseline gap-x-8 gap-y-3 lift lift-3">
+              <a
+                href="/contact/"
+                class="link group inline-flex items-baseline gap-2 text-base sm:text-lg text-ink"
+              >
+                Start a project
+                <span aria-hidden="true" class="text-accent transition-transform group-hover:translate-x-1">→</span>
+              </a>
+              <a
+                href="/work/"
+                class="link inline-flex items-baseline gap-2 text-sm text-ink-dim"
+              >
+                See work
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 001 SELECTED WORK ──────────────────────────────────────────── */}
+  {workEntries.length > 0 && (
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
+    <SectionHeader num="001" eyebrow="Selected work" title="Things I've built." />
+
+    <ul class="grid grid-cols-12 gap-6 lg:gap-10">
+      <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>
+      <li class="col-span-12 lg:col-span-10">
+        <ul class="divide-y divide-rule border-y border-rule">
+          {workEntries.map((entry, i) => (
+            <li>
+              <a
+                href={`/work/${entry.id}/`}
+                class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 sm:py-6 items-baseline transition-colors hover:bg-paper-2 px-2 -mx-2"
+              >
+                <span class="col-span-2 sm:col-span-1 font-mono text-xs text-ink-faint tracking-widest">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span class="col-span-7 sm:col-span-5 text-[clamp(1.125rem,2.5vw,1.5rem)] font-semibold tracking-tight">
+                  {entry.data.title}
+                  <span class="ml-2 text-accent group-hover:translate-x-1 inline-block transition-transform">→</span>
+                </span>
+                <time datetime={String(entry.data.year)} class="col-span-3 sm:col-span-1 sm:col-start-12 sm:row-start-1 text-right font-mono text-xs text-ink-faint tracking-widest">
+                  {entry.data.year}
+                </time>
+                <span class="col-span-12 sm:col-span-5 sm:col-start-7 sm:row-start-1 text-ink-dim text-sm sm:text-base">
+                  {entry.data.summary}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+          <a href="/work/" class="link text-ink-dim">All work →</a>
+        </div>
+      </li>
+    </ul>
+  </section>
+  )}
+
+  {/* ── 002 WRITING ────────────────────────────────────────────────── */}
+  {writingEntries.length > 0 && (
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
+    <SectionHeader num="002" eyebrow="Recent writing" title="Notes from the keyboard." />
+
+    <ul class="grid grid-cols-12 gap-6 lg:gap-10">
+      <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>
+      <li class="col-span-12 lg:col-span-10">
+        {writingEntries.length > 0 ? (
+          <ul class="divide-y divide-rule border-y border-rule">
+            {writingEntries.map((entry) => (
+              <li>
+                <a
+                  href={`/writing/${entry.id}/`}
+                  class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 sm:py-6 items-baseline transition-colors hover:bg-paper-2 px-2 -mx-2"
+                >
+                  <time
+                    datetime={entry.data.publishedAt.toISOString().split("T")[0]}
+                    class="col-span-6 sm:col-span-2 font-mono text-xs text-ink-faint tracking-widest uppercase"
+                  >
+                    {dateShort.format(entry.data.publishedAt)}
+                  </time>
+                  <span class="col-span-6 sm:col-span-3 sm:col-start-10 text-right font-mono text-xs text-ink-faint tracking-widest uppercase">
+                    {entry.data.tags.slice(0, 2).join(" · ")}
+                  </span>
+                  <span class="col-span-12 sm:col-span-7 sm:col-start-3 sm:row-start-1 text-[clamp(1.05rem,2.2vw,1.375rem)] tracking-tight">
+                    {entry.data.title}
+                    <span class="ml-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-ink-dim">Nothing published yet. Working on it.</p>
+        )}
+        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+          <a href="/writing/" class="link text-ink-dim">All writing →</a>
+        </div>
+      </li>
+    </ul>
+  </section>
+  )}
+
+  {/* ── 003 NOW ────────────────────────────────────────────────────── */}
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
+    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-start">
+      <div class="hidden lg:block lg:col-span-2 section-num">003</div>
+      <div class="col-span-12 lg:col-span-10">
+        <div class="eyebrow mb-3">Now</div>
+        <p class="text-[clamp(1.5rem,3.5vw,1.875rem)] font-medium tracking-tight leading-snug max-w-3xl">
+          Building <a href="https://pyxyll.com" class="link text-accent" target="_blank" rel="noopener">pyxyll.com</a>,
+          taking freelance briefs, and quietly relearning Rust on weekends.
+        </p>
+        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+          <a href="/now/" class="link text-ink-dim">What I'm doing now →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 004 CTA ────────────────────────────────────────────────────── */}
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-24 sm:py-32 border-t border-rule" data-reveal>
+    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
+      <div class="hidden lg:block lg:col-span-2 section-num">004</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+        <h2 class="display text-[clamp(2.75rem,7vw,4.5rem)]">
+          Say hi<span class="text-accent">.</span>
+        </h2>
+        <a
+          href="/contact/"
+          class="inline-flex items-center gap-3 self-start sm:self-end border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent transition-colors"
+        >
+          Start a conversation
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

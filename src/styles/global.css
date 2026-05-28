@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+@theme {
+  --color-ink: #fafafa;
+  --color-ink-dim: #a1a1aa;
+  --color-ink-faint: #525252;
+  --color-paper: #0a0a0a;
+  --color-paper-2: #111111;
+  --color-rule: #1f1f1f;
+  --color-rule-strong: #2a2a2a;
+  --color-accent: #da2862;
+  --color-accent-dim: #9f1239;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--color-rule);
+  }
+
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  body {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-paper);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rule-strong);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* Brutalist-lite display number — used as the marginalia "001 / 002 / 003" */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-faint);
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: var(--color-ink-dim);
+  text-transform: uppercase;
+}
+
+/* Animated underline for inline links (writing entries, nav) */
+.link {
+  position: relative;
+  padding-bottom: 1px;
+}
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Display headline — used on home for DYLAN / COLLINS */
+.display {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.88;
+}
+
+/* Hairline rule (used everywhere we'd have a border) */
+.rule {
+  height: 1px;
+  background: var(--color-rule);
+}
+
+/* Reveal-on-load: tiny one-shot fade for the page */
+@keyframes lift {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.lift {
+  animation: lift 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lift-1 { animation-delay: 0.05s; }
+.lift-2 { animation-delay: 0.12s; }
+.lift-3 { animation-delay: 0.20s; }
+.lift-4 { animation-delay: 0.30s; }
+
+/* Reveal-on-scroll observer target */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Prose for MDX writing pages */
+.prose {
+  max-width: 65ch;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+.prose > * + * {
+  margin-top: 1.25em;
+}
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 2.5em;
+  margin-bottom: 0;
+}
+.prose h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2em;
+}
+.prose a {
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-accent);
+  padding-bottom: 1px;
+  transition: color 0.2s ease;
+}
+.prose a:hover {
+  color: var(--color-accent);
+}
+.prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  padding: 0.1em 0.35em;
+}
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+.prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.prose blockquote {
+  border-left: 1px solid var(--color-accent);
+  padding-left: 1.25em;
+  color: var(--color-ink-dim);
+  font-style: normal;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+.prose li + li {
+  margin-top: 0.3em;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin: 2.5em 0;
+}
