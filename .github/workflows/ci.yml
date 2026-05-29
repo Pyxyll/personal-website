@@ -1,0 +1,36 @@
+name: CI
+
+# Type-checks every push and PR. This does NOT deploy — Coolify's native git
+# integration handles deploys (it builds the Dockerfile on push to master, and
+# a failed `astro build` there keeps the last good version live). This workflow
+# only catches what Coolify's build doesn't: TypeScript + Astro template errors
+# that compile but shouldn't ship.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [master]
+
+# Cancel superseded runs on the same ref so we're not checking stale commits.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: astro check
+        run: npm run check
