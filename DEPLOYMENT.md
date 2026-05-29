@@ -6,7 +6,7 @@ with nginx. No database, no runtime env vars at request time.
 ## Pipeline at a glance
 
 ```
-push to master
+push to main
    │
    ├─→ GitHub Actions (.github/workflows/ci.yml): astro check   ← type gate, non-blocking
    │
@@ -22,14 +22,14 @@ It reports status on the commit but does not block or trigger the deploy.
 ## First-time Coolify setup
 
 1. New **Application** → **Public/Private Repository** → connect this Git repo.
-2. Branch: `master`.
+2. Branch: `main`.
 3. Build pack: **Dockerfile** (auto-detected).
 4. Base directory: `/` (repo root — *not* `/frontend`, that was the old stack).
 5. Port: `80`.
 6. Domain: `dylancollins.me` (+ `www.dylancollins.me` → redirect to apex).
 7. Enable HTTPS (Let's Encrypt).
 8. **Enable "Auto Deploy"** — Coolify registers a GitHub webhook so every push
-   to `master` redeploys automatically. No GitHub Actions secret or token needed
+   to `main` redeploys automatically. No GitHub Actions secret or token needed
    for this; Coolify owns the webhook.
 
 ### Migrating from the old stack
