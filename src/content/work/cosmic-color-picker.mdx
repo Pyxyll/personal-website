@@ -1,0 +1,32 @@
+---
+title: "cosmic-color-picker"
+summary: "A native Wayland colour picker for the COSMIC desktop: magnifier lens, live hex readout, multi-monitor. Built because nothing else worked."
+category: "COSMIC"
+role: "Solo"
+publishedAt: 2026-05-06
+stack: ["Rust", "Wayland", "libcosmic"]
+repo: "https://github.com/Pyxyll/cosmic-color-picker"
+---
+
+## Why it exists
+
+COSMIC didn't have a working colour picker. `hyprpicker` won't run because
+`cosmic-comp` doesn't expose `zwlr_screencopy_v1`, and the desktop portal's
+own `PickColor` handler is still a `// XXX implement` stub. So I built one.
+
+## What it is
+
+A PowerToys-style picker in three parts that all share one history file:
+
+- **`cosmic-color-pickerd`** — a headless daemon that owns the IPC socket, runs
+  the screen overlay on demand, and persists history. Autostarts at login.
+- **`cosmic-color-picker`** — the GUI: a hero swatch, HEX/RGB/HSL/HSV readouts,
+  a history strip, and a settings page with a click-to-record shortcut binder.
+- **`cosmic-applet-color-picker`** — a panel applet with a pick button and a
+  strip of recent colours.
+
+The hotkey, the applet, and the GUI's pick button all funnel into the same
+daemon, so every pick lands in shared history no matter where it came from.
+
+It'll be obsolete the day System76 implements `PickColor` properly. Until then,
+it's the stopgap I use every day.

@@ -12,7 +12,7 @@ const writingEntries = (await getCollection("writing", ({ data }) => !data.draft
   .slice(0, 3);
 
 const workEntries = (await getCollection("work"))
-  .sort((a, b) => a.data.order - b.data.order || b.data.year - a.data.year)
+  .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt)
   .slice(0, 4);
 
 const dateShort = new Intl.DateTimeFormat("en-IE", {
@@ -94,8 +94,8 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
                   {entry.data.title}
                   <span class="ml-2 text-accent group-hover:translate-x-1 inline-block transition-transform">→</span>
                 </span>
-                <time datetime={String(entry.data.year)} class="col-span-3 sm:col-span-1 sm:col-start-12 sm:row-start-1 text-right font-mono text-xs text-ink-faint tracking-widest">
-                  {entry.data.year}
+                <time datetime={entry.data.publishedAt.toISOString().split("T")[0]} class="col-span-3 sm:col-span-1 sm:col-start-12 sm:row-start-1 text-right font-mono text-xs text-ink-faint tracking-widest">
+                  {entry.data.publishedAt.getFullYear()}
                 </time>
                 <span class="col-span-12 sm:col-span-5 sm:col-start-7 sm:row-start-1 text-ink-dim text-sm sm:text-base">
                   {entry.data.summary}
@@ -169,8 +169,7 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
       <div class="col-span-12 lg:col-span-10">
         <div class="eyebrow mb-3">Now</div>
         <p class="text-[clamp(1.5rem,3.5vw,1.875rem)] font-medium tracking-tight leading-snug max-w-3xl">
-          WordPress by day, Rust desktop bits by night, and slowly turning
-          <a href="https://pyxyll.com" class="link text-accent" target="_blank" rel="noopener">pyxyll.com</a> into something.
+          A day job, a few side projects, and a long list I never quite get to.
         </p>
         <div class="mt-6 font-mono text-xs uppercase tracking-widest">
           <a href="/now/" class="link text-ink-dim">What I'm doing now →</a>

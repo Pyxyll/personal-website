@@ -160,18 +160,18 @@ async function main() {
       })
     );
 
+    const category = bail(
+      await text({
+        message: "Category",
+        placeholder: "COSMIC, Web apps, Sites, Homelab…",
+        validate: (v) => (v.trim().length === 0 ? "Category is required" : undefined),
+      })
+    );
+
     const role = bail(
       await text({
         message: "Role (optional)",
         placeholder: "e.g. Designer & engineer  (leave blank to omit)",
-      })
-    );
-
-    const year = bail(
-      await text({
-        message: "Year",
-        initialValue: String(new Date().getFullYear()),
-        validate: (v) => (/^\d{4}$/.test(v.trim()) ? undefined : "Enter a 4-digit year"),
       })
     );
 
@@ -193,25 +193,17 @@ async function main() {
       await text({ message: "Repo URL (optional)", placeholder: "https://… (leave blank to omit)" })
     );
 
-    const orderRaw = bail(
-      await text({
-        message: "Sort order (lower = higher up the list)",
-        initialValue: "0",
-        validate: (v) => (/^\d+$/.test(v.trim()) ? undefined : "Enter a whole number"),
-      })
-    );
-
     const lines = [
       "---",
       `title: ${yamlStr(title)}`,
       `summary: ${yamlStr(summary)}`,
+      `category: ${yamlStr(category.trim())}`,
     ];
     if (role.trim()) lines.push(`role: ${yamlStr(role.trim())}`);
-    lines.push(`year: ${Number(year)}`);
+    lines.push(`publishedAt: ${today()}`);
     lines.push(`stack: ${yamlList(stack)}`);
     if (url.trim()) lines.push(`url: ${yamlStr(url.trim())}`);
     if (repo.trim()) lines.push(`repo: ${yamlStr(repo.trim())}`);
-    lines.push(`order: ${Number(orderRaw)}`);
     lines.push("---");
     frontmatter = lines.join("\n");
     body = `\n\n## Overview\n\nWhat it is, who it was for, what you did.\n`;

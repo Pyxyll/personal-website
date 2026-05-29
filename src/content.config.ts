@@ -19,12 +19,12 @@ const work = defineCollection({
   schema: z.object({
     title: z.string(),
     summary: z.string(),
+    category: z.string(),
     role: z.string().optional(),
-    year: z.coerce.number(),
+    publishedAt: z.coerce.date(),
     stack: z.array(z.string()).default([]),
     url: z.url().optional(),
     repo: z.url().optional(),
-    order: z.number().default(0),
   }),
 });
 

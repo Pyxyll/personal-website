@@ -63,7 +63,17 @@ export async function renderOg({ title, subtitle, eyebrow }: OgInput): Promise<U
   const titleLines = wrap(title, 16, 3);
   const subtitleLines = subtitle ? wrap(subtitle, 50, 2) : [];
 
-  const titleSize = titleLines.length === 1 ? 132 : titleLines.length === 2 ? 110 : 88;
+  // Base size by line count, then clamp down so the widest line (including the
+  // trailing accent dot on the last line) still fits the content width. Without
+  // this, a long unbreakable token like "cosmic-color-picker" overflows the card.
+  const AVAIL = W - 160; // 80px padding each side
+  const CHAR_W = 0.52; // approx glyph advance ÷ font-size for the bold sans
+  const longest = Math.max(
+    ...titleLines.map((l, i) => l.length + (i === titleLines.length - 1 ? 1 : 0))
+  );
+  const sizeByLines = titleLines.length === 1 ? 132 : titleLines.length === 2 ? 110 : 88;
+  const sizeByWidth = Math.floor(AVAIL / (CHAR_W * longest));
+  const titleSize = Math.max(44, Math.min(sizeByLines, sizeByWidth));
   const lineHeight = Math.round(titleSize * 1.02);
 
   const titleStartY = 280 - ((titleLines.length - 1) * lineHeight) / 2;

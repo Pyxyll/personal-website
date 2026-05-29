@@ -1,0 +1,29 @@
+---
+title: "dylancollins.me"
+summary: "This site. Astro, a single shader, a Cloudflare Worker for the contact form, and all the content in MDX."
+category: "Sites"
+role: "Designer & engineer"
+publishedAt: 2026-01-07
+stack: ["Astro", "TypeScript", "Tailwind", "Cloudflare Workers"]
+url: "https://dylancollins.me"
+repo: "https://github.com/Pyxyll/personal-website"
+---
+
+## The brief, to myself
+
+The previous version had a Laravel backend, a Postgres database, a Next.js
+frontend, and a React Native companion app, all to publish a post every couple
+of weeks. This time the rule was: stop overbuilding.
+
+## What it is
+
+One static Astro site. Posts and projects live as MDX files, so publishing is
+a commit and a push. A single dithered shader sits behind the home wordmark;
+everything else is type and hairlines. The contact form posts to a tiny
+Cloudflare Worker that calls Resend server-side, which keeps the site fully
+static with no backend to babysit. It deploys to my own VPS through Coolify.
+
+## What I kept
+
+The pink accent, the monospace details, and the idea that a personal site can
+be a little weird without being a maintenance burden.
