@@ -4,9 +4,9 @@
 export const site = {
   name: "Dylan Collins",
   shortName: "Dylan Collins",
-  title: "Dylan Collins — Software engineer",
+  title: "Dylan Collins · Software engineer",
   description:
-    "Software engineer in Ireland. Freelance briefs, end-to-end web apps, and writing about the craft.",
+    "Software engineer in Ireland. I build for work, for fun, and for people who need a hand.",
   url: "https://dylancollins.me",
   locale: "en_IE",
   language: "en-IE",

@@ -69,7 +69,7 @@
   }
 }
 
-/* Brutalist-lite display number — used as the marginalia "001 / 002 / 003" */
+/* Brutalist-lite display number, used as the marginalia "001 / 002 / 003" */
 .section-num {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -108,7 +108,7 @@
   transform-origin: left;
 }
 
-/* Display headline — used on home for DYLAN / COLLINS */
+/* Display headline, used on home for DYLAN / COLLINS */
 .display {
   font-family: var(--font-sans);
   font-weight: 900;

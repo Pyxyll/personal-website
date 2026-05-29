@@ -8,7 +8,7 @@ import { Dithering } from "@paper-design/shaders-react";
 //   - tight mask → only the central area shows, fades hard to page edge
 //
 // maxPixelCount: the lib defaults to 1920*1080*4 (~8.3M). Above that it renders
-// the shader below display resolution and the browser upscales it — which makes
+// the shader below display resolution and the browser upscales it, which makes
 // the ordered dither pattern beat against the pixel grid and produces visible
 // horizontal banding on large/maximised windows. We raise the cap so the shader
 // always renders 1:1 (covers up to ~4K @ 2x DPR). The dither shader is cheap, so

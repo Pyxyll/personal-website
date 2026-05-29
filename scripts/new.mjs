@@ -4,7 +4,7 @@
 // editor and commit. Keeps the frontmatter honest so the build never trips
 // over a typo'd field.
 //
-// Schema source of truth: src/content.config.ts — keep these in sync.
+// Schema source of truth: src/content.config.ts (keep these in sync).
 
 import {
   intro,
@@ -117,7 +117,7 @@ async function main() {
     const description = bail(
       await text({
         message: "Description",
-        placeholder: "One sentence — shows in lists, OG cards, and search.",
+        placeholder: "One sentence that shows in lists, OG cards, and search.",
         validate: (v) => (v.trim().length === 0 ? "Description is required" : undefined),
       })
     );
@@ -155,7 +155,7 @@ async function main() {
     const summary = bail(
       await text({
         message: "Summary",
-        placeholder: "One line — shows in the work list and OG card.",
+        placeholder: "One line that shows in the work list and OG card.",
         validate: (v) => (v.trim().length === 0 ? "Summary is required" : undefined),
       })
     );
@@ -223,7 +223,7 @@ async function main() {
   note(`src/content/${type}/${slug}.mdx`, "Created");
   log.info("Open it in your editor and write the body. Commit when ready.");
   if (type === "writing") {
-    log.message("It's a draft — set `draft: false` in the frontmatter to publish.");
+    log.message("It's a draft. Set `draft: false` in the frontmatter to publish.");
   }
   outro("Done.");
 }

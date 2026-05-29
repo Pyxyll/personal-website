@@ -100,8 +100,8 @@ const rssUrl = new URL("/rss.xml", canonical).toString();
     )}
 
     {/* Feeds */}
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Writing`} href={rssUrl} />
-    <link rel="alternate" type="application/atom+xml" title={`${site.name} — Writing`} href={rssUrl} />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} · Writing`} href={rssUrl} />
+    <link rel="alternate" type="application/atom+xml" title={`${site.name} · Writing`} href={rssUrl} />
 
     {/* Pre-load slot for per-page <head> additions (JSON-LD, extra meta) */}
     <slot name="head" />

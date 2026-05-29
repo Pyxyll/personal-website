@@ -9,7 +9,7 @@ export default defineConfig({
   output: "static",
   trailingSlash: "always",
   prefetch: {
-    // Hover-prefetch internal links — subsequent navs feel instant without
+    // Hover-prefetch internal links; subsequent navs feel instant without
     // the bandwidth cost of prefetching everything.
     prefetchAll: false,
     defaultStrategy: "hover",

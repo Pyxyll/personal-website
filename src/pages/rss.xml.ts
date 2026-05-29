@@ -18,7 +18,7 @@ export async function GET(context: APIContext) {
   }
 
   return rss({
-    title: `${site.name} — Writing`,
+    title: `${site.name} · Writing`,
     description: "Notes from the keyboard. Web, infra, the occasional rant.",
     site: context.site ?? site.url,
     items: posts.map((post) => ({
@@ -32,7 +32,7 @@ export async function GET(context: APIContext) {
     customData: [
       `<language>${site.language.toLowerCase()}</language>`,
       `<atom:link href="${new URL("/rss.xml", site.url).toString()}" rel="self" type="application/rss+xml" />`,
-      `<image><url>${new URL("/og.png", site.url).toString()}</url><title>${site.name} — Writing</title><link>${site.url}</link></image>`,
+      `<image><url>${new URL("/og.png", site.url).toString()}</url><title>${site.name} · Writing</title><link>${site.url}</link></image>`,
     ].join(""),
     xmlns: { atom: "http://www.w3.org/2005/Atom" },
   });

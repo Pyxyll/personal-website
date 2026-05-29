@@ -131,7 +131,7 @@ export function blogSchema(args: { url: string }) {
     "@type": "Blog",
     "@id": `${args.url}#blog`,
     url: args.url,
-    name: `${site.name} — Writing`,
+    name: `${site.name} · Writing`,
     description: "Notes from the keyboard. Web, infra, the occasional rant.",
     inLanguage: site.language,
     publisher: { "@id": `${site.url}/#person` },
@@ -161,7 +161,7 @@ export function contactPageSchema(args: { url: string }) {
     "@type": "ContactPage",
     "@id": `${args.url}#contact`,
     url: args.url,
-    name: `Contact — ${site.name}`,
+    name: `Contact · ${site.name}`,
     inLanguage: site.language,
     about: { "@id": `${site.url}/#person` },
   };

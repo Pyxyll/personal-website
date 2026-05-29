@@ -1,4 +1,4 @@
-// Brand icon renderer — same SVG source rasterised at multiple sizes for
+// Brand icon renderer, same SVG source rasterised at multiple sizes for
 // favicons, apple-touch-icon, and PWA manifest icons.
 import { Resvg } from "@resvg/resvg-js";
 

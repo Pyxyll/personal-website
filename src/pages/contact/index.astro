@@ -8,8 +8,8 @@ const pageUrl = new URL("/contact/", site.url).toString();
 ---
 
 <Base
-  title="Contact — Dylan Collins"
-  description="Get in touch — email or a quick form, whichever you prefer."
+  title="Contact · Dylan Collins"
+  description="Get in touch: email or a quick form, whichever you prefer."
 >
   <Schema
     slot="head"
@@ -29,8 +29,8 @@ const pageUrl = new URL("/contact/", site.url).toString();
           Say hi<span class="text-accent">.</span>
         </h1>
         <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          Freelance brief, a quick question, or a "did you ever finish that
-          side project" — all welcome. Fastest by email.
+          Building something and want a hand? Got a question, or just want to
+          say hi? All welcome. Fastest by email.
         </p>
       </div>
     </header>
@@ -92,7 +92,7 @@ const pageUrl = new URL("/contact/", site.url).toString();
             ></textarea>
           </label>
 
-          {/* Honeypot — hidden from humans, catches bots. Never fill this. */}
+          {/* Honeypot: hidden from humans, catches bots. Never fill this. */}
           <div aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 overflow-hidden" hidden>
             <label>
               Company
@@ -155,7 +155,7 @@ const pageUrl = new URL("/contact/", site.url).toString();
           if (res.ok) {
             form.reset();
             label.textContent = "Sent";
-            setStatus("Got it — I'll be in touch.", "ok");
+            setStatus("Got it. I'll be in touch.", "ok");
           } else {
             button.disabled = false;
             label.textContent = "Send";

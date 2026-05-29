@@ -4,7 +4,7 @@ import Schema from "../../components/Schema.astro";
 import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 
-const updatedDate = new Date("2026-05-20");
+const updatedDate = new Date("2026-05-29");
 const updated = new Intl.DateTimeFormat("en-IE", {
   year: "numeric",
   month: "long",
@@ -16,7 +16,7 @@ const pageUrl = new URL("/now/", site.url).toString();
 ---
 
 <Base
-  title="Now — Dylan Collins"
+  title="Now · Dylan Collins"
   description="What I'm focused on right now."
 >
   <Schema
@@ -24,7 +24,7 @@ const pageUrl = new URL("/now/", site.url).toString();
     data={[
       webPageSchema({
         url: pageUrl,
-        name: "Now — Dylan Collins",
+        name: "Now · Dylan Collins",
         description: "What I'm focused on right now.",
       }),
       breadcrumbSchema([
@@ -41,8 +41,9 @@ const pageUrl = new URL("/now/", site.url).toString();
           Now<span class="text-accent">.</span>
         </h1>
         <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          A <a href="https://nownownow.com/about" class="link" target="_blank" rel="noopener">/now</a> page.
-          What I'm actually working on this month, not what I want you to think I'm working on.
+          A <a href="https://nownownow.com/about" class="link" target="_blank" rel="noopener">/now</a> page:
+          what I'm focused on right now, and what I'm not. The honest version,
+          not what I want you to think I'm working on.
         </p>
         <div class="font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
           Last updated · <time datetime={isoUpdated}>{updated}</time>
@@ -54,15 +55,13 @@ const pageUrl = new URL("/now/", site.url).toString();
       <div class="col-span-12 lg:col-span-2 section-num">Work</div>
       <div class="col-span-12 lg:col-span-10 prose">
         <p>
-          Finishing a freelance build for a small product team — Laravel
-          backend, Next.js admin, a React Native companion app. Wrapping in
-          June, slot opens after.
+          Software developer at <strong>The B!G Idea</strong>, keeping our
+          WordPress platform running while building its replacement.
         </p>
         <p>
-          Quietly available for short-engagement freelance work from May 2026.
-          Best fit: web apps where someone has shipped the first version and
-          needs an engineer who can pick up the whole stack without much
-          hand-holding.
+          Outside of that, I like helping people build things. If you're working
+          on something interesting and want a hand, <a href="/contact/">say hi</a>.
+          Always happy to talk it through.
         </p>
       </div>
     </div>
@@ -70,14 +69,14 @@ const pageUrl = new URL("/now/", site.url).toString();
     <div class="rule my-12 lg:my-16"></div>
 
     <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
-      <div class="col-span-12 lg:col-span-2 section-num">Side</div>
+      <div class="col-span-12 lg:col-span-2 section-num">Projects</div>
       <div class="col-span-12 lg:col-span-10 prose">
-        <p>
-          <a href="https://pyxyll.com" target="_blank" rel="noopener">pyxyll.com</a> is
-          where I let myself be silly — current target is a tiny indie-web
-          experiment around shared bookmarks. Expect rough edges.
-        </p>
-        <p>Re-learning Rust by porting one of my old Go services. Going slow on purpose.</p>
+        <ul style="list-style:none;padding-left:0">
+          <li><strong>VoxesDen</strong>: voice actors build voice cards to send to casting directors, played right in the browser. In progress.</li>
+          <li><strong>Rust applets for COSMIC</strong>: small pieces for System76's desktop environment.</li>
+          <li><strong><a href="https://pyxyll.com" target="_blank" rel="noopener">pyxyll.com</a></strong>: earmarked as the home for an indie-web project. Right now it's a domain and an idea, nothing more.</li>
+          <li><strong>Linux desktop tinkering</strong>: an endless rabbit hole I've made peace with running for the rest of my life.</li>
+        </ul>
       </div>
     </div>
 
@@ -87,8 +86,8 @@ const pageUrl = new URL("/now/", site.url).toString();
       <div class="col-span-12 lg:col-span-2 section-num">Off</div>
       <div class="col-span-12 lg:col-span-10 prose">
         <p>
-          Mostly: building keyboards, printing things that don't need to exist,
-          and trying not to buy more Pokémon cards.
+          Coffee, cats, gaming, 3D printing, and a pile of other hobbies I
+          don't get to nearly enough.
         </p>
       </div>
     </div>

@@ -1,14 +1,14 @@
 // Contact-form mailer. A single edge handler: validates the submission, then
-// calls Resend's REST API twice — a notification to the site owner (with the
+// calls Resend's REST API twice: a notification to the site owner (with the
 // sender's address as Reply-To, so replying in your inbox goes straight back
 // to them) and a confirmation to the sender. No framework, no SDK, no deps.
 //
 // Secrets / vars (see wrangler.toml + `wrangler secret put`):
-//   RESEND_API_KEY  (secret)  — Resend API key
-//   TO_EMAIL        (var)     — inbox that receives notifications
-//   FROM_NOTIFY     (var)     — "Name <addr@send.dylancollins.me>" for the notification
-//   FROM_CONFIRM    (var)     — "Name <addr@send.dylancollins.me>" for the confirmation
-//   RATE_LIMITER    (binding, optional) — Cloudflare Rate Limiting binding
+//   RESEND_API_KEY  (secret)  Resend API key
+//   TO_EMAIL        (var)     inbox that receives notifications
+//   FROM_NOTIFY     (var)     "Name <addr@send.dylancollins.me>" for the notification
+//   FROM_CONFIRM    (var)     "Name <addr@send.dylancollins.me>" for the confirmation
+//   RATE_LIMITER    (binding, optional) Cloudflare Rate Limiting binding
 
 const ALLOWED_ORIGINS = [
   "https://dylancollins.me",
@@ -67,7 +67,7 @@ export default {
       const ip = request.headers.get("CF-Connecting-IP") ?? "anon";
       const { success } = await env.RATE_LIMITER.limit({ key: ip });
       if (!success) {
-        return json({ error: "Too many messages — try again in a minute." }, 429, headers);
+        return json({ error: "Too many messages. Try again in a minute." }, 429, headers);
       }
     }
 
@@ -96,13 +96,13 @@ export default {
       return json({ error: "Please fill in name, email, and message." }, 400, headers);
     }
     if (name.length > 100 || email.length > 200 || message.length > 5000) {
-      return json({ error: "That's a bit long — please trim it down." }, 400, headers);
+      return json({ error: "That's a bit long. Please trim it down." }, 400, headers);
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return json({ error: "That email doesn't look right." }, 400, headers);
     }
 
-    // 1) Notification to the owner — Reply-To is the sender, so you reply directly.
+    // 1) Notification to the owner: Reply-To is the sender, so you reply directly.
     const notify = await sendEmail(env, {
       from: env.FROM_NOTIFY,
       to: [env.TO_EMAIL],
@@ -124,21 +124,21 @@ export default {
       return json({ error: "Something went wrong sending your message." }, 502, headers);
     }
 
-    // 2) Confirmation to the sender — best-effort; don't fail the request if it errors.
+    // 2) Confirmation to the sender: best-effort; don't fail the request if it errors.
     ctx.waitUntil(
       sendEmail(env, {
         from: env.FROM_CONFIRM,
         to: [email],
         reply_to: env.TO_EMAIL,
         subject: "Thanks for reaching out",
-        text: `Hi ${name},\n\nThanks for getting in touch — your message landed and I'll get back to you within a couple of days.\n\nFor reference, here's what you sent:\n\n${message}\n\n— Dylan`,
+        text: `Hi ${name},\n\nThanks for getting in touch. Your message landed and I'll get back to you within a couple of days.\n\nFor reference, here's what you sent:\n\n${message}\n\nDylan`,
         html: `
           <div style="font-family:ui-sans-serif,system-ui,sans-serif;max-width:560px;line-height:1.6">
             <p>Hi ${escapeHtml(name)},</p>
-            <p>Thanks for getting in touch — your message landed and I'll get back to you within a couple of days.</p>
+            <p>Thanks for getting in touch. Your message landed and I'll get back to you within a couple of days.</p>
             <p style="color:#666">For reference, here's what you sent:</p>
             <blockquote style="border-left:2px solid #da2862;padding-left:12px;color:#444;white-space:pre-wrap">${escapeHtml(message)}</blockquote>
-            <p>— Dylan</p>
+            <p>Dylan</p>
           </div>`,
       }).catch((e) => console.error("Confirmation email failed:", e))
     );

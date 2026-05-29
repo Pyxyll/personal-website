@@ -11,7 +11,7 @@ const entries = (await getCollection("work")).sort(
 );
 
 const pageUrl = new URL("/work/", site.url).toString();
-const pageTitle = "Work — Dylan Collins";
+const pageTitle = "Work · Dylan Collins";
 const pageDesc = "Selected client work, freelance projects, and things I've shipped.";
 ---
 
@@ -34,10 +34,11 @@ const pageDesc = "Selected client work, freelance projects, and things I've ship
           Work<span class="text-accent">.</span>
         </h1>
         <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          A short list. Freelance and full-time. Most of it Laravel, Next.js,
-          React Native, and a lot of Postgres. Reach out if anything overlaps
-          with what you're building.
+          A short list of things I've built, for work, for fun, and for people
+          who needed a hand. If something here overlaps with what you're making,
+          <a href="/contact/" class="link">say hi</a>.
         </p>
+
       </div>
     </header>
 
