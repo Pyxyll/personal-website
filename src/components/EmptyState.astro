@@ -1,0 +1,22 @@
+---
+// Brutalist-lite empty state: a hairline-bordered panel with a mono label,
+// a short line, and an optional CTA. Used wherever a collection has no entries
+// yet so the section reads as "intentionally empty", not broken.
+interface Props {
+  label?: string;
+  message: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+}
+const { label = "Coming soon", message, ctaHref, ctaLabel } = Astro.props;
+---
+
+<div class="border border-dashed border-rule-strong px-6 py-10 sm:px-10 sm:py-12 flex flex-col gap-4">
+  <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">[ {label} ]</span>
+  <p class="text-ink-dim text-base sm:text-lg max-w-xl">{message}</p>
+  {ctaHref && ctaLabel && (
+    <a href={ctaHref} class="link self-start font-mono text-xs uppercase tracking-widest text-ink-dim">
+      {ctaLabel} →
+    </a>
+  )}
+</div>

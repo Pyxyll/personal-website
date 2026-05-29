@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
+import EmptyState from "../../components/EmptyState.astro";
 import { getCollection } from "astro:content";
 import { collectionPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
@@ -41,7 +42,17 @@ const pageDesc = "Selected client work, freelance projects, and things I've ship
     </header>
 
     {entries.length === 0 ? (
-      <p class="text-ink-dim">Nothing public yet. Drop me a line and I'll send recent samples.</p>
+      <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+        <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+        <div class="col-span-12 lg:col-span-10">
+          <EmptyState
+            label="In progress"
+            message="Case studies are being written up. In the meantime, reach out and I'll send recent samples."
+            ctaHref="/contact/"
+            ctaLabel="Get in touch"
+          />
+        </div>
+      </div>
     ) : (
     <ul class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
       <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>

@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
+import EmptyState from "../../components/EmptyState.astro";
 import { getCollection } from "astro:content";
 import { blogSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
@@ -55,7 +56,17 @@ const pageUrl = new URL("/writing/", site.url).toString();
     </header>
 
     {entries.length === 0 && (
-      <p class="text-ink-dim">No posts yet.</p>
+      <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+        <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+        <div class="col-span-12 lg:col-span-10">
+          <EmptyState
+            label="Coming soon"
+            message="First posts are in the drafts folder. Notes on web, infra, and the things I build will land here. Subscribe via RSS to catch them."
+            ctaHref="/rss.xml"
+            ctaLabel="RSS feed"
+          />
+        </div>
+      </div>
     )}
 
     {years.map((year) => (

@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import HeroShader from "../components/HeroShader";
 import SectionHeader from "../components/SectionHeader.astro";
+import EmptyState from "../components/EmptyState.astro";
 import Schema from "../components/Schema.astro";
 import { getCollection } from "astro:content";
 import { personSchema, websiteSchema } from "../lib/schema";
@@ -64,13 +65,21 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
   </section>
 
   {/* ── 001 SELECTED WORK ──────────────────────────────────────────── */}
-  {workEntries.length > 0 && (
   <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
     <SectionHeader num="001" eyebrow="Selected work" title="Things I've built." />
 
-    <ul class="grid grid-cols-12 gap-6 lg:gap-10">
-      <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>
-      <li class="col-span-12 lg:col-span-10">
+    <div class="grid grid-cols-12 gap-6 lg:gap-10">
+      <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+      <div class="col-span-12 lg:col-span-10">
+        {workEntries.length === 0 ? (
+          <EmptyState
+            label="In progress"
+            message="Case studies are being written up. In the meantime, reach out and I'll send recent samples."
+            ctaHref="/contact/"
+            ctaLabel="Get in touch"
+          />
+        ) : (
+        <>
         <ul class="divide-y divide-rule border-y border-rule">
           {workEntries.map((entry, i) => (
             <li>
@@ -98,20 +107,28 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
         <div class="mt-6 font-mono text-xs uppercase tracking-widest">
           <a href="/work/" class="link text-ink-dim">All work →</a>
         </div>
-      </li>
-    </ul>
+        </>
+        )}
+      </div>
+    </div>
   </section>
-  )}
 
   {/* ── 002 WRITING ────────────────────────────────────────────────── */}
-  {writingEntries.length > 0 && (
   <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
     <SectionHeader num="002" eyebrow="Recent writing" title="Notes from the keyboard." />
 
-    <ul class="grid grid-cols-12 gap-6 lg:gap-10">
-      <li class="col-span-12 lg:col-span-2 hidden lg:block"></li>
-      <li class="col-span-12 lg:col-span-10">
-        {writingEntries.length > 0 ? (
+    <div class="grid grid-cols-12 gap-6 lg:gap-10">
+      <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+      <div class="col-span-12 lg:col-span-10">
+        {writingEntries.length === 0 ? (
+          <EmptyState
+            label="Coming soon"
+            message="First posts are in the drafts folder. Notes on web, infra, and the things I build will land here."
+            ctaHref="/writing/"
+            ctaLabel="The writing page"
+          />
+        ) : (
+        <>
           <ul class="divide-y divide-rule border-y border-rule">
             {writingEntries.map((entry) => (
               <li>
@@ -136,16 +153,14 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
               </li>
             ))}
           </ul>
-        ) : (
-          <p class="text-ink-dim">Nothing published yet. Working on it.</p>
+          <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+            <a href="/writing/" class="link text-ink-dim">All writing →</a>
+          </div>
+        </>
         )}
-        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
-          <a href="/writing/" class="link text-ink-dim">All writing →</a>
-        </div>
-      </li>
-    </ul>
+      </div>
+    </div>
   </section>
-  )}
 
   {/* ── 003 NOW ────────────────────────────────────────────────────── */}
   <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
