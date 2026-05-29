@@ -1,0 +1,21 @@
+name = "dylancollins-contact"
+main = "src/index.js"
+compatibility_date = "2026-05-01"
+
+# Non-secret config. Edit these to match your verified Resend subdomain + inbox.
+[vars]
+TO_EMAIL = "hello@dylancollins.me"
+FROM_NOTIFY = "dylancollins.me <contact@send.dylancollins.me>"
+FROM_CONFIRM = "Dylan Collins <hello@send.dylancollins.me>"
+
+# Per-IP rate limit: 5 submissions per 60s. The Worker degrades gracefully if
+# this binding is removed. If `wrangler deploy` complains about the syntax on
+# your CLI version, delete this block — the honeypot + validation still stand.
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
+# RESEND_API_KEY is a secret — never put it here. Set it with:
+#   wrangler secret put RESEND_API_KEY

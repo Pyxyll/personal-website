@@ -53,9 +53,9 @@ const pageUrl = new URL("/contact/", site.url).toString();
     <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
       <div class="col-span-12 lg:col-span-2 section-num">Form</div>
       <div class="col-span-12 lg:col-span-10">
-        {/* Formspree-style action target — replace endpoint with your real one */}
         <form
-          action="https://formspree.io/f/REPLACE_ME"
+          id="contact-form"
+          action={site.contactEndpoint}
           method="POST"
           class="grid gap-6 max-w-2xl"
         >
@@ -65,6 +65,8 @@ const pageUrl = new URL("/contact/", site.url).toString();
               type="text"
               name="name"
               required
+              maxlength="100"
+              autocomplete="name"
               class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent focus:outline-none transition-colors"
             />
           </label>
@@ -74,6 +76,8 @@ const pageUrl = new URL("/contact/", site.url).toString();
               type="email"
               name="email"
               required
+              maxlength="200"
+              autocomplete="email"
               class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent focus:outline-none transition-colors"
             />
           </label>
@@ -83,20 +87,86 @@ const pageUrl = new URL("/contact/", site.url).toString();
               name="message"
               rows="5"
               required
+              maxlength="5000"
               class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent focus:outline-none transition-colors resize-y"
             ></textarea>
           </label>
-          <div>
+
+          {/* Honeypot — hidden from humans, catches bots. Never fill this. */}
+          <div aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 overflow-hidden" hidden>
+            <label>
+              Company
+              <input type="text" name="company" tabindex="-1" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="flex items-center gap-4">
             <button
               type="submit"
-              class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent transition-colors"
+              class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Send
+              <span data-label>Send</span>
               <span aria-hidden="true">→</span>
             </button>
+            <p
+              id="contact-status"
+              role="status"
+              aria-live="polite"
+              class="font-mono text-xs uppercase tracking-widest"
+            ></p>
           </div>
         </form>
       </div>
     </div>
   </section>
+
+  <script>
+    // Progressive enhancement: intercept the submit, POST JSON to the Worker,
+    // and show inline status. Without JS the form still POSTs natively to the
+    // Worker (form-encoded), which the Worker also accepts.
+    const form = document.getElementById("contact-form") as HTMLFormElement | null;
+    const status = document.getElementById("contact-status");
+    const button = form?.querySelector("button[type=submit]") as HTMLButtonElement | null;
+    const label = form?.querySelector("[data-label]");
+
+    if (form && status && button && label) {
+      const setStatus = (msg: string, tone: "ok" | "err" | "") => {
+        status.textContent = msg;
+        status.style.color =
+          tone === "ok" ? "var(--color-accent)" : tone === "err" ? "#f87171" : "var(--color-ink-faint)";
+      };
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+
+        button.disabled = true;
+        label.textContent = "Sending";
+        setStatus("", "");
+
+        try {
+          const res = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const body = await res.json().catch(() => ({}));
+
+          if (res.ok) {
+            form.reset();
+            label.textContent = "Sent";
+            setStatus("Got it — I'll be in touch.", "ok");
+          } else {
+            button.disabled = false;
+            label.textContent = "Send";
+            setStatus(body.error ?? "Something went wrong. Try again?", "err");
+          }
+        } catch {
+          button.disabled = false;
+          label.textContent = "Send";
+          setStatus("Network error. Try again?", "err");
+        }
+      });
+    }
+  </script>
 </Base>

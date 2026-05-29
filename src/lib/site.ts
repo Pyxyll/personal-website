@@ -12,6 +12,9 @@ export const site = {
   language: "en-IE",
   themeColor: "#0a0a0a",
   accent: "#da2862",
+  // Cloudflare Worker that handles the contact form (calls Resend server-side).
+  // Replace with your real Worker URL after `wrangler deploy` (see worker/README.md).
+  contactEndpoint: "https://dylancollins-contact.YOUR-SUBDOMAIN.workers.dev",
   author: {
     name: "Dylan Collins",
     email: "hello@dylancollins.me",
