@@ -24,7 +24,7 @@ function iconSvg(size: number) {
 </svg>`;
 }
 
-export async function renderIcon(size: number, opts?: { background?: string }): Promise<Uint8Array> {
+export async function renderIcon(size: number, opts?: { background?: string }): Promise<Uint8Array<ArrayBuffer>> {
   const png = new Resvg(iconSvg(size), {
     fitTo: { mode: "width", value: size },
     background: opts?.background ?? "#0a0a0a",

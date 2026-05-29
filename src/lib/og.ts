@@ -49,7 +49,7 @@ interface OgInput {
   eyebrow?: string;
 }
 
-export async function renderOg({ title, subtitle, eyebrow }: OgInput): Promise<Uint8Array> {
+export async function renderOg({ title, subtitle, eyebrow }: OgInput): Promise<Uint8Array<ArrayBuffer>> {
   const ACCENT = "#da2862";
   const PAPER = "#0a0a0a";
   const INK = "#fafafa";
