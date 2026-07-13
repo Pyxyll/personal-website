@@ -1,0 +1,106 @@
+---
+title: "ShiftDesk"
+summary: "Shift cover for a dental practice: staff claim open shifts, managers assign cover and see the gaps before they bite. Interactive demo, no backend."
+category: "Web apps"
+role: "Design + build"
+publishedAt: 2026-07-12
+stack: ["Astro", "React", "TypeScript"]
+---
+
+<p>
+  <a href="/work/shiftdesk/demo/">Try the live demo →</a>
+</p>
+
+## The problem
+
+Publishing a rota is the easy half. The hard half is what happens after it
+changes — someone calls in sick, someone drops a late surgery, and the cover has
+to be found and validated in the hour you have to find it.
+
+Most rota tools treat that as a broadcast problem: notify everyone, let a human
+sort it out. That puts the manager back on the phone, and it means a gap is only
+as visible as whoever last looked at the sheet.
+
+ShiftDesk treats it as a constraint problem. Open shifts are a first-class state
+that anyone eligible can claim without asking, and the system refuses the
+combinations that create the next mess — so cover gets found by the people who
+have the availability, not by the person with the phone.
+
+## What it does
+
+The same week of data is shown through three lenses.
+
+**Staff** see the rota as themselves. Open shifts are dashed and amber; the ones
+they hold are outlined in teal. They can claim an open shift, drop one they no
+longer want, and mark a day unavailable. You can switch which employee you're
+signed in as from the header — the rota, the hour count and the notifications all
+follow.
+
+**Managers** see coverage rather than personal schedule: a fill bar per day, a
+count of the gaps, who has marked themselves off, and hours-against-target for
+the whole team. They can assign an open shift, unassign someone, or add a new
+open shift to any day.
+
+**Stats** rolls the same live state up into filled-vs-open hours by role,
+coverage per week, and hours per person. It is computed from state, not seeded —
+claim a few shifts and the bars move.
+
+## The rules that make it safe
+
+A scheduling tool is only useful if it refuses the bad rota. Three rules do most
+of that work here:
+
+- **No double-booking.** Claiming a shift that overlaps one you already hold is
+  rejected, and the toast names the shift it clashes with rather than just saying
+  "no".
+- **Availability is respected.** Marking a day off blocks you from claiming on it,
+  and hides you from the manager's assign picker for that day.
+- **The picker only offers people who can actually work it.** It filters to the
+  matching role, drops anyone with an overlapping shift, and drops anyone who is
+  off — so an assignment is valid by construction rather than by the manager
+  remembering.
+
+Marking a day off deliberately does *not* strip shifts you already hold. It warns
+you that you still hold them and leaves the decision with you, because silently
+dropping someone's shift is a worse failure than an inconsistent-looking day.
+
+Every change writes to a per-shift history and a session activity feed, so
+"who dropped Friday?" has an answer.
+
+## Scope, and what a second site changes
+
+The demo is one week at one site, with six people, so the rules are legible in
+about thirty seconds of clicking. That's a demo decision, not a ceiling.
+
+The part that carries over is the eligibility model: a shift is claimable by you
+if the role matches, you're free, and it doesn't overlap something you already
+hold. Adding sites mostly means adding one more term to that check — which sites
+you're qualified and willing to travel to — and letting a shift belong to a
+location. Claiming, clash rejection, the assign picker and the coverage rollups
+all keep working off the same predicate.
+
+What genuinely gets harder with a group is not the rota, it's the questions
+across it: who can cover Ealing on Thursday when the bank staff are already at
+Croydon, and which sites are quietly carrying the overtime. That's a reporting
+and float-pool problem, and it's where I'd want to talk about your actual
+constraints before designing anything.
+
+## Notes on the build
+
+The entire scenario — rota, availability, notifications, per-shift history — is
+one reducer. That's what keeps an action like *claim* honest: a rule check, then
+a state patch, with no route through the code where the toast congratulates you
+on a shift the grid didn't actually give you.
+
+Motion here is load-bearing rather than decorative. Claiming a shift or changing
+a filter reorders the columns, so cards animate from where they were to where
+they land — positions measured before the state change, replayed after — and you
+can keep your eye on the shift you were looking at instead of hunting for it
+again. Open shifts pulse their dashed border, which turns an under-covered week
+into something you notice rather than something you count. All of it collapses
+under `prefers-reduced-motion`.
+
+The page itself is static HTML; only the demo hydrates. Its styles are scoped so
+that a light, rounded product UI and this site's dark brutalist theme can share a
+page without bleeding into one another — the demo is a product, and it should
+look like one rather than like a page of my website.

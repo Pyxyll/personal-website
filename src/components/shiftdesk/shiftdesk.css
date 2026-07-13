@@ -1,0 +1,1089 @@
+/*
+ * ShiftDesk demo — self-contained visual identity.
+ *
+ * This is a fictional product UI, deliberately NOT styled with the site's dark
+ * brutalist tokens. Everything is scoped under `.sd` so it can't leak into the
+ * surrounding page, and the page chrome can't leak in either.
+ */
+@import "@fontsource/instrument-sans/latin-400.css";
+@import "@fontsource/instrument-sans/latin-500.css";
+@import "@fontsource/instrument-sans/latin-600.css";
+@import "@fontsource/instrument-sans/latin-700.css";
+
+.sd {
+  /* Surfaces + ink */
+  --sd-bg: oklch(0.975 0.004 160);
+  --sd-surface: #ffffff;
+  --sd-ink: oklch(0.28 0.02 200);
+  --sd-ink-2: oklch(0.35 0.02 200);
+  --sd-muted: oklch(0.55 0.02 200);
+  --sd-faint: oklch(0.62 0.015 200);
+  --sd-line: oklch(0.92 0.01 180);
+  --sd-line-2: oklch(0.93 0.008 180);
+  --sd-wash: oklch(0.945 0.008 180);
+
+  /* Accent (teal) + open-shift (amber) */
+  --sd-accent: oklch(0.5 0.09 195);
+  --sd-accent-strong: oklch(0.55 0.09 195);
+  --sd-accent-wash: oklch(0.965 0.01 195);
+  --sd-open: oklch(0.55 0.14 45);
+  --sd-open-line: oklch(0.82 0.06 60);
+  --sd-open-wash: oklch(0.985 0.012 75);
+
+  font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  background: var(--sd-bg);
+  color: var(--sd-ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.sd *,
+.sd *::before,
+.sd *::after {
+  box-sizing: border-box;
+}
+
+.sd button {
+  font-family: inherit;
+}
+
+/* ---------------------------------------------------------------- keyframes */
+/* Prefixed to avoid colliding with the site's own global keyframes. */
+@keyframes sd-toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes sd-cardPulse {
+  0% { box-shadow: 0 0 0 0 oklch(0.55 0.09 195 / 0.4); transform: scale(1); }
+  35% { transform: scale(1.03); }
+  100% { box-shadow: 0 0 0 12px oklch(0.55 0.09 195 / 0); transform: scale(1); }
+}
+@keyframes sd-slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sd-riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Two identical scene animations, alternated by `sceneEpoch` so that switching
+   modes re-triggers the entry animation even though the element persists. */
+@keyframes sd-sceneInA {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sd-sceneInB {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sd-growX {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes sd-growY {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes sd-bellRing {
+  0%, 12%, 100% { transform: rotate(0); }
+  2% { transform: rotate(14deg); }
+  4% { transform: rotate(-12deg); }
+  6% { transform: rotate(9deg); }
+  8% { transform: rotate(-6deg); }
+  10% { transform: rotate(3deg); }
+}
+@keyframes sd-gapPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.97); }
+}
+@keyframes sd-dashPulse {
+  0%, 100% { border-color: oklch(0.82 0.06 60); }
+  50% { border-color: oklch(0.7 0.11 55); }
+}
+@keyframes sd-popIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sd-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------- header */
+.sd-header {
+  background: var(--sd-surface);
+  border-bottom: 1px solid var(--sd-line);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  animation: sd-slideDown 0.5s cubic-bezier(0.22, 0.9, 0.26, 1) both;
+}
+
+.sd-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.sd-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--sd-accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  animation: sd-popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+}
+.sd-brand-name {
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.1;
+}
+.sd-brand-sub {
+  font-size: 11.5px;
+  color: var(--sd-muted);
+}
+.sd-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Avatar bubble — size + colour come from inline style. */
+.sd-avatar {
+  border-radius: 50%;
+  flex: none;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------- header controls + menus */
+.sd-userbtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid oklch(0.9 0.01 180);
+  background: var(--sd-surface);
+  border-radius: 999px;
+  padding: 5px 12px 5px 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--sd-ink-2);
+  cursor: pointer;
+  min-height: 36px;
+  transition: border-color 0.15s ease;
+}
+.sd-userbtn:hover {
+  border-color: oklch(0.75 0.03 195);
+}
+.sd-caret {
+  font-size: 9px;
+  color: var(--sd-muted);
+}
+
+.sd-bellbtn {
+  position: relative;
+  border: 1px solid oklch(0.9 0.01 180);
+  background: var(--sd-surface);
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease;
+}
+.sd-bellbtn:hover {
+  border-color: oklch(0.75 0.03 195);
+}
+.sd-bell {
+  display: inline-block;
+  transform-origin: top center;
+}
+.sd-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--sd-open);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  animation: sd-popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Click-outside catcher behind an open menu. */
+.sd-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+}
+.sd-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  background: var(--sd-surface);
+  border: 1px solid oklch(0.9 0.01 180);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px oklch(0.3 0.02 200 / 0.15);
+  padding: 6px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: sd-popIn 0.16s ease;
+}
+.sd-menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: oklch(0.58 0.02 200);
+  padding: 6px 10px 4px;
+}
+.sd-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: oklch(0.32 0.02 200);
+  cursor: pointer;
+  text-align: left;
+  min-height: 38px;
+}
+.sd-menu-item:hover {
+  background: oklch(0.965 0.008 195) !important;
+}
+.sd-menu-item-name {
+  flex: 1;
+}
+.sd-menu-item-role {
+  font-size: 11px;
+  color: oklch(0.6 0.02 200);
+}
+
+.sd-inbox {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  background: var(--sd-surface);
+  border: 1px solid oklch(0.9 0.01 180);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px oklch(0.3 0.02 200 / 0.15);
+  padding: 10px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: sd-popIn 0.16s ease;
+}
+.sd-inbox-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 2px 4px;
+}
+.sd-inbox-empty {
+  font-size: 12.5px;
+  color: oklch(0.6 0.02 200);
+  padding: 8px 4px;
+}
+.sd-notif {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  border-radius: 9px;
+  padding: 8px 10px;
+}
+.sd-notif-text {
+  font-size: 12.5px;
+  color: var(--sd-ink-2);
+  line-height: 1.35;
+}
+.sd-notif-when {
+  font-size: 10.5px;
+  color: var(--sd-faint);
+  margin-top: 2px;
+}
+.sd-dot {
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Mode toggle (Staff / Manager / Stats) */
+.sd-modes {
+  display: flex;
+  background: var(--sd-wash);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.sd-mode {
+  border: none;
+  cursor: pointer;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.18s ease;
+  min-height: 32px;
+}
+.sd-mode:active {
+  transform: scale(0.93);
+}
+
+.sd-reset {
+  border: 1px solid oklch(0.9 0.01 180);
+  background: var(--sd-surface);
+  color: oklch(0.5 0.02 200);
+  border-radius: 9px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 36px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.sd-reset:hover {
+  border-color: oklch(0.75 0.03 195);
+  color: oklch(0.35 0.03 195);
+}
+
+/* --------------------------------------------------------------------- main */
+.sd-main {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 18px;
+  flex: 1;
+}
+.sd-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.sd-lede {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  color: var(--sd-muted);
+}
+.sd-footnote {
+  margin: 24px 4px 8px;
+  font-size: 12px;
+  color: var(--sd-faint);
+}
+
+/* Generic white panel */
+.sd-card {
+  background: var(--sd-surface);
+  border: 1px solid var(--sd-line);
+  border-radius: 14px;
+}
+.sd-card-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.sd-card-sub {
+  font-size: 12px;
+  color: var(--sd-muted);
+}
+
+/* --------------------------------------------------------------------- stats */
+.sd-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.sd-track {
+  border-radius: 999px;
+  background: var(--sd-wash);
+  overflow: hidden;
+}
+.sd-track-fill {
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left;
+  transition: width 0.4s ease;
+}
+.sd-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--sd-muted);
+}
+.sd-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sd-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+.sd-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  height: 150px;
+  padding: 0 6px;
+}
+.sd-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.sd-bar {
+  width: 100%;
+  max-width: 64px;
+  border-radius: 8px 8px 3px 3px;
+  transform-origin: bottom;
+  transition: height 0.4s ease;
+  animation: sd-growY 0.7s cubic-bezier(0.22, 0.9, 0.26, 1) 0.25s both;
+}
+
+/* ------------------------------------------------------------- week nav bar */
+.sd-weekbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.sd-navbtn {
+  border: 1px solid oklch(0.9 0.01 180);
+  background: var(--sd-surface);
+  color: oklch(0.45 0.02 200);
+  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+}
+.sd-weeklabel {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+.sd-readonly {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: oklch(0.5 0.02 200);
+  background: oklch(0.94 0.008 180);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.sd-subheading {
+  margin: 6px 0 0 42px;
+  font-size: 13.5px;
+  color: var(--sd-muted);
+}
+.sd-mystrip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--sd-surface);
+  border: 1px solid var(--sd-line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  animation: sd-riseIn 0.45s cubic-bezier(0.22, 0.9, 0.26, 1) 0.1s both;
+}
+.sd-kpis {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sd-kpi {
+  background: var(--sd-surface);
+  border: 1px solid var(--sd-line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 74px;
+}
+.sd-kpi-label {
+  font-size: 12px;
+  color: var(--sd-muted);
+}
+.sd-kpi-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- filter bar */
+.sd-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  animation: sd-riseIn 0.45s cubic-bezier(0.22, 0.9, 0.26, 1) 0.15s both;
+}
+.sd-filters-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sd-muted);
+  margin-right: 2px;
+}
+.sd-chip {
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sd-chip:active {
+  transform: scale(0.93);
+}
+.sd-divider {
+  width: 1px;
+  height: 20px;
+  background: oklch(0.9 0.01 180);
+  margin: 0 4px;
+}
+
+/* Mobile day tabs */
+.sd-daytabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  animation: sd-riseIn 0.45s cubic-bezier(0.22, 0.9, 0.26, 1) 0.18s both;
+}
+.sd-daytab {
+  flex: 1;
+  min-width: 48px;
+  border-radius: 10px;
+  padding: 7px 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s ease;
+  min-height: 46px;
+}
+
+/* -------------------------------------------------------------- week calendar */
+.sd-week {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.sd-day {
+  background: var(--sd-surface);
+  border: 1px solid var(--sd-line);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+}
+.sd-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px 0;
+}
+.sd-day-name {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.sd-day-date {
+  font-size: 12.5px;
+  color: oklch(0.6 0.02 200);
+}
+.sd-gapflag {
+  font-size: 11px;
+  font-weight: 600;
+  color: oklch(0.5 0.14 45);
+  background: oklch(0.96 0.03 60);
+  border: 1px solid oklch(0.88 0.06 60);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  animation: sd-gapPulse 2.6s ease-in-out infinite;
+}
+.sd-offbtn {
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.sd-coverage {
+  height: 5px;
+  border-radius: 999px;
+  background: oklch(0.93 0.02 60);
+  overflow: hidden;
+}
+.sd-coverage-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sd-accent-strong);
+  transition: width 0.3s ease;
+}
+.sd-coverage-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3px;
+}
+.sd-coverage-label {
+  font-size: 10.5px;
+  color: oklch(0.6 0.02 200);
+}
+.sd-offlist {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--sd-muted);
+}
+.sd-day-empty {
+  font-size: 12.5px;
+  color: oklch(0.65 0.015 200);
+  text-align: center;
+  padding: 18px 6px;
+  border: 1.5px dashed var(--sd-line-2);
+  border-radius: 11px;
+  animation: sd-fadeIn 0.3s ease;
+}
+
+/* ---------------------------------------------------------------- shift card */
+.sd-shift {
+  border-radius: 11px;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.25s ease, border-color 0.25s ease,
+    transform 0.18s ease, box-shadow 0.18s ease;
+}
+.sd-shift:hover {
+  border-color: oklch(0.72 0.07 195);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px oklch(0.3 0.02 200 / 0.12);
+}
+.sd-shift-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.sd-shift-role {
+  font-size: 13px;
+  font-weight: 650;
+}
+.sd-shift-time {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sd-muted);
+  background: oklch(0.955 0.006 180);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.sd-shift-note {
+  font-size: 11px;
+  color: var(--sd-accent-strong);
+  background: var(--sd-accent-wash);
+  border-radius: 6px;
+  padding: 2px 7px;
+  align-self: flex-start;
+}
+.sd-shift-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+}
+.sd-shift-who {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.sd-shift-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sd-shift-action {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: none;
+  min-height: 30px;
+  transition: transform 0.12s ease;
+}
+.sd-shift-action:active {
+  transform: scale(0.95);
+}
+
+/* Manager assign picker, nested inside a shift card */
+.sd-picker {
+  border-top: 1px solid var(--sd-line-2);
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sd-picker-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sd-muted);
+}
+.sd-candidate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--sd-line);
+  background: var(--sd-surface);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sd-ink-2);
+  cursor: pointer;
+  text-align: left;
+  min-height: 32px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.sd-candidate:hover {
+  border-color: oklch(0.72 0.07 195);
+  background: oklch(0.98 0.008 195);
+}
+.sd-candidate-name {
+  flex: 1;
+}
+.sd-candidate-load {
+  font-size: 11px;
+  color: oklch(0.6 0.02 200);
+}
+.sd-picker-empty {
+  font-size: 11.5px;
+  color: oklch(0.6 0.02 200);
+  font-style: italic;
+}
+.sd-picker-cancel {
+  border: none;
+  background: transparent;
+  color: var(--sd-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  padding: 3px 2px;
+}
+
+/* ----------------------------------------------------- manager: add a shift */
+.sd-addbtn {
+  border: 1.5px dashed oklch(0.88 0.02 195);
+  background: transparent;
+  color: var(--sd-accent);
+  border-radius: 11px;
+  padding: 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 38px;
+}
+.sd-addbtn:hover {
+  background: oklch(0.975 0.008 195);
+  border-color: oklch(0.72 0.07 195);
+}
+.sd-addform {
+  border: 1.5px solid oklch(0.88 0.02 195);
+  background: oklch(0.985 0.006 195);
+  border-radius: 11px;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: sd-popIn 0.18s ease;
+}
+.sd-addform-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: oklch(0.4 0.04 195);
+}
+.sd-select {
+  border: 1px solid oklch(0.9 0.01 180);
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  font-family: inherit;
+  background: var(--sd-surface);
+  color: oklch(0.32 0.02 200);
+  min-height: 34px;
+}
+.sd-submit {
+  flex: 1;
+  border: none;
+  background: var(--sd-accent);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+}
+.sd-cancel {
+  border: 1px solid oklch(0.9 0.01 180);
+  background: var(--sd-surface);
+  color: oklch(0.5 0.02 200);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+}
+
+/* ------------------------------------------------------------- lower panels */
+.sd-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+  align-items: start;
+}
+.sd-panel {
+  background: var(--sd-surface);
+  border: 1px solid var(--sd-line);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.sd-myshift {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid oklch(0.94 0.008 180);
+  border-radius: 10px;
+  padding: 8px 11px;
+}
+.sd-myshift-day {
+  font-size: 12px;
+  font-weight: 700;
+  color: oklch(0.45 0.05 195);
+  background: var(--sd-accent-wash);
+  border-radius: 7px;
+  padding: 4px 8px;
+  min-width: 34px;
+  text-align: center;
+}
+.sd-empty-note {
+  font-size: 13px;
+  color: oklch(0.6 0.02 200);
+  padding: 10px 0;
+}
+.sd-activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12.5px;
+  color: oklch(0.4 0.02 200);
+}
+.sd-activity-when {
+  font-size: 11px;
+  color: var(--sd-faint);
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------- modal */
+.sd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.25 0.02 200 / 0.35);
+  backdrop-filter: blur(3px);
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  animation: sd-fadeIn 0.18s ease;
+}
+.sd-modal {
+  background: var(--sd-surface);
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 20px 50px oklch(0.25 0.02 200 / 0.3);
+  animation: sd-popIn 0.2s ease;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: left;
+}
+.sd-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.sd-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.sd-modal-sub {
+  font-size: 13px;
+  color: var(--sd-muted);
+  margin-top: 2px;
+}
+.sd-modal-close {
+  border: none;
+  background: oklch(0.95 0.008 180);
+  color: oklch(0.45 0.02 200);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  cursor: pointer;
+  flex: none;
+}
+.sd-modal-note {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--sd-accent-strong);
+  background: var(--sd-accent-wash);
+  border-radius: 7px;
+  padding: 3px 9px;
+  margin: 6px 0 2px;
+}
+.sd-modal-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 11px;
+  padding: 10px 12px;
+  margin: 12px 0;
+}
+.sd-modal-section {
+  font-size: 12px;
+  font-weight: 700;
+  color: oklch(0.5 0.02 200);
+  margin-bottom: 7px;
+}
+.sd-hist {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 5px 0;
+}
+.sd-hist-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+}
+.sd-hist-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: oklch(0.75 0.04 195);
+  flex: none;
+  margin-top: 5px;
+}
+.sd-hist-line {
+  width: 1.5px;
+  flex: 1;
+  background: var(--sd-line-2);
+  margin-top: 3px;
+}
+.sd-hist-text {
+  font-size: 12.5px;
+  color: oklch(0.38 0.02 200);
+  line-height: 1.4;
+}
+.sd-hist-when {
+  font-size: 10.5px;
+  color: var(--sd-faint);
+  margin-top: 1px;
+}
+
+/* -------------------------------------------------------------------- toast */
+.sd-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px oklch(0.3 0.02 200 / 0.25);
+  animation: sd-toastIn 0.22s ease;
+  z-index: 50;
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Visible keyboard focus — the source design relied on hover alone. */
+.sd :focus-visible {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd *,
+  .sd *::before,
+  .sd *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

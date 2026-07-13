@@ -12,7 +12,7 @@ const entries = (await getCollection("work")).sort(
 
 // Group by category, preserving the date sort within each. Known categories
 // render in this order; anything new falls in after, alphabetically.
-const CATEGORY_ORDER = ["COSMIC", "Web apps", "Sites", "Homelab"];
+const CATEGORY_ORDER = ["Web apps", "Sites", "COSMIC", "Homelab"];
 const groups = entries.reduce<Record<string, typeof entries>>((acc, e) => {
   (acc[e.data.category] ??= []).push(e);
   return acc;

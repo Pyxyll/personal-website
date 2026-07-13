@@ -1,0 +1,152 @@
+---
+/**
+ * Shell for a live demo.
+ *
+ * Deliberately has no site chrome: the demo is the page, so it reads as a
+ * product you've opened rather than as a page of this website. The only thing
+ * added is a small floating pill linking back to the site and to the write-up.
+ */
+import "../styles/global.css";
+import Head from "../components/Head.astro";
+import { site } from "../lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  /** Where "Case study" points — the write-up this demo belongs to. */
+  caseStudyHref: string;
+  /** Page background, so overscroll and the edges match the demo, not the site. */
+  background: string;
+}
+
+const { caseStudyHref, background, ...head } = Astro.props;
+---
+
+<!doctype html>
+<html lang={site.language}>
+  <head>
+    <Head {...head} colorScheme="light" themeColor={background}>
+      <slot name="head" />
+    </Head>
+    <style define:vars={{ background }}>
+      /* Override the site's dark html background — the demo owns this page. */
+      html,
+      body {
+        background: var(--background);
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#demo" class="skip">Skip to the demo</a>
+
+    <main id="demo" tabindex="-1">
+      <slot />
+    </main>
+
+    <nav class="pill" aria-label="Back to site">
+      <a href="/" class="home">
+        <span class="arrow" aria-hidden="true">←</span>
+        <span>Dylan Collins</span>
+      </a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href={caseStudyHref}>Case study</a>
+    </nav>
+
+    <style>
+      /* Scoped to this layout, and deliberately not Tailwind — it must not
+         inherit anything from the demo's own visual world, or leak into it. */
+      .pill {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(10, 10, 10, 0.88);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .pill a {
+        color: #a1a1aa;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        white-space: nowrap;
+      }
+      .pill a:hover {
+        color: #fafafa;
+      }
+      .home {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .home:hover .arrow {
+        transform: translateX(-3px);
+        color: var(--color-accent);
+      }
+      .arrow {
+        display: inline-block;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+      .sep {
+        width: 1px;
+        height: 13px;
+        background: rgba(255, 255, 255, 0.18);
+      }
+      .pill a:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 3px;
+        border-radius: 2px;
+      }
+
+      /* Keep the pill clear of whatever the demo puts at the foot of its page. */
+      main :global(> *) {
+        padding-bottom: 64px;
+      }
+
+      .skip {
+        position: absolute;
+        left: -9999px;
+      }
+      .skip:focus {
+        left: 20px;
+        top: 20px;
+        position: fixed;
+        z-index: 300;
+        background: #0a0a0a;
+        color: #fafafa;
+        border: 1px solid var(--color-accent);
+        padding: 10px 16px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      @media (max-width: 520px) {
+        .pill {
+          right: 12px;
+          bottom: 12px;
+          padding: 7px 12px;
+          font-size: 10px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .pill a,
+        .arrow {
+          transition: none;
+        }
+      }
+    </style>
+  </body>
+</html>

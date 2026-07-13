@@ -1,0 +1,78 @@
+---
+title: "Pagerr"
+summary: "An in-store book locator: search a title, the shelf lights up on the floor plan, and a walking route is drawn from the checkout. Rebuilt from client work as an interactive demo."
+category: "Web apps"
+role: "Design + build"
+publishedAt: 2026-07-13
+stack: ["Astro", "React", "TypeScript", "SVG"]
+---
+
+<p>
+  <a href="/work/pagerr/demo/">Try the live demo →</a>
+</p>
+
+## What it is
+
+A customer asks where a book is. The honest answer is usually a pointed finger
+and "Fiction, somewhere on the left" — which is fine until the shop is busy, or
+the person asking is holding a list.
+
+Pagerr answers the question spatially. You type a title or an author, and the
+shelf it lives on lights up on a floor plan of the store, with a dotted route
+drawn from the checkout to the shelf. Add a few books and it stops being a lookup
+and becomes a trip: the stops get ordered into a sensible walk, numbered on the
+map, and the route redraws to take them all in.
+
+This is a rebuild of client work, with a seeded catalogue standing in for the real
+one. The version that shipped also talked to barcode scanners and store hardware,
+which is not something a portfolio page can honestly show you.
+
+## The part that's actually hard
+
+Drawing a line from A to B is trivial and useless: it goes straight through the
+bookcases. A route is only worth showing if it's a route a person could walk.
+
+So the floor plan isn't decoration, it's the data structure. Shelves have real
+positions, and the gaps between them are modelled as corridors — four running
+across the shop, four running up it. Every shelf knows which corridor point you'd
+stand at to reach it. A leg of a route is then a small problem: get from one
+corridor position to another, using whichever crossing corridor costs least, and
+turn the corners.
+
+That constraint is what makes the rest fall out. Once a route has a real length,
+ordering a multi-book trip is just repeatedly walking to the nearest unvisited
+stop. It's a greedy nearest-neighbour tour, not an optimal one — for a dozen
+stops in a grid of aisles it gives you the order you'd have picked anyway, and it
+runs instantly, which matters more than the last few metres of savings.
+
+## Peeking inside a shelf
+
+Knowing the shelf gets you within about a metre. The last metre is the annoying
+one, so clicking any shelf opens it: a bookcase of spines, with the catalogued
+titles darker than the filler and the one you searched for highlighted and
+pulsing, captioned with the row it's on.
+
+The filler spines are generated, not authored — a shelf holding six real books
+would look absurd, and hand-writing five hundred fake ones is a bad use of a
+life. They come from a PRNG seeded by the shelf's own id, so the arrangement is
+stable: the same shelf looks the same every time you open it, rather than
+reshuffling itself under you on each render.
+
+## Notes on the build
+
+The routing lives in its own module of pure functions over coordinates, which is
+the main reason the interesting logic is legible — and checkable — at all.
+Geometry tangled into a component is geometry nobody will touch again. Keeping it
+separable also let me assert the only thing that really matters: sample a few
+hundred points along the rendered path and confirm that none of them land inside
+a bookcase.
+
+The route animation is two effects layered. The dashes march along the path
+forever, which reads as direction of travel, while a mask wipes along the same
+path to reveal it the first time. The reveal has to be a mask rather than a dash
+offset, because you can't animate one `stroke-dashoffset` in two directions for
+two different reasons.
+
+The shop's warm paper and terracotta don't leak into this site's dark theme, and
+the dark theme doesn't leak into the shop — the demo's styles are scoped, so the
+two can sit on one page and each keep its own world.

@@ -1,0 +1,34 @@
+---
+import Demo from "../../../layouts/Demo.astro";
+import Schema from "../../../components/Schema.astro";
+import Pagerr from "../../../components/pagerr/Pagerr";
+import { breadcrumbSchema } from "../../../lib/schema";
+import { site } from "../../../lib/site";
+
+const pageUrl = new URL("/work/pagerr/demo/", site.url).toString();
+const pageTitle = "Pagerr · Live demo · Dylan Collins";
+const pageDesc =
+  "An interactive in-store book locator: search a title and the shelf lights up on the floor plan, with a walking route from the checkout.";
+---
+
+<Demo
+  title={pageTitle}
+  description={pageDesc}
+  ogImage="/og/work/pagerr.png"
+  caseStudyHref="/work/pagerr/"
+  background="#F0EEE6"
+>
+  <Schema
+    slot="head"
+    data={[
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Work", url: site.url + "/work/" },
+        { name: "Pagerr", url: site.url + "/work/pagerr/" },
+        { name: "Live demo", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <Pagerr client:load />
+</Demo>

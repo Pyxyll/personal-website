@@ -1,0 +1,34 @@
+---
+import Demo from "../../../layouts/Demo.astro";
+import Schema from "../../../components/Schema.astro";
+import ShiftDesk from "../../../components/shiftdesk/ShiftDesk";
+import { breadcrumbSchema } from "../../../lib/schema";
+import { site } from "../../../lib/site";
+
+const pageUrl = new URL("/work/shiftdesk/demo/", site.url).toString();
+const pageTitle = "ShiftDesk · Live demo · Dylan Collins";
+const pageDesc =
+  "An interactive staff-scheduling demo: claim and drop shifts as a nurse, or assign cover and spot gaps as the practice manager.";
+---
+
+<Demo
+  title={pageTitle}
+  description={pageDesc}
+  ogImage="/og/work/shiftdesk.png"
+  caseStudyHref="/work/shiftdesk/"
+  background="oklch(0.975 0.004 160)"
+>
+  <Schema
+    slot="head"
+    data={[
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Work", url: site.url + "/work/" },
+        { name: "ShiftDesk", url: site.url + "/work/shiftdesk/" },
+        { name: "Live demo", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <ShiftDesk client:load />
+</Demo>
