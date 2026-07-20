@@ -61,7 +61,7 @@ const soleCopy = p.stock === 1;
 
           <div class="ncc-stock">
             <span aria-hidden="true" class="ncc-stock-dot"></span>
-            {soleCopy ? "One in stock — once it's gone, it's gone" : `${p.stock} in stock`}
+            {soleCopy ? "One in stock. Once it's gone, it's gone" : `${p.stock} in stock`}
           </div>
 
           <form class="ncc-buy" data-buy>
@@ -84,7 +84,7 @@ const soleCopy = p.stock === 1;
 
           <ul class="ncc-product-facts">
             <li><span>Collection</span> {shop.venue}, {shop.street}, {shop.town}</li>
-            <li><span>Postage</span> Quoted per item — ask before you reserve</li>
+            <li><span>Postage</span> Quoted per item, ask before you reserve</li>
             <li><span>Condition</span> Second-hand and sold as described</li>
           </ul>
         </div>
