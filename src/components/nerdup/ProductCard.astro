@@ -1,0 +1,27 @@
+---
+/** Product tile, used on the shop grid, the "just in" wall and related items. */
+import { euro, type Product } from "./data";
+
+interface Props {
+  product: Product;
+  /** Show the arrival date instead of the condition line. */
+  showArrival?: boolean;
+  eager?: boolean;
+}
+
+const { product: p, showArrival = false, eager = false } = Astro.props;
+const soleCopy = p.stock === 1;
+---
+
+<a class="ncc-tile" href={`/demos/nerd-up-collective/shop/${p.slug}/`} data-ncc-reveal>
+  <div class="ncc-tileimg">
+    <img src={p.img} alt={p.alt} loading={eager ? "eager" : "lazy"} decoding="async" />
+    <span aria-hidden="true" class="ncc-tiletag">{p.meta.split(" · ")[0]}</span>
+    {soleCopy && <span class="ncc-tileone">One only</span>}
+  </div>
+  <div class="ncc-tilemeta">
+    <span class="ncc-tilename">{p.name}</span>
+    <span class="ncc-tileprice">{euro(p.price)}</span>
+  </div>
+  <div class="ncc-tiledate">{showArrival ? `Just in · ${p.justIn}` : p.condition}</div>
+</a>

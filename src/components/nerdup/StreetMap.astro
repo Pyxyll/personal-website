@@ -1,0 +1,107 @@
+---
+/**
+ * Stylised street map of Wexford town centre, drawn rather than embedded.
+ *
+ * A Google/OSM iframe would drag its own visual language onto a page whose
+ * whole identity is flat cream-and-amber geometry, so this is hand-drawn SVG in
+ * the page's palette with the triangle motif as the pin.
+ *
+ * Schematic, not survey-accurate: the streets are in their real relative
+ * positions (North Main Street running north–south, the Bullring off its east
+ * side, the quays and the Slaney further east) but nothing is to scale. It's
+ * an orientation aid — the "Get directions" button is what actually navigates.
+ */
+---
+
+<div class="map">
+  <svg viewBox="0 0 600 480" role="img" aria-label="Stylised map of Wexford town centre showing Eclectic Avenue on North Main Street, near the Bullring">
+    <rect width="600" height="480" fill="#15140f"></rect>
+
+    {/* River Slaney, east edge */}
+    <path d="M508 -20 L552 -20 L600 190 L600 500 L470 500 L486 300 Z" fill="rgba(247,243,234,0.05)"></path>
+    <path d="M508 -20 L486 300 L470 500" fill="none" stroke="rgba(247,243,234,0.10)" stroke-width="2"></path>
+
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      {/* Secondary streets */}
+      <g stroke="rgba(247,243,234,0.09)" stroke-width="9">
+        <path d="M232 96 L120 60"></path>
+        <path d="M232 186 L452 205"></path>
+        <path d="M232 366 L444 372"></path>
+        <path d="M120 60 L96 240 L128 420"></path>
+        <path d="M232 276 L128 300"></path>
+      </g>
+      {/* The quays, running with the river */}
+      <path d="M470 40 L452 205 L444 372 L436 452" stroke="rgba(247,243,234,0.12)" stroke-width="11"></path>
+      {/* North & South Main Street — the spine */}
+      <path d="M240 20 L232 276 L228 460" stroke="rgba(247,243,234,0.20)" stroke-width="15"></path>
+      {/* Common Quay Street, Main Street to the water */}
+      <path d="M232 276 L458 288" stroke="rgba(247,243,234,0.12)" stroke-width="10"></path>
+    </g>
+
+    {/* The Bullring, the open square off Main Street's east side */}
+    <rect x="248" y="248" width="58" height="46" fill="rgba(247,243,234,0.07)"></rect>
+    <text x="277" y="276" class="lbl sm" text-anchor="middle">BULLRING</text>
+
+    {/* Street labels */}
+    <text x="252" y="150" class="lbl">NORTH MAIN ST</text>
+    <text x="240" y="430" class="lbl">SOUTH MAIN ST</text>
+    <text x="470" y="120" class="lbl">THE QUAYS</text>
+    <text x="536" y="392" class="lbl">RIVER SLANEY</text>
+    <text x="248" y="200" class="lbl sm">ANNE ST</text>
+    <text x="300" y="308" class="lbl sm">COMMON QUAY ST</text>
+
+    {/* Pin: Eclectic Avenue, on North Main Street beside the Bullring */}
+    <g>
+      <line x1="232" y1="238" x2="232" y2="214" stroke="#e8b23a" stroke-width="2"></line>
+      <path d="M232 214 L244 236 L220 236 Z" fill="#e8b23a"></path>
+      <rect x="150" y="182" width="164" height="26" fill="#e8b23a"></rect>
+      <text x="232" y="199" class="pin" text-anchor="middle">ECLECTIC AVENUE</text>
+    </g>
+  </svg>
+
+  <span class="note">Stylised — not to scale</span>
+</div>
+
+<style>
+  .map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* The container is taller than the artwork on narrow screens; cover keeps
+       the pin near the middle rather than letterboxing the map. */
+    object-fit: cover;
+  }
+  .lbl {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    fill: #8a8272;
+  }
+  .lbl.sm {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    fill: #6f6a5e;
+  }
+  .pin {
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    fill: #15140f;
+  }
+  .note {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #6f6a5e;
+  }
+</style>

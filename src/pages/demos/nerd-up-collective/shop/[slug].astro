@@ -1,0 +1,112 @@
+---
+/**
+ * Product page for the Nerd-Up Collective concept.
+ *
+ * The basket is a mock — it moves a counter and shows a confirmation, nothing
+ * is sent anywhere. That's deliberate for a pitch: it demonstrates the shape of
+ * selling online without implying a payment integration exists.
+ */
+import Shell from "../../../../components/nerdup/Shell.astro";
+import ProductCard from "../../../../components/nerdup/ProductCard.astro";
+import { products, euro, categoryName, shop } from "../../../../components/nerdup/data";
+
+export function getStaticPaths() {
+  return products.map((p) => ({ params: { slug: p.slug }, props: { product: p } }));
+}
+
+const { product: p } = Astro.props;
+
+// Same category first, then anything else, so a thin category still fills out.
+const related = [
+  ...products.filter((x) => x.slug !== p.slug && x.category === p.category),
+  ...products.filter((x) => x.slug !== p.slug && x.category !== p.category),
+].slice(0, 4);
+
+const pageTitle = `${p.name} · ${shop.name}`;
+const pageDesc = `${p.blurb} ${p.condition}. ${euro(p.price)} at Nerd-Up Collective, Wexford.`;
+const soleCopy = p.stock === 1;
+---
+
+<Shell title={pageTitle} description={pageDesc} ogImage={p.img} current="shop">
+  <section class="ncc-product">
+    <div class="ncc-product-inner">
+      <nav class="ncc-crumbs" aria-label="Breadcrumb">
+        <a href="/demos/nerd-up-collective/shop/">Shop</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/demos/nerd-up-collective/shop/?c=${p.category}`}>{categoryName(p.category)}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{p.name}</span>
+      </nav>
+
+      <div class="ncc-product-grid">
+        <div class="ncc-product-img">
+          <img src={p.img} alt={p.alt} loading="eager" decoding="async" />
+          {soleCopy && <span class="ncc-tileone ncc-tileone-lg">One only</span>}
+        </div>
+
+        <div class="ncc-product-body">
+          <div class="ncc-kicker ncc-kicker-left" style="margin-bottom:16px;">
+            <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+            {categoryName(p.category).toUpperCase()}
+          </div>
+          <h1 class="ncc-product-title">{p.name}</h1>
+          <p class="ncc-product-meta">{p.meta}</p>
+
+          <div class="ncc-product-price">
+            <span class="ncc-price-big">{euro(p.price)}</span>
+            <span class="ncc-product-cond">{p.condition}</span>
+          </div>
+
+          <p class="ncc-product-detail">{p.detail}</p>
+
+          <div class="ncc-stock">
+            <span aria-hidden="true" class="ncc-stock-dot"></span>
+            {soleCopy ? "One in stock — once it's gone, it's gone" : `${p.stock} in stock`}
+          </div>
+
+          <form class="ncc-buy" data-buy>
+            <button type="submit" class="ncc-btn ncc-btn-dark ncc-btn-lg ncc-buy-btn">
+              Reserve this
+              <span aria-hidden="true" class="ncc-arrow"></span>
+            </button>
+            <a href={shop.facebook} target="_blank" rel="noopener" class="ncc-btn ncc-btn-outline ncc-btn-lg">
+              Ask about it
+            </a>
+          </form>
+
+          <div class="ncc-buy-done" data-buy-done hidden aria-live="polite">
+            <div class="ncc-buy-done-title">Held for you</div>
+            <p>
+              We'd hold this behind the counter for 48 hours and message you to arrange collection
+              or postage. Nothing is charged online.
+            </p>
+          </div>
+
+          <ul class="ncc-product-facts">
+            <li><span>Collection</span> {shop.venue}, {shop.street}, {shop.town}</li>
+            <li><span>Postage</span> Quoted per item — ask before you reserve</li>
+            <li><span>Condition</span> Second-hand and sold as described</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ncc-related">
+        <h2 class="ncc-related-head">More from the shelves</h2>
+        <div class="ncc-shop-grid">
+          {related.map((r) => <ProductCard product={r} />)}
+        </div>
+      </div>
+    </div>
+  </section>
+</Shell>
+
+<script>
+  // Mock reservation: swaps to a confirmation. Nothing leaves the page.
+  const form = document.querySelector<HTMLFormElement>("[data-buy]");
+  const done = document.querySelector<HTMLElement>("[data-buy-done]");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    form.hidden = true;
+    if (done) done.hidden = false;
+  });
+</script>

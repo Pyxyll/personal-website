@@ -24,7 +24,11 @@ export default defineConfig({
       changefreq: "monthly",
       priority: 0.7,
       lastmod: new Date(),
-      filter: (page) => !page.includes("/og/") && !page.includes("/og.png"),
+      // /demos/ holds noindexed spec concepts pitched to prospects — listing
+      // them here would contradict their robots tag and put them in front of
+      // the businesses they're about.
+      filter: (page) =>
+        !page.includes("/og/") && !page.includes("/og.png") && !page.includes("/demos/"),
       serialize: (item) => {
         // Bump home + writing list priority; lower /contact + /now slightly
         if (item.url === "https://dylancollins.me/") item.priority = 1.0;

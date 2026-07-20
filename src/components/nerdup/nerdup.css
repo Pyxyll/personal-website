@@ -1,0 +1,1262 @@
+/*
+ * Nerd-Up Collective concept — shared stylesheet.
+ *
+ * Namespaced under .ncc throughout: the demo owns its visual world and must
+ * neither inherit from nor leak into the site's global stylesheet.
+ */
+
+/* Namespaced under .ncc: the demo owns its visual world and must neither
+   inherit from nor leak into the site's global stylesheet. */
+.ncc {
+  --accent: #e8b23a;
+  position: relative;
+  overflow-x: clip;
+  background: #f7f3ea;
+  color: #111111;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.ncc *,
+.ncc *::before,
+.ncc *::after {
+  box-sizing: border-box;
+}
+/* Link colours are wrapped in :where() so they carry zero specificity.
+   An element selector like `.ncc a` (0,1,1) otherwise outranks every
+   single-class button rule (0,1,0) and forces ink-on-ink — invisible on the
+   dark buttons. At zero specificity any button class wins by default, and
+   new ones will too without needing to be listed here. */
+:where(.ncc a) {
+  color: #111111;
+}
+.ncc a {
+  text-decoration: none;
+}
+:where(.ncc a:hover) {
+  color: var(--accent);
+}
+.ncc ::selection {
+  background: var(--accent);
+  color: #111111;
+}
+.ncc *:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+html:has(.ncc) {
+  scroll-behavior: smooth;
+}
+
+/* --- the triangle motif, used at every scale --- */
+.ncc-tri {
+  display: inline-block;
+  flex: none;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.ncc-tri-sm {
+  width: 12px;
+  height: 11px;
+}
+.ncc-ghost-tri {
+  position: absolute;
+  pointer-events: none;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* --- shared type --- */
+.ncc-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.26em;
+  color: #7a756b;
+  margin-bottom: 40px;
+}
+.ncc-kicker-left {
+  letter-spacing: 0.24em;
+  margin-bottom: 22px;
+}
+.ncc-kicker-onDark {
+  color: #b8b0a0;
+}
+.ncc-h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(44px, 6.6vw, 92px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0 auto 34px;
+  max-width: 14ch;
+  text-wrap: balance;
+}
+.ncc-h1-em {
+  font-style: italic;
+  font-weight: 500;
+}
+.ncc-h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(36px, 5vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.ncc-h2-sm {
+  font-size: clamp(32px, 4.6vw, 58px);
+  margin-bottom: 28px;
+}
+.ncc-h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+/* --- buttons --- */
+.ncc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.ncc-btn-lg {
+  font-size: 15px;
+  padding: 15px 28px;
+}
+.ncc-btn-dark {
+  background: #111111;
+  color: #f7f3ea;
+}
+.ncc-btn-dark:hover {
+  background: var(--accent);
+  color: #111111;
+}
+.ncc-btn-accent {
+  background: var(--accent);
+  color: #111111;
+}
+.ncc-btn-accent:hover {
+  background: #f7f3ea;
+  color: #111111;
+}
+.ncc-btn-outline {
+  /* Solid rather than transparent: in the hero it sits over the photograph,
+     and a see-through button reads as a hole punched in the image. */
+  background: #f7f3ea;
+  border: 1.5px solid #111111;
+  color: #111111;
+}
+.ncc-btn-outline:hover {
+  background: #111111;
+  color: #f7f3ea;
+}
+.ncc-btn-outline-light {
+  border: 1.5px solid rgba(247, 243, 234, 0.35);
+  color: #f7f3ea;
+}
+.ncc-btn-outline-light:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ncc-arrow {
+  display: inline-block;
+  width: 11px;
+  height: 10px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* --- nav --- */
+.ncc-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(247, 243, 234, 0.88);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-nav {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.ncc-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ncc-wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.ncc-wordmark-main {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+.ncc-wordmark-sub {
+  font-family: "Space Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.42em;
+  color: #7a756b;
+  margin-top: 3px;
+}
+.ncc-desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+.ncc-navlink {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.ncc-mobile-btn {
+  display: none;
+  background: none;
+  border: 1px solid rgba(17, 17, 17, 0.2);
+  padding: 9px 11px;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+.ncc-mobile-btn span {
+  width: 18px;
+  height: 2px;
+  background: #111;
+}
+.ncc-menu {
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+  padding: 12px 40px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ncc-menu[hidden] {
+  display: none;
+}
+.ncc-menulink {
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+}
+.ncc-menulink-last {
+  border-bottom: 0;
+}
+.ncc-menucta {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px;
+  background: #111111;
+  color: #f7f3ea;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.ncc-menucta:hover {
+  background: var(--accent);
+  color: #111111;
+}
+
+/* --- hero --- */
+.ncc-hero {
+  position: relative;
+  overflow: hidden;
+}
+/* The triangle mark at full-bleed, filled with the shop. Bigger than the flat
+   glyph it replaces, because it now has to carry an image rather than just
+   tint the background. */
+.ncc-hero-glyph {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -44%);
+  width: min(940px, 96vw);
+  height: min(840px, 88vw);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  overflow: hidden;
+  pointer-events: none;
+}
+.ncc-hero-glyph img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Fades out toward the apex so the headline never sits on busy pixels; the
+     wide base is where the shop actually shows. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 20%, #000 76%);
+  mask-image: linear-gradient(to bottom, transparent 20%, #000 76%);
+  filter: grayscale(0.55) contrast(1.04);
+  opacity: 0.5;
+}
+/* Amber wash over the photo, so the mark still reads as the brand colour
+   rather than as a photo that happens to be triangular. */
+.ncc-hero-glyph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0.14;
+}
+.ncc-hero-inner {
+  position: relative;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 132px 40px 120px;
+  text-align: center;
+}
+.ncc-hero-lede {
+  font-size: clamp(17px, 1.9vw, 21px);
+  line-height: 1.55;
+  color: #3a382f;
+  max-width: 560px;
+  margin: 0 auto 42px;
+  text-wrap: pretty;
+}
+.ncc-hero-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
+/* --- just in --- */
+.ncc-justin {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-ghost-justin {
+  left: -150px;
+  bottom: -170px;
+  width: 520px;
+  height: 456px;
+  border: 1.5px solid rgba(17, 17, 17, 0.05);
+}
+.ncc-justin-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 92px 40px 100px;
+}
+.ncc-hd-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px 40px;
+  align-items: end;
+  margin-bottom: 52px;
+}
+.ncc-hd-note {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #3a382f;
+  max-width: 330px;
+  margin: 0 0 6px;
+  text-wrap: pretty;
+}
+/* Masonry-ish wall: even tiles, so columns stay level. */
+.ncc-tile {
+  break-inside: avoid;
+  margin-bottom: 26px;
+}
+.ncc-tileimg {
+  position: relative;
+  aspect-ratio: 4/5;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  overflow: hidden;
+  transition: transform 0.35s ease, border-color 0.35s ease;
+}
+.ncc-tile:hover .ncc-tileimg {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+}
+.ncc-tiletag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  pointer-events: none;
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #111;
+  padding: 4px 8px;
+}
+.ncc-tilemeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 14px;
+}
+.ncc-tilename {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+}
+.ncc-tileprice {
+  font-size: 14px;
+  color: #7a756b;
+}
+.ncc-tiledate {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  color: #7a756b;
+  padding-top: 4px;
+}
+.ncc-social {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 32px;
+  background: #111111;
+  color: #f7f3ea;
+}
+.ncc-social-text {
+  font-size: 15.5px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 220px;
+}
+
+/* --- dark sections (categories, visit) --- */
+.ncc-dark {
+  position: relative;
+  overflow: hidden;
+  background: #111111;
+  color: #f7f3ea;
+}
+.ncc-dark .ncc-h2,
+.ncc-dark .ncc-h3 {
+  color: #f7f3ea;
+}
+.ncc-dark-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 100px 40px 108px;
+}
+.ncc-ghost-find {
+  right: -120px;
+  top: -110px;
+  width: 440px;
+  height: 386px;
+  border: 1.5px solid rgba(247, 243, 234, 0.05);
+}
+.ncc-dark-head {
+  max-width: 660px;
+  margin-bottom: 60px;
+}
+.ncc-dark-lede {
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: #cfc8b8;
+  margin: 0;
+  text-wrap: pretty;
+}
+.ncc-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(247, 243, 234, 0.14);
+}
+.ncc-cat {
+  background: #111111;
+  padding: 30px 26px 32px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.3s ease;
+}
+.ncc-cat:hover {
+  background: #1b1a17;
+}
+.ncc-cat-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  margin: 0 0 9px;
+  color: #f7f3ea;
+}
+.ncc-cat-line {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #9c9484;
+  margin: 0;
+}
+
+/* --- about --- */
+.ncc-about {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-about-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 104px 40px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 76px;
+  align-items: center;
+}
+.ncc-about-body {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: #3a382f;
+  margin: 0 0 18px;
+  text-wrap: pretty;
+}
+.ncc-tri-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 34px;
+}
+.ncc-tri-row span {
+  width: 14px;
+  height: 12px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.ncc-tri-solid {
+  background: var(--accent);
+}
+.ncc-tri-outline-1 {
+  border: 1.4px solid rgba(17, 17, 17, 0.28);
+}
+.ncc-tri-outline-2 {
+  border: 1.4px solid rgba(17, 17, 17, 0.15);
+}
+.ncc-about-img {
+  position: relative;
+  aspect-ratio: 5/4;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  overflow: hidden;
+}
+.ncc-about-tri {
+  position: absolute;
+  top: 42px;
+  right: -18px;
+  z-index: 2;
+  pointer-events: none;
+  width: 92px;
+  height: 82px;
+  background: var(--accent);
+  opacity: 0.9;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* --- community --- */
+.ncc-events {
+  background: #f0eadb;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-events-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 76px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.ncc-events-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #3a382f;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* --- visit --- */
+.ncc-ghost-visit {
+  left: -130px;
+  bottom: -150px;
+  width: 400px;
+  height: 350px;
+  border: 1.5px solid rgba(247, 243, 234, 0.06);
+}
+.ncc-visit-grid {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 104px 40px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 60px;
+  align-items: stretch;
+}
+.ncc-visit-details {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.ncc-visit-label {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #b8b0a0;
+  margin-bottom: 8px;
+}
+.ncc-visit-where {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #f7f3ea;
+}
+.ncc-visit-hours {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #cfc8b8;
+}
+.ncc-visit-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+.ncc-visit-btns .ncc-btn {
+  padding: 13px 22px;
+}
+.ncc-map {
+  position: relative;
+  min-height: 360px;
+  border: 1px solid rgba(247, 243, 234, 0.16);
+  overflow: hidden;
+}
+/* --- footer --- */
+.ncc-footer {
+  background: #f7f3ea;
+}
+.ncc-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 60px 40px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 32px;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-footer-blurb {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #7a756b;
+  margin: 0;
+}
+.ncc-footer-cols {
+  display: flex;
+  gap: 56px;
+  flex-wrap: wrap;
+}
+.ncc-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.ncc-footer-col a {
+  font-size: 14px;
+}
+.ncc-footer-head {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #7a756b;
+  margin-bottom: 4px;
+}
+.ncc-footer-legal {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  color: #a49a83;
+}
+.ncc-footer-credit a {
+  color: #a49a83;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- responsive: the design injected these at runtime; they belong here --- */
+@media (max-width: 900px) {
+  .ncc-desktop-nav {
+    display: none;
+  }
+  .ncc-mobile-btn {
+    display: flex;
+  }
+    .ncc-hd-grid {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .ncc-cat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ncc-about-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .ncc-visit-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+@media (max-width: 640px) {
+    .ncc-cat-grid {
+    grid-template-columns: 1fr;
+  }
+  .ncc-nav,
+  .ncc-menu,
+  .ncc-justin-inner,
+  .ncc-dark-inner,
+  .ncc-about-grid,
+  .ncc-visit-grid,
+  .ncc-events-inner,
+  .ncc-footer-inner,
+  .ncc-footer-legal {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .ncc-hero-inner {
+    padding: 88px 24px 80px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.ncc) {
+    scroll-behavior: auto;
+  }
+  .ncc * {
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Shop listing + product page
+   ========================================================================== */
+
+.ncc-shop {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-shop-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 72px 40px 100px;
+}
+.ncc-shop-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px 40px;
+  align-items: end;
+  margin-bottom: 36px;
+}
+
+/* --- filter bar --- */
+.ncc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 28px;
+  margin-bottom: 36px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+}
+.ncc-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border: 1.5px solid rgba(17, 17, 17, 0.18);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.ncc-filter:hover {
+  border-color: #111111;
+}
+.ncc-filter.is-on {
+  background: #111111;
+  color: #f7f3ea;
+  border-color: #111111;
+}
+.ncc-filter-n {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  opacity: 0.6;
+}
+.ncc-empty {
+  font-size: 15.5px;
+  color: #7a756b;
+  padding: 40px 0;
+}
+.ncc-empty[hidden] {
+  display: none;
+}
+
+/* --- product grid. A real grid, not the home page's masonry columns:
+       equal-height cards read as a catalogue rather than a scrapbook. --- */
+.ncc-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px;
+}
+.ncc-shop-grid > [hidden] {
+  display: none;
+}
+.ncc-tileone {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  background: var(--accent);
+  padding: 4px 8px;
+}
+.ncc-tileone-lg {
+  font-size: 11px;
+  padding: 6px 11px;
+  top: 16px;
+  right: 16px;
+}
+.ncc-shop-note {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 32px;
+  background: #111111;
+  color: #f7f3ea;
+}
+
+/* --- product page --- */
+.ncc-product {
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-product-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 40px 100px;
+}
+.ncc-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a756b;
+  padding-bottom: 36px;
+}
+.ncc-crumbs [aria-current] {
+  color: #111;
+}
+.ncc-product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+.ncc-product-img {
+  position: relative;
+  aspect-ratio: 4/5;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  overflow: hidden;
+}
+.ncc-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ncc-product-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(30px, 3.8vw, 46px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 10px;
+  text-wrap: balance;
+}
+.ncc-product-meta {
+  font-family: "Space Mono", monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: #7a756b;
+  margin: 0 0 28px;
+}
+.ncc-product-price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+}
+.ncc-product-cond {
+  font-size: 14px;
+  color: #7a756b;
+}
+.ncc-product-detail {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: #3a382f;
+  margin: 24px 0;
+  text-wrap: pretty;
+}
+.ncc-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #3a382f;
+  margin-bottom: 24px;
+}
+.ncc-stock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3f8f4f;
+}
+.ncc-buy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ncc-buy[hidden] {
+  display: none;
+}
+.ncc-buy-btn {
+  cursor: pointer;
+  font-family: inherit;
+}
+.ncc-buy-done {
+  border: 1.5px solid var(--accent);
+  background: rgba(232, 178, 58, 0.12);
+  padding: 22px 24px;
+}
+.ncc-buy-done[hidden] {
+  display: none;
+}
+.ncc-buy-done-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.ncc-buy-done p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #3a382f;
+}
+.ncc-product-facts {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14.5px;
+  color: #3a382f;
+}
+.ncc-product-facts span {
+  display: inline-block;
+  min-width: 104px;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a756b;
+}
+.ncc-related {
+  margin-top: 88px;
+  padding-top: 44px;
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
+}
+.ncc-related-head {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  margin: 0 0 28px;
+}
+
+/* --- wants list --- */
+.ncc-wants {
+  position: relative;
+  overflow: hidden;
+  background: #f0eadb;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+.ncc-wants-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 96px 40px 104px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.ncc-wants-lede {
+  font-size: 17px;
+  line-height: 1.65;
+  color: #3a382f;
+  margin: 22px 0 28px;
+  max-width: 34em;
+  text-wrap: pretty;
+}
+.ncc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.ncc-step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  counter-increment: step;
+}
+.ncc-step::before {
+  content: counter(step);
+  flex: none;
+  width: 28px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.ncc-step-body strong {
+  display: block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+.ncc-step-body span {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #3a382f;
+}
+.ncc-wants-card {
+  background: #f7f3ea;
+  border: 1.5px solid #111111;
+  padding: 34px 32px;
+  box-shadow: 10px 10px 0 #111111;
+}
+.ncc-wants-card h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.ncc-wants-card > p {
+  font-size: 14.5px;
+  color: #7a756b;
+  margin: 0 0 22px;
+}
+.ncc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ncc-form[hidden] {
+  display: none;
+}
+.ncc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ncc-label {
+  font-family: "Space Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.ncc-input {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  padding: 12px 13px;
+  border: 1.5px solid rgba(17, 17, 17, 0.35);
+  background: #fff;
+  color: #111;
+}
+.ncc-input:focus {
+  border-color: #111;
+  outline: none;
+}
+textarea.ncc-input {
+  resize: vertical;
+  min-height: 84px;
+}
+.ncc-form-note {
+  font-size: 12.5px;
+  color: #7a756b;
+  margin: 0;
+}
+.ncc-wants-done {
+  border: 1.5px solid var(--accent);
+  background: rgba(232, 178, 58, 0.14);
+  padding: 26px;
+  text-align: center;
+}
+.ncc-wants-done[hidden] {
+  display: none;
+}
+.ncc-wants-done-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.ncc-wants-done p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #3a382f;
+}
+
+
+/* --- responsive --- */
+@media (max-width: 1080px) {
+  .ncc-shop-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .ncc-shop-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ncc-shop-head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .ncc-product-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .ncc-wants-inner {
+    grid-template-columns: 1fr;
+    gap: 44px;
+    padding: 72px 40px 80px;
+  }
+}
+@media (max-width: 640px) {
+  .ncc-shop-inner,
+  .ncc-product-inner,
+  .ncc-wants-inner,
+  .ncc-shop-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .ncc-shop-note,
+  .ncc-social {
+    padding: 22px 20px;
+  }
+  .ncc-wants-card {
+    padding: 26px 22px;
+    box-shadow: 6px 6px 0 #111111;
+  }
+  .ncc-buy .ncc-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (max-width: 420px) {
+  .ncc-shop-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Product tile corrections
+   ========================================================================== */
+
+/* The tile image is a bare <img> (ImageSlot only styles its own placeholder),
+   so it needs to be told to fill its aspect-ratio box — otherwise it renders
+   at natural size and the tile shows a wildly zoomed crop. */
+.ncc-tileimg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The whole tile is a link, so the title would otherwise inherit the accent
+   link-hover — amber on cream is about 2.2:1 and unreadable. The image border
+   and lift carry the hover affordance instead. */
+.ncc-tilename {
+  color: #111111;
+}
+
+/* On a phone the hero is tall and narrow, so a viewport-width triangle reads
+   as a small floating shape mid-column. Oversize it and let the section clip
+   the corners — the mark stays legible and the photo keeps some presence. */
+@media (max-width: 640px) {
+  .ncc-hero-glyph {
+    width: 155vw;
+    height: 135vw;
+    transform: translate(-50%, -38%);
+  }
+  .ncc-hero-glyph img {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 14%, #000 66%);
+    mask-image: linear-gradient(to bottom, transparent 14%, #000 66%);
+    opacity: 0.55;
+  }
+}

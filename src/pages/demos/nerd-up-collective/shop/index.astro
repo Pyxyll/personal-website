@@ -1,0 +1,108 @@
+---
+/**
+ * Shop listing for the Nerd-Up Collective concept.
+ *
+ * Filtering is client-side over the full grid rather than one page per
+ * category: the catalogue is small, the whole thing fits in a single response,
+ * and it keeps filtering instant. The category links are still real URLs
+ * (?c=games) so a filtered view can be linked and shared.
+ */
+import Shell from "../../../../components/nerdup/Shell.astro";
+import ProductCard from "../../../../components/nerdup/ProductCard.astro";
+import { products, categories, shop } from "../../../../components/nerdup/data";
+
+const pageTitle = `Shop · ${shop.name}`;
+const pageDesc =
+  "Second-hand games, VHS, comics, vinyl and collectibles from Nerd-Up Collective, Wexford. Stock is one-off and changes weekly.";
+
+const counts = Object.fromEntries(
+  categories.map((c) => [c.slug, products.filter((p) => p.category === c.slug).length])
+);
+---
+
+<Shell title={pageTitle} description={pageDesc} current="shop">
+  <section class="ncc-shop">
+    <span aria-hidden="true" class="ncc-ghost-tri ncc-ghost-justin"></span>
+    <div class="ncc-shop-inner">
+      <div class="ncc-shop-head" data-ncc-reveal>
+        <div>
+          <div class="ncc-kicker ncc-kicker-left">
+            <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+            THE SHOP
+          </div>
+          <h1 class="ncc-h2">Everything on the shelves</h1>
+        </div>
+        <p class="ncc-hd-note">
+          Stock is one-off and second-hand, so what's here is genuinely what's in the shop.
+          Reserve online and collect in {shop.town}, or ask us to post it.
+        </p>
+      </div>
+
+      {/* Filter bar. Real links, so a filtered view is shareable. */}
+      <div class="ncc-filters" role="group" aria-label="Filter by category">
+        <a href="?c=all" class="ncc-filter is-on" data-filter="all">
+          All <span class="ncc-filter-n">{products.length}</span>
+        </a>
+        {categories.map((c) => (
+          <a href={`?c=${c.slug}`} class="ncc-filter" data-filter={c.slug}>
+            {c.name} <span class="ncc-filter-n">{counts[c.slug]}</span>
+          </a>
+        ))}
+      </div>
+
+      <div class="ncc-shop-grid" data-grid>
+        {products.map((p, i) => (
+          <div data-cat={p.category}>
+            <ProductCard product={p} eager={i < 4} />
+          </div>
+        ))}
+      </div>
+
+      <p class="ncc-empty" data-empty hidden>Nothing in that category right now — try another.</p>
+
+      <div class="ncc-shop-note" data-ncc-reveal>
+        <span aria-hidden="true" class="ncc-tri" style="width:16px;height:14px;"></span>
+        <span class="ncc-social-text">
+          Looking for something specific? Put it on your wants list and we'll message you when it
+          lands.
+        </span>
+        <a href="/demos/nerd-up-collective/#wants" class="ncc-btn ncc-btn-accent">Start a wants list →</a>
+      </div>
+    </div>
+  </section>
+</Shell>
+
+<script>
+  // Category filter. Reads ?c= on load so a shared link opens filtered, and
+  // uses replaceState afterwards so filtering doesn't stack history entries.
+  const grid = document.querySelector<HTMLElement>("[data-grid]");
+  const empty = document.querySelector<HTMLElement>("[data-empty]");
+  const buttons = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-filter]"));
+
+  function apply(cat: string, push: boolean) {
+    if (!grid) return;
+    let shown = 0;
+    Array.from(grid.children).forEach((child) => {
+      const el = child as HTMLElement;
+      const match = cat === "all" || el.dataset.cat === cat;
+      el.hidden = !match;
+      if (match) shown++;
+    });
+    buttons.forEach((b) => b.classList.toggle("is-on", b.dataset.filter === cat));
+    if (empty) empty.hidden = shown > 0;
+    if (push) {
+      const url = cat === "all" ? location.pathname : `${location.pathname}?c=${cat}`;
+      history.replaceState(null, "", url);
+    }
+  }
+
+  buttons.forEach((b) => {
+    b.addEventListener("click", (e) => {
+      e.preventDefault();
+      apply(b.dataset.filter ?? "all", true);
+    });
+  });
+
+  const initial = new URLSearchParams(location.search).get("c");
+  if (initial && buttons.some((b) => b.dataset.filter === initial)) apply(initial, false);
+</script>

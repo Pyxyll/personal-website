@@ -1,0 +1,50 @@
+---
+/** Site footer, shared across every page of the concept. */
+import { shop, categories } from "./data";
+---
+
+<footer class="ncc-footer">
+  <div class="ncc-footer-inner">
+    <div style="max-width:340px;">
+      <div class="ncc-brand" style="margin-bottom:14px;">
+        <span aria-hidden="true" class="ncc-tri" style="width:20px;height:18px;"></span>
+        <span class="ncc-wordmark">
+          <span class="ncc-wordmark-main" style="font-size:19px;">NERD-UP</span>
+          <span class="ncc-wordmark-sub" style="font-size:9px;">COLLECTIVE</span>
+        </span>
+      </div>
+      <p class="ncc-footer-blurb">
+        Retro games, VHS, comics, vinyl and collectibles — inside {shop.venue} on
+        {shop.street}, {shop.town}.
+      </p>
+    </div>
+
+    <div class="ncc-footer-cols">
+      <div class="ncc-footer-col">
+        <span class="ncc-footer-head">SHOP</span>
+        {categories.slice(0, 4).map((c) => (
+          <a href={`/demos/nerd-up-collective/shop/?c=${c.slug}`}>{c.name}</a>
+        ))}
+      </div>
+      <div class="ncc-footer-col">
+        <span class="ncc-footer-head">COLLECTORS</span>
+        <a href="/demos/nerd-up-collective/#wants">Wants list</a>
+        <a href="/demos/nerd-up-collective/#just-in">Just in</a>
+        <a href="/demos/nerd-up-collective/#about">About the shop</a>
+      </div>
+      <div class="ncc-footer-col">
+        <span class="ncc-footer-head">VISIT</span>
+        <a href="/demos/nerd-up-collective/#visit">{shop.venue}, {shop.town}</a>
+        <a href={shop.facebook} target="_blank" rel="noopener">Facebook</a>
+        <a href={shop.directions} target="_blank" rel="noopener">Get directions</a>
+      </div>
+    </div>
+  </div>
+  <div class="ncc-footer-legal">
+    <span>Unaffiliated concept by Dylan Collins · placeholder content</span>
+    <span class="ncc-footer-credit">
+      Product photography is stock, standing in for the shop's own — via
+      <a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash</a>.
+    </span>
+  </div>
+</footer>

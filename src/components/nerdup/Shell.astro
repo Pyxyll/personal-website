@@ -1,0 +1,127 @@
+---
+/**
+ * Page shell for the Nerd-Up Collective concept.
+ *
+ * Wraps the site's chrome-less Demo layout with this concept's fonts,
+ * stylesheet, nav and footer, plus the shared menu behaviour — so home, shop
+ * and product pages are guaranteed to match.
+ */
+import Demo from "../../layouts/Demo.astro";
+import Nav from "./Nav.astro";
+import Footer from "./Footer.astro";
+import "./nerdup.css";
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  current?: "home" | "shop" | "about" | "visit";
+}
+
+const {
+  title,
+  description,
+  ogImage = "/demos/nerd-up-collective/og.png",
+  current,
+} = Astro.props;
+---
+
+<Demo title={title} description={description} ogImage={ogImage} background="#F7F3EA" noindex>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="ncc">
+    <Nav current={current} />
+    <slot />
+    <Footer />
+  </div>
+</Demo>
+
+<script>
+  // Mobile menu ------------------------------------------------------------
+  const burger = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const menu = document.querySelector<HTMLElement>("#ncc-menu");
+
+  function setMenu(open: boolean) {
+    if (!burger || !menu) return;
+    menu.hidden = !open;
+    burger.setAttribute("aria-expanded", String(open));
+  }
+
+  burger?.addEventListener("click", () => setMenu(menu?.hidden === true));
+  document.querySelectorAll("[data-menu-close]").forEach((el) => {
+    el.addEventListener("click", () => setMenu(false));
+  });
+  // Widening past the breakpoint must not strand the menu open behind the
+  // desktop nav.
+  window.matchMedia("(min-width: 901px)").addEventListener("change", (e) => {
+    if (e.matches) setMenu(false);
+  });
+
+  // Reveal on scroll -------------------------------------------------------
+  // The hidden state is applied by JS rather than CSS so that a page with no
+  // JS — or with a blocked/failed script — renders fully visible rather than
+  // blank. Two further guards below, because "invisible until an observer
+  // fires" is a bad thing to bet a shopfront on.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!reduce && "IntersectionObserver" in window) {
+    const show = (el: HTMLElement) => {
+      el.style.opacity = "1";
+      // Clear rather than pin to "none": card hover lifts are transforms too,
+      // and pinning would kill them.
+      el.style.transform = "";
+      el.style.willChange = "";
+    };
+
+    const hidden: HTMLElement[] = [];
+    document.querySelectorAll<HTMLElement>("[data-ncc-reveal]").forEach((el) => {
+      // Anything already on screen is left alone. Fading in content the
+      // visitor is already looking at is both a needless risk and a slightly
+      // cheap effect — the animation is for things scrolled into later.
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) return;
+
+      el.style.opacity = "0";
+      el.style.transform = "translateY(26px)";
+      el.style.transition =
+        "opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1)";
+      el.style.willChange = "opacity, transform";
+      hidden.push(el);
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          show(entry.target as HTMLElement);
+          io.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    hidden.forEach((el) => io.observe(el));
+
+    // Last resort: if the observer hasn't dealt with something after a couple
+    // of seconds, show it anyway. Losing the animation beats losing the page.
+    setTimeout(() => {
+      hidden.forEach((el) => {
+        if (el.style.opacity === "0") show(el);
+      });
+    }, 2000);
+  }
+
+  // Printing bypasses scroll entirely, so force everything visible.
+  window.addEventListener("beforeprint", () => {
+    document.querySelectorAll<HTMLElement>("[data-ncc-reveal]").forEach((el) => {
+      el.style.opacity = "1";
+      el.style.transform = "";
+    });
+  });
+</script>

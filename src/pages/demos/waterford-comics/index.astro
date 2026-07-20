@@ -1,0 +1,1698 @@
+---
+/**
+ * Spec concept for Waterford Comics — an unsolicited design sent to the shop.
+ *
+ * Deliberately lives under /demos/ rather than in the `work` content
+ * collection: nothing here was commissioned, so it must not appear in the work
+ * index alongside real client projects. It is also noindexed, so it can't
+ * compete with the shop's own presence in search.
+ *
+ * Ported from a Claude Design file. The design tool's own syntax (sc-if,
+ * style-hover, style-before, DCLogic) has no runtime here, so conditionals
+ * became media queries plus a little vanilla JS, and the pseudo-element and
+ * hover styles became real CSS. Everything is namespaced under .wc so the
+ * demo's visual world stays sealed off from the site's.
+ */
+import Demo from "../../../layouts/Demo.astro";
+
+const pageTitle = "Waterford Comics · Site concept · Dylan Collins";
+const pageDesc =
+  "An unsolicited website concept for Waterford Comics — a family-run comic, manga and collectibles shop on Newtown Road.";
+---
+
+<Demo title={pageTitle} description={pageDesc} background="#fbf7ee" noindex>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="wc">
+    {/* Displacement filters that give every border its hand-inked wobble. */}
+    <svg aria-hidden="true" width="0" height="0" style="position:absolute;pointer-events:none;">
+      <defs>
+        <filter id="rough" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="1" seed="7" result="n"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5"></feDisplacementMap>
+        </filter>
+        <filter id="rough-fine" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="4" result="n"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"></feDisplacementMap>
+        </filter>
+      </defs>
+    </svg>
+
+    {/* ===================== NAV ===================== */}
+    <header class="wc-header">
+      <nav class="wc-nav">
+        <a href="#top" class="wc-logo">
+          <span>Waterford</span>
+          <span class="wc-logo-accent">Comics</span>
+          <span class="wc-logo-dot"></span>
+        </a>
+
+        <div class="wc-nav-desktop">
+          <a href="#shop" class="wc-navlink">Shop</a>
+          <a href="#pulllist" class="wc-navlink">Pull List</a>
+          <a href="#cafe" class="wc-navlink">Café</a>
+          <a href="#events" class="wc-navlink">Events</a>
+          <a href="#visit" class="wc-navlink">Visit</a>
+          <span class="wc-btnwrap" data-anglebtn data-drop="#15121d" data-off="6,8">
+            <a
+              href="#pulllist"
+              class="wc-btn"
+              style="--ax:6px;--ay:7px;font-size:13px;letter-spacing:.1em;background:#e63a2e;color:#fbf7ee;padding:9px 16px;"
+              >Join the Pull List</a
+            >
+          </span>
+        </div>
+
+        <button class="wc-burger" aria-label="Menu" aria-expanded="false" aria-controls="wc-menu" data-menu-toggle>
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+
+      <div class="wc-menu" id="wc-menu" hidden>
+        <a href="#shop" class="wc-menulink" data-menu-close>Shop</a>
+        <a href="#pulllist" class="wc-menulink" data-menu-close>Pull List</a>
+        <a href="#cafe" class="wc-menulink" data-menu-close>Café</a>
+        <a href="#events" class="wc-menulink" data-menu-close>Events</a>
+        <a href="#visit" class="wc-menulink" data-menu-close>Visit</a>
+        <a href="#pulllist" class="wc-menucta" data-menu-close>Join the Pull List</a>
+      </div>
+    </header>
+
+    {/* ===================== HERO ===================== */}
+    <section id="top" class="wc-hero">
+      <div aria-hidden="true" class="wc-dots wc-dots-hero"></div>
+      <div class="wc-hero-inner">
+        <div>
+          <div class="wc-eyebrow" style="color:#e63a2e;margin-bottom:22px;">
+            Family-run · Newtown Road, Waterford
+          </div>
+          <h1 class="wc-h1">
+            Your local for<br />
+            <span class="wc-h1-mark">comics</span>
+            <span> &amp;</span><br />
+            collectibles
+          </h1>
+          <p class="wc-hero-lede">
+            Comics and graphic novels, manga, trading cards, figures and merch — stacked floor to
+            ceiling, with people who actually know the stock. Sit in, read, and pull your weekly
+            titles.
+          </p>
+          <div class="wc-hero-btns">
+            <span class="wc-btnwrap" data-anglebtn data-drop="#fbf7ee" data-off="9,11">
+              <a
+                href="#shop"
+                class="wc-btn"
+                style="--ax:9px;--ay:10px;font-size:14px;letter-spacing:.08em;background:#e63a2e;color:#fbf7ee;border-color:#fbf7ee;padding:15px 26px;"
+                >Browse the shop</a
+              >
+            </span>
+            <span class="wc-btnwrap" data-anglebtn data-drop="#e63a2e" data-off="9,11">
+              <a
+                href="#pulllist"
+                class="wc-btn"
+                style="--ax:9px;--ay:10px;font-size:14px;letter-spacing:.08em;background:#15121d;color:#fbf7ee;border-color:#fbf7ee;padding:15px 26px;"
+                >Start a pull list</a
+              >
+            </span>
+          </div>
+          {/* Review count is placeholder copy from the concept — verify against
+              the shop's actual Google listing before this goes to them. */}
+          <div class="wc-rating">
+            <span style="color:#e63a2e;font-size:16px;letter-spacing:.1em;">★★★★</span>
+            <span>Rated by locals on Google · Shop local, get looked after</span>
+          </div>
+        </div>
+
+        <div class="wc-hero-aside">
+          <div class="wc-bubble">
+            <div class="wc-eyebrow" style="font-size:11px;color:#e63a2e;margin-bottom:6px;">
+              New comic day
+            </div>
+            <div class="wc-bubble-text">
+              Fresh comics land every Wednesday — first dibs to pull-list members
+            </div>
+            <div class="wc-bubble-tail-outer"></div>
+            <div class="wc-bubble-tail-inner"></div>
+          </div>
+          <div class="wc-stamp">EST. ON NEWTOWN ROAD</div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== NEW THIS WEEK ===================== */}
+    <section id="shop" class="wc-band">
+      <div aria-hidden="true" class="wc-dots wc-dots-band"></div>
+      <div class="wc-band-inner">
+        <div class="wc-band-head">
+          <div>
+            <div class="wc-eyebrow" style="color:#15121d;margin-bottom:8px;">New this week</div>
+            <h2 class="wc-h2">On the shelf now</h2>
+          </div>
+          <span class="wc-btnwrap" data-anglebtn data-drop="#15121d" data-off="7,9">
+            <a
+              href="#pulllist"
+              class="wc-btn"
+              style="--ax:7px;--ay:8px;font-size:12.5px;letter-spacing:.08em;background:#fbf7ee;color:#15121d;padding:11px 18px;"
+              >Pull these for me →</a
+            >
+          </span>
+        </div>
+
+        <div class="wc-grid-cards">
+          <div class="wc-tilt" style="--rot:-1.6deg">
+            <div class="wc-card" data-wc-reveal>
+              <div class="wc-cover" style="background:linear-gradient(135deg,#e63a2e 0%,#15121d 100%);">
+                <span class="wc-tag">New series</span>
+                <span class="wc-issue" style="font-size:34px;color:rgba(251,247,238,.85);">#1</span>
+              </div>
+              <div class="wc-cardbody">
+                <div class="wc-cardtitle">The Tin Lighthouse</div>
+                <div class="wc-cardmeta">Indie · sci-fi</div>
+                <div class="wc-price">€4.50</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wc-tilt" style="--rot:1.3deg">
+            <div class="wc-card" data-wc-reveal>
+              <div class="wc-cover" style="background:linear-gradient(135deg,#15121d 0%,#e63a2e 100%);">
+                <span class="wc-tag">Restock</span>
+                <span class="wc-issue" style="font-size:30px;color:rgba(21,18,29,.7);">V3</span>
+              </div>
+              <div class="wc-cardbody">
+                <div class="wc-cardtitle">Hollowpoint</div>
+                <div class="wc-cardmeta">Graphic novel</div>
+                <div class="wc-price">€12.99</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wc-tilt" style="--rot:-0.9deg">
+            <div class="wc-card" data-wc-reveal>
+              <div class="wc-cover" style="background:linear-gradient(135deg,#e63a2e 0%,#211c2e 100%);">
+                <span class="wc-tag">Pre-order</span>
+                <span class="wc-issue" style="font-size:34px;color:rgba(251,247,238,.85);">#7</span>
+              </div>
+              <div class="wc-cardbody">
+                <div class="wc-cardtitle">Saltwater Saints</div>
+                <div class="wc-cardmeta">Ongoing · fantasy</div>
+                <div class="wc-price">€4.99</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wc-tilt" style="--rot:1.6deg">
+            <div class="wc-card" data-wc-reveal>
+              <div class="wc-cover" style="background:linear-gradient(135deg,#211c2e 0%,#e63a2e 100%);">
+                <span class="wc-tag">Singles</span>
+                <span class="wc-issue" style="font-size:26px;color:rgba(21,18,29,.7);">TCG</span>
+              </div>
+              <div class="wc-cardbody">
+                <div class="wc-cardtitle">Foil singles bag</div>
+                <div class="wc-cardmeta">Trading cards</div>
+                <div class="wc-price">€6.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== DIAGONAL RIBBON ===================== */}
+    <div aria-hidden="true" class="wc-ribbon-slot">
+      <div class="wc-ribbon">
+        <div class="wc-ribbon-text">
+          New comics every Wednesday&nbsp;&nbsp;✦&nbsp;&nbsp;First dibs for
+          members&nbsp;&nbsp;✦&nbsp;&nbsp;Singles · sealed · figures ·
+          manga&nbsp;&nbsp;✦&nbsp;&nbsp;Café next door&nbsp;&nbsp;✦&nbsp;&nbsp;Shop local, get
+          looked after&nbsp;&nbsp;✦
+        </div>
+      </div>
+    </div>
+
+    {/* ===================== WHAT WE STOCK ===================== */}
+    <section class="wc-stock">
+      <div class="wc-stock-inner">
+        <div style="margin-bottom:30px;">
+          <div class="wc-eyebrow" style="color:#e63a2e;margin-bottom:8px;">What we stock</div>
+          <h2 class="wc-h2">Six aisles, one nerd haven</h2>
+        </div>
+
+        <div class="wc-panelgrid">
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><rect x="14" y="13" width="20" height="26" rx="2" /><rect x="22" y="19" width="20" height="26" rx="2" /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">Comics &amp; graphic novels</div>
+            <p class="wc-panelbody">
+              Single issues, trades and original graphic novels — indie shelves alongside the big
+              runs.
+            </p>
+          </div>
+
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><rect x="12" y="14" width="32" height="22" rx="4" /><path d="M20 36 v8 l9 -8" /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">Manga &amp; anime</div>
+            <p class="wc-panelbody">
+              Shonen to seinen, new volumes weekly, plus art books and anime merch.
+            </p>
+          </div>
+
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><rect x="16" y="16" width="24" height="24" rx="3" transform="rotate(45 28 28)" /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">Trading cards &amp; TCG</div>
+            <p class="wc-panelbody">
+              Singles and sealed across the major games — bring a deck, we run league nights.
+            </p>
+          </div>
+
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><circle cx="28" cy="19" r="7" /><path d="M17 44 q11 -17 22 0" /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">Figures &amp; toys</div>
+            <p class="wc-panelbody">
+              Collectible figures, blind boxes and statues — display pieces and pocket-money picks.
+            </p>
+          </div>
+
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><path d="M17 17 h14 l11 11 -15 15 -11 -11 z" /><circle cx="25" cy="25" r="2.6" /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">Merch &amp; apparel</div>
+            <p class="wc-panelbody">
+              Tees, pins, prints and posters — wear the fandom, no logos required.
+            </p>
+          </div>
+
+          <div class="wc-panel" data-wc-reveal>
+            <div class="wc-panelicon">
+              <svg width="34" height="34" viewBox="0 0 56 56" fill="none" stroke="#fbf7ee" stroke-width="3"
+                ><rect x="15" y="22" width="22" height="18" rx="3" /><path d="M37 26 h5 a4 4 0 0 1 0 8 h-5" /><path
+                  d="M21 12 v5 M29 12 v5"
+                /></svg
+              >
+            </div>
+            <div class="wc-paneltitle">The café next door</div>
+            <p class="wc-panelbody">
+              Same owners, one door over. Buy a book, grab a coffee, sit and actually read it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== PULL LIST ===================== */}
+    <section id="pulllist" class="wc-pull">
+      <div aria-hidden="true" class="wc-dots wc-dots-pull"></div>
+      <div class="wc-pull-inner">
+        <div>
+          <div class="wc-eyebrow" style="letter-spacing:.18em;color:#e63a2e;margin-bottom:16px;">
+            ★ The pull list · our flagship
+          </div>
+          <h2 class="wc-h2 wc-h2-big">Never miss an issue again</h2>
+          <p class="wc-pull-lede">
+            A pull list is your standing weekly order. Tell us the titles you follow and we set a
+            copy aside every Wednesday — held behind the counter with your name on it. No app, no
+            subscription fee, no sold-out heartbreak.
+          </p>
+          <div class="wc-ticks">
+            <div class="wc-tick"><span class="wc-tickmark">✓</span><span>Reserved for you, every week</span></div>
+            <div class="wc-tick"><span class="wc-tickmark">✓</span><span>First dibs on new-comic Wednesday</span></div>
+            <div class="wc-tick"><span class="wc-tickmark">✓</span><span>Members' discount on your pulls</span></div>
+            <div class="wc-tick"><span class="wc-tickmark">✓</span><span>Pause or cancel anytime</span></div>
+          </div>
+        </div>
+
+        <div class="wc-membercard">
+          <div class="wc-memberbadge">Member card</div>
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span class="wc-price-big">€0</span>
+            <span class="wc-eyebrow" style="font-size:13px;letter-spacing:.08em;color:#6b6478;">to join</span>
+          </div>
+          <p style="font-size:14.5px;color:#3a3447;margin:8px 0 22px;">
+            You only ever pay for the books you actually pull. Set it up in two minutes.
+          </p>
+
+          <form class="wc-form" data-pull-form>
+            <label class="wc-field">
+              <span class="wc-label">Your name</span>
+              <input name="name" type="text" required placeholder="Jamie Power" class="wc-input" />
+            </label>
+            <label class="wc-field">
+              <span class="wc-label">Email</span>
+              <input name="email" type="email" required placeholder="you@email.ie" class="wc-input" />
+            </label>
+            <label class="wc-field">
+              <span class="wc-label">Titles to pull</span>
+              <input
+                name="titles"
+                type="text"
+                placeholder="e.g. Saltwater Saints, Hollowpoint…"
+                class="wc-input"
+              />
+            </label>
+            <span class="wc-btnwrap" data-anglebtn data-drop="#15121d" data-off="8,10" style="display:block;margin-top:6px;">
+              <button
+                type="submit"
+                class="wc-btn"
+                style="--ax:8px;--ay:9px;width:100%;text-align:center;font-size:14px;letter-spacing:.08em;background:#e63a2e;color:#fbf7ee;padding:14px 18px;"
+                >Set up my pull list</button
+              >
+            </span>
+          </form>
+
+          <div class="wc-confirm" aria-live="polite" data-pull-confirm hidden>
+            <div class="wc-confirm-title">You're on the list!</div>
+            <p style="margin:10px 0 0;font-size:14.5px;color:#3a3447;">
+              That'd land in the shop's inbox — we'd start setting your titles aside this Wednesday.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== CAFÉ ===================== */}
+    <section id="cafe" class="wc-cafe">
+      <div class="wc-cafe-art">
+        <div class="wc-cafe-dots"></div>
+        <div class="wc-cafe-plaque">
+          <div class="wc-eyebrow" style="font-size:11px;letter-spacing:.14em;margin-bottom:4px;">Next door</div>
+          <div class="wc-cafe-plaque-title">Read &amp; refill</div>
+        </div>
+      </div>
+      <div class="wc-cafe-body">
+        <div class="wc-eyebrow" style="color:#e63a2e;margin-bottom:10px;">Comics + coffee</div>
+        <h2 class="wc-h2" style="margin-bottom:18px;">Stay a while</h2>
+        <p style="max-width:32em;font-size:17px;color:#3a3447;margin:0 0 26px;">
+          The attached café is run by the same family. Pour-overs, pastries and a long table you're
+          welcome to spread your stack across. Buy first, then read as long as you like — that's the
+          whole point.
+        </p>
+        <span class="wc-btnwrap" data-anglebtn data-drop="#e63a2e" data-off="8,10" style="align-self:flex-start;">
+          <a
+            href="#visit"
+            class="wc-btn"
+            style="--ax:8px;--ay:9px;font-size:13px;letter-spacing:.08em;background:#15121d;color:#fbf7ee;padding:13px 22px;"
+            >See café hours →</a
+          >
+        </span>
+      </div>
+    </section>
+
+    {/* ===================== EVENTS ===================== */}
+    <section id="events" class="wc-band">
+      <div aria-hidden="true" class="wc-dots wc-dots-events"></div>
+      <div class="wc-band-inner">
+        <div style="margin-bottom:30px;">
+          <div class="wc-eyebrow" style="color:#15121d;margin-bottom:8px;">What's on</div>
+          <h2 class="wc-h2">The shop after hours</h2>
+        </div>
+        <div class="wc-grid-events">
+          <div class="wc-tilt" style="--rot:1.4deg">
+            <div class="wc-card wc-eventcard" data-wc-reveal>
+              <div class="wc-eventwhen">Thursdays · 18:30</div>
+              <div class="wc-eventtitle">TCG league night</div>
+              <p class="wc-panelbody">
+                Casual and ranked tables, all skill levels. Bring a deck or build one from singles on
+                the night.
+              </p>
+            </div>
+          </div>
+          <div class="wc-tilt" style="--rot:-1.1deg">
+            <div class="wc-card wc-eventcard" data-wc-reveal>
+              <div class="wc-eventwhen">Saturdays · 11:00</div>
+              <div class="wc-eventtitle">New-reader morning</div>
+              <p class="wc-panelbody">
+                Never read comics? Staff pick you a starting point over coffee. No question too
+                basic.
+              </p>
+            </div>
+          </div>
+          <div class="wc-tilt" style="--rot:1.7deg">
+            <div class="wc-card wc-eventcard" data-wc-reveal>
+              <div class="wc-eventwhen">Last Sunday · 13:00</div>
+              <div class="wc-eventtitle">Collectors' swap</div>
+              <p class="wc-panelbody">
+                Bring singles, figures and back issues to trade. Tables free for members, all
+                welcome.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== VISIT ===================== */}
+    <section id="visit" class="wc-visit">
+      <div class="wc-visit-inner">
+        <div>
+          <div class="wc-eyebrow" style="color:#e63a2e;margin-bottom:8px;">Visit the shop</div>
+          <h2 class="wc-h2" style="margin-bottom:22px;">Come in &amp; browse</h2>
+          <div class="wc-address">Newtown Road<br />Newtown, Waterford City</div>
+
+          <table class="wc-hours">
+            <tbody>
+              <tr><td>Mon – Fri</td><td>10:00 – 17:00</td></tr>
+              <tr><td>Saturday</td><td>10:00 – 18:00</td></tr>
+              <tr><td>Sunday</td><td>12:00 – 17:00</td></tr>
+            </tbody>
+          </table>
+
+          <div class="wc-visit-btns">
+            <span class="wc-btnwrap" data-anglebtn data-drop="#15121d" data-off="8,10">
+              <a
+                href="https://maps.google.com/?q=Newtown+Road+Waterford"
+                target="_blank"
+                rel="noopener"
+                class="wc-btn"
+                style="--ax:8px;--ay:9px;font-size:13px;letter-spacing:.08em;background:#e63a2e;color:#fbf7ee;padding:13px 20px;"
+                >Get directions</a
+              >
+            </span>
+            {/* Placeholder number from the concept — confirm the shop's real
+                line before sending this link to them. */}
+            <span class="wc-btnwrap" data-anglebtn data-drop="#e63a2e" data-off="8,10">
+              <a
+                href="tel:+353833248821"
+                class="wc-btn"
+                style="--ax:8px;--ay:9px;font-size:13px;letter-spacing:.08em;background:#fbf7ee;color:#15121d;padding:13px 20px;"
+                >Call the shop</a
+              >
+            </span>
+          </div>
+        </div>
+
+        <div class="wc-map">
+          <div class="wc-map-road-v"></div>
+          <div class="wc-map-road-h"></div>
+          <div class="wc-map-pin">
+            <div class="wc-map-pinlabel">We're here</div>
+            <div class="wc-map-pindot"></div>
+          </div>
+          <div class="wc-map-note">▢ map placeholder — swap for embed</div>
+        </div>
+      </div>
+    </section>
+
+    {/* ===================== FOOTER ===================== */}
+    <footer class="wc-footer">
+      <div class="wc-footer-inner">
+        <div>
+          <div class="wc-logo" style="font-size:24px;">
+            <span>Waterford</span><span class="wc-logo-accent">Comics</span><span class="wc-logo-dot"></span>
+          </div>
+          <p style="max-width:24em;color:#bdb6a8;font-size:15px;margin:16px 0 0;">
+            A family-run comic, manga, trading-card and collectibles shop on Newtown Road — with a
+            café next door and a pull list with your name on it.
+          </p>
+        </div>
+        <div>
+          <div class="wc-footer-head">Shop</div>
+          <div class="wc-footer-links">
+            <a href="#shop">New this week</a>
+            <a href="#shop">Comics &amp; manga</a>
+            <a href="#shop">Trading cards</a>
+            <a href="#shop">Figures &amp; merch</a>
+          </div>
+        </div>
+        <div>
+          <div class="wc-footer-head">Members</div>
+          <div class="wc-footer-links">
+            <a href="#pulllist">Join the pull list</a>
+            <a href="#events">League nights</a>
+            <a href="#events">Collectors' swap</a>
+          </div>
+        </div>
+        <div>
+          <div class="wc-footer-head">Visit</div>
+          <div class="wc-footer-links">
+            <a href="#visit">Newtown Road, Waterford</a>
+            <a href="tel:+353833248821">+353 83 324 8821</a>
+            <a href="#cafe">The café</a>
+          </div>
+        </div>
+      </div>
+      <div class="wc-footer-rule">
+        <div class="wc-footer-legal">
+          <span>Waterford Comics — Newtown Road, Waterford City</span>
+          <span style="color:#e63a2e;"
+            >◆ Unaffiliated concept by Dylan Collins — original artwork only</span
+          >
+        </div>
+      </div>
+    </footer>
+  </div>
+</Demo>
+
+<style is:global>
+  /* Everything is namespaced under .wc: this demo has its own visual world and
+     must neither inherit from nor leak into the site's global stylesheet. */
+  .wc {
+    background: #fbf7ee;
+    color: #15121d;
+    font-family: "Archivo", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .wc *,
+  .wc *::before,
+  .wc *::after {
+    box-sizing: border-box;
+  }
+  .wc ::selection {
+    background: #e63a2e;
+    color: #fbf7ee;
+  }
+  .wc a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .wc a:hover {
+    color: #e63a2e;
+  }
+  .wc *:focus-visible {
+    outline: 3px solid #e63a2e;
+    outline-offset: 3px;
+  }
+  html:has(.wc) {
+    scroll-behavior: smooth;
+  }
+
+  /* --- shared type --- */
+  .wc-eyebrow {
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  .wc-h1 {
+    font-family: "Anton", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.96;
+    letter-spacing: 0.01em;
+    font-size: clamp(46px, 6.6vw, 92px);
+    margin: 0;
+  }
+  .wc-h1-mark {
+    display: inline-block;
+    background: #e63a2e;
+    color: #fbf7ee;
+    transform: rotate(-2.2deg);
+    padding: 0 0.12em;
+    margin: 0.06em 0;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+  }
+  .wc-h2 {
+    font-family: "Anton", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(34px, 4.6vw, 52px);
+    line-height: 0.98;
+    margin: 0;
+  }
+  .wc-h2-big {
+    font-size: clamp(40px, 5.4vw, 68px);
+    line-height: 0.95;
+  }
+
+  /* --- buttons: a face sitting over a wandering SVG drop shadow --- */
+  .wc-btnwrap {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+  }
+  .wc-btn {
+    position: relative;
+    z-index: 1;
+    display: block;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 3px solid #15121d;
+    transition: transform 0.12s;
+    cursor: pointer;
+  }
+  .wc-btn:hover {
+    transform: translate(-1px, -1px);
+    color: inherit;
+  }
+  .wc-btn:active {
+    transform: translate(var(--ax), var(--ay));
+  }
+
+  /* --- halftone dot fields --- */
+  .wc-dots {
+    position: absolute;
+    inset: 0;
+    background-size: 9px 9px;
+    pointer-events: none;
+  }
+  .wc-dots-hero {
+    background-image: radial-gradient(#fbf7ee 1.1px, transparent 1.3px);
+    opacity: 0.13;
+    -webkit-mask-image: radial-gradient(125% 90% at 10% 104%, #000 0%, #000 24%, transparent 64%);
+    mask-image: radial-gradient(125% 90% at 10% 104%, #000 0%, #000 24%, transparent 64%);
+  }
+  .wc-dots-band {
+    background-image: radial-gradient(#15121d 1.1px, transparent 1.3px);
+    opacity: 0.2;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 16%, transparent 64%);
+    mask-image: linear-gradient(to top, #000 0%, #000 16%, transparent 64%);
+  }
+  .wc-dots-events {
+    background-image: radial-gradient(#15121d 1.1px, transparent 1.3px);
+    opacity: 0.14;
+    -webkit-mask-image: radial-gradient(125% 100% at 4% 104%, #000 0%, #000 22%, transparent 64%);
+    mask-image: radial-gradient(125% 100% at 4% 104%, #000 0%, #000 22%, transparent 64%);
+  }
+  .wc-dots-pull {
+    background-image: radial-gradient(#fbf7ee 1.1px, transparent 1.3px);
+    opacity: 0.13;
+    -webkit-mask-image: radial-gradient(120% 110% at 100% 104%, #000 0%, #000 24%, transparent 66%);
+    mask-image: radial-gradient(120% 110% at 100% 104%, #000 0%, #000 24%, transparent 66%);
+  }
+
+  /* --- nav --- */
+  .wc-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #fbf7ee;
+    border-bottom: 3px solid #15121d;
+  }
+  .wc-nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .wc-logo {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    font-family: "Anton", sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 0.9;
+  }
+  .wc-logo-accent {
+    color: #e63a2e;
+  }
+  .wc-logo-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e63a2e;
+    margin-bottom: 4px;
+  }
+  .wc-nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+  .wc-navlink {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+  .wc-burger {
+    display: none;
+    background: #e63a2e;
+    border: 3px solid #15121d;
+    box-shadow: 3px 3px 0 #15121d;
+    width: 46px;
+    height: 42px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .wc-burger span {
+    width: 20px;
+    height: 3px;
+    background: #fbf7ee;
+    display: block;
+  }
+  .wc-menu {
+    border-top: 3px solid #15121d;
+    background: #fbf7ee;
+    padding: 8px 24px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wc-menu[hidden] {
+    display: none;
+  }
+  .wc-menulink {
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    padding: 12px 0;
+    border-bottom: 1px dashed #15121d;
+  }
+  .wc-menucta {
+    margin-top: 10px;
+    text-align: center;
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    background: #e63a2e;
+    color: #fbf7ee;
+    border: 3px solid #15121d;
+    box-shadow: 4px 4px 0 #15121d;
+    padding: 12px 16px;
+  }
+
+  /* --- hero --- */
+  .wc-hero {
+    position: relative;
+    background: #15121d;
+    color: #fbf7ee;
+    overflow: hidden;
+  }
+  .wc-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 74px 24px 84px;
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .wc-hero-lede {
+    max-width: 30em;
+    font-size: 19px;
+    color: #e8e1d2;
+    margin: 26px 0 30px;
+  }
+  .wc-hero-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 34px;
+  }
+  .wc-rating {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-family: "Space Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: #cfc7b6;
+  }
+  .wc-hero-aside {
+    position: relative;
+    align-self: stretch;
+    min-height: 280px;
+  }
+  .wc-bubble {
+    position: absolute;
+    top: 6px;
+    right: 0;
+    max-width: 280px;
+    background: #fbf7ee;
+    color: #15121d;
+    border: 3px solid #15121d;
+    border-radius: 22px;
+    padding: 18px 20px;
+    box-shadow: 6px 6px 0 #e63a2e;
+    transform: rotate(2.6deg);
+  }
+  .wc-bubble-text {
+    font-family: "Anton", sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: 23px;
+    line-height: 1.02;
+  }
+  .wc-bubble-tail-outer {
+    position: absolute;
+    bottom: -18px;
+    left: 42px;
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-top: 20px solid #15121d;
+  }
+  .wc-bubble-tail-inner {
+    position: absolute;
+    bottom: -12px;
+    left: 46px;
+    width: 0;
+    height: 0;
+    border-left: 11px solid transparent;
+    border-top: 14px solid #fbf7ee;
+  }
+  .wc-stamp {
+    position: absolute;
+    bottom: 0;
+    right: 24px;
+    width: 128px;
+    height: 128px;
+    border: 3px dashed rgba(251, 247, 238, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #cfc7b6;
+    transform: rotate(-8deg);
+    padding: 14px;
+  }
+
+  /* --- red bands (shop, events) --- */
+  .wc-band {
+    position: relative;
+    background: #e63a2e;
+    color: #fbf7ee;
+    overflow: hidden;
+    border-top: 5px solid #15121d;
+    border-bottom: 5px solid #15121d;
+  }
+  .wc-band-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 54px 24px 64px;
+  }
+  .wc-band-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  /* --- product / event cards --- */
+  .wc-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 26px;
+  }
+  .wc-grid-events {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 26px;
+  }
+  .wc-tilt {
+    transform: rotate(var(--rot));
+  }
+  .wc-card {
+    position: relative;
+    background: #fbf7ee;
+    color: #15121d;
+    box-shadow: 6px 6px 0 #15121d;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .wc-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid #15121d;
+    filter: url(#rough);
+    pointer-events: none;
+  }
+  /* Hover cancels the wrapper's tilt, so the card snaps square as it lifts. */
+  .wc-card:hover {
+    transform: translateY(-4px) rotate(calc(-1 * var(--rot)));
+    box-shadow: 9px 9px 0 #15121d;
+  }
+  .wc-eventcard {
+    padding: 26px 24px 28px;
+  }
+  .wc-cover {
+    height: 188px;
+    border-bottom: 3px solid #15121d;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+  .wc-tag {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: #fbf7ee;
+    color: #15121d;
+    border: 2px solid #15121d;
+    padding: 4px 8px;
+  }
+  .wc-issue {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-family: "Anton", sans-serif;
+  }
+  .wc-cardbody {
+    padding: 16px 16px 18px;
+  }
+  .wc-cardtitle {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 21px;
+    line-height: 1.02;
+  }
+  .wc-cardmeta {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    margin-top: 8px;
+    color: #6b6478;
+  }
+  .wc-price {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 18px;
+    margin-top: 12px;
+  }
+  .wc-eventwhen {
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #e63a2e;
+    margin-bottom: 14px;
+  }
+  .wc-eventtitle {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 27px;
+    line-height: 0.98;
+    margin-bottom: 10px;
+  }
+
+  /* --- diagonal ribbon --- */
+  .wc-ribbon-slot {
+    position: relative;
+    z-index: 6;
+    height: 0;
+    overflow: visible;
+  }
+  .wc-ribbon {
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    top: -28px;
+    transform: rotate(-2.6deg);
+    background: #15121d;
+    border-top: 3px solid #15121d;
+    border-bottom: 3px solid #15121d;
+    box-shadow: 0 7px 0 rgba(21, 18, 29, 0.22);
+    padding: 13px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .wc-ribbon-text {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    color: #fbf7ee;
+    text-align: center;
+  }
+
+  /* --- what we stock --- */
+  .wc-stock {
+    background: #fbf7ee;
+    padding: 64px 24px 72px;
+  }
+  .wc-stock-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .wc-panelgrid {
+    position: relative;
+    background: #15121d;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 6px;
+    box-shadow: 8px 8px 0 #15121d;
+  }
+  .wc-panelgrid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid #15121d;
+    filter: url(#rough);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .wc-panel {
+    background: #fbf7ee;
+    padding: 30px 26px 34px;
+    transition: background 0.15s;
+    cursor: default;
+  }
+  .wc-panel:hover {
+    background: #e63a2e;
+  }
+  .wc-panel:hover .wc-paneltitle,
+  .wc-panel:hover .wc-panelbody {
+    color: #fbf7ee;
+  }
+  .wc-panel:hover svg {
+    stroke: #fbf7ee;
+  }
+  .wc-panelicon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #15121d;
+    border: 3px solid #15121d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .wc-paneltitle {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .wc-panelbody {
+    margin: 0;
+    font-size: 15.5px;
+    color: #3a3447;
+  }
+
+  /* --- pull list --- */
+  .wc-pull {
+    position: relative;
+    background: #15121d;
+    color: #fbf7ee;
+    overflow: hidden;
+    border-top: 5px solid #15121d;
+  }
+  .wc-pull-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 70px 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .wc-pull-lede {
+    max-width: 32em;
+    font-size: 18px;
+    color: #e8e1d2;
+    margin: 24px 0 30px;
+  }
+  .wc-ticks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 22px;
+    max-width: 30em;
+  }
+  .wc-tick {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-weight: 600;
+  }
+  .wc-tickmark {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    background: #e63a2e;
+    border: 3px solid #fbf7ee;
+    color: #fbf7ee;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .wc-membercard {
+    background: #fbf7ee;
+    color: #15121d;
+    box-shadow: 10px 10px 0 #e63a2e;
+    padding: 30px 28px;
+    position: relative;
+    transform: rotate(-1.6deg);
+  }
+  .wc-membercard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid #15121d;
+    filter: url(#rough);
+    pointer-events: none;
+  }
+  .wc-memberbadge {
+    position: absolute;
+    top: -15px;
+    right: 22px;
+    background: #e63a2e;
+    color: #fbf7ee;
+    border: 3px solid #15121d;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    transform: rotate(3deg);
+    box-shadow: 3px 3px 0 #15121d;
+  }
+  .wc-price-big {
+    font-family: "Anton", sans-serif;
+    font-size: 64px;
+    line-height: 0.8;
+    color: #e63a2e;
+  }
+  .wc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .wc-form[hidden],
+  .wc-confirm[hidden] {
+    display: none;
+  }
+  .wc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .wc-label {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+  .wc-input {
+    font-family: "Archivo", sans-serif;
+    font-size: 15px;
+    padding: 11px 12px;
+    border: 3px solid #15121d;
+    background: #fff;
+    color: #15121d;
+  }
+  .wc-confirm {
+    border: 3px solid #e63a2e;
+    background: rgba(230, 58, 46, 0.1);
+    padding: 22px;
+    text-align: center;
+  }
+  .wc-confirm-title {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 26px;
+    color: #e63a2e;
+    line-height: 1;
+  }
+
+  /* --- café --- */
+  .wc-cafe {
+    background: #fbf7ee;
+    border-top: 5px solid #15121d;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+  .wc-cafe-art {
+    position: relative;
+    min-height: 340px;
+    background: #211c2e;
+    background-image: repeating-linear-gradient(45deg, #211c2e 0 22px, #15121d 22px 44px);
+    overflow: hidden;
+    border-right: 7px solid #15121d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wc-cafe-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(#fbf7ee 1.1px, transparent 1.3px);
+    background-size: 9px 9px;
+    opacity: 0.12;
+    -webkit-mask-image: radial-gradient(80% 80% at 50% 45%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(80% 80% at 50% 45%, #000 0%, transparent 72%);
+  }
+  .wc-cafe-plaque {
+    position: relative;
+    background: #fbf7ee;
+    color: #15121d;
+    border: 3px solid #15121d;
+    box-shadow: 6px 6px 0 #e63a2e;
+    transform: rotate(-5deg);
+    padding: 22px 28px;
+    text-align: center;
+  }
+  .wc-cafe-plaque-title {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 34px;
+    line-height: 0.95;
+  }
+  .wc-cafe-body {
+    padding: 56px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* --- visit --- */
+  .wc-visit {
+    background: #fbf7ee;
+    padding: 64px 24px 72px;
+  }
+  .wc-visit-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 44px;
+    align-items: stretch;
+  }
+  .wc-address {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  .wc-hours {
+    margin-top: 26px;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 380px;
+    font-size: 15.5px;
+  }
+  .wc-hours tr {
+    border-bottom: 1px dashed #15121d;
+  }
+  .wc-hours td {
+    padding: 9px 0;
+    font-weight: 600;
+  }
+  .wc-hours td + td {
+    text-align: right;
+    font-family: "Space Mono", monospace;
+    font-weight: 400;
+  }
+  .wc-visit-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin-top: 28px;
+  }
+  .wc-map {
+    position: relative;
+    min-height: 340px;
+    border: 3px solid #15121d;
+    box-shadow: 8px 8px 0 #15121d;
+    background: #f0e9d8;
+    background-image: linear-gradient(#e3ddcc 2px, transparent 2px),
+      linear-gradient(90deg, #e3ddcc 2px, transparent 2px);
+    background-size: 44px 44px;
+    overflow: hidden;
+  }
+  .wc-map-road-v {
+    position: absolute;
+    top: 0;
+    left: 38%;
+    width: 46px;
+    height: 100%;
+    background: #e3ddcc;
+    transform: skewX(-12deg);
+  }
+  .wc-map-road-h {
+    position: absolute;
+    top: 54%;
+    left: 0;
+    width: 100%;
+    height: 34px;
+    background: #d8d1c0;
+    transform: skewY(-3deg);
+  }
+  .wc-map-pin {
+    position: absolute;
+    top: 30%;
+    left: 46%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .wc-map-pinlabel {
+    background: #15121d;
+    color: #fbf7ee;
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 9px;
+    border: 2px solid #fbf7ee;
+    white-space: nowrap;
+    margin-bottom: 6px;
+  }
+  .wc-map-pindot {
+    width: 30px;
+    height: 30px;
+    background: #e63a2e;
+    border: 3px solid #15121d;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(45deg);
+    box-shadow: 3px 3px 0 rgba(21, 18, 29, 0.3);
+  }
+  .wc-map-note {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-family: "Space Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: #8a8f84;
+  }
+
+  /* --- footer --- */
+  .wc-footer {
+    background: #15121d;
+    color: #fbf7ee;
+    padding: 54px 24px 0;
+  }
+  .wc-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 34px;
+    padding-bottom: 42px;
+  }
+  .wc-footer-head {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #e63a2e;
+    margin-bottom: 14px;
+  }
+  .wc-footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 15px;
+    color: #d7d0c2;
+  }
+  .wc-footer-rule {
+    border-top: 3px solid #2b2536;
+  }
+  .wc-footer-legal {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 0 26px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: "Space Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    color: #8d8678;
+  }
+
+  /* --- responsive: the concept is drawn wide, so collapse the paired grids --- */
+  @media (max-width: 880px) {
+    .wc-nav-desktop {
+      display: none;
+    }
+    .wc-burger {
+      display: flex;
+    }
+    .wc-hero-inner,
+    .wc-pull-inner,
+    .wc-cafe,
+    .wc-visit-inner {
+      grid-template-columns: 1fr;
+    }
+    .wc-hero-aside {
+      min-height: 230px;
+    }
+    .wc-bubble {
+      position: relative;
+      top: 0;
+      max-width: none;
+    }
+    .wc-stamp {
+      display: none;
+    }
+    .wc-cafe-art {
+      border-right: 0;
+      border-bottom: 7px solid #15121d;
+    }
+    .wc-cafe-body {
+      padding: 44px 24px;
+    }
+    .wc-footer-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    .wc-ribbon-text {
+      font-size: 17px;
+    }
+  }
+  @media (max-width: 560px) {
+    .wc-ticks {
+      grid-template-columns: 1fr;
+    }
+    .wc-hero-btns,
+    .wc-visit-btns {
+      gap: 22px;
+    }
+    .wc-footer-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html:has(.wc) {
+      scroll-behavior: auto;
+    }
+    .wc * {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Mobile menu ------------------------------------------------------------
+  const burger = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const menu = document.querySelector<HTMLElement>("#wc-menu");
+
+  function setMenu(open: boolean) {
+    if (!burger || !menu) return;
+    menu.hidden = !open;
+    burger.setAttribute("aria-expanded", String(open));
+  }
+
+  burger?.addEventListener("click", () => setMenu(menu?.hidden === true));
+  document.querySelectorAll("[data-menu-close]").forEach((el) => {
+    el.addEventListener("click", () => setMenu(false));
+  });
+  // The menu is a mobile affordance; widening past the breakpoint must not
+  // leave it stranded open behind the desktop nav.
+  const wide = window.matchMedia("(min-width: 881px)");
+  wide.addEventListener("change", (e) => {
+    if (e.matches) setMenu(false);
+  });
+
+  // Pull-list form — swaps to a confirmation, nothing is sent anywhere -------
+  const form = document.querySelector<HTMLFormElement>("[data-pull-form]");
+  const confirm = document.querySelector<HTMLElement>("[data-pull-confirm]");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    form.reset();
+    form.hidden = true;
+    if (confirm) confirm.hidden = false;
+  });
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Reveal on scroll -------------------------------------------------------
+  if (!reduce) {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-wc-reveal]"));
+    els.forEach((el) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(22px)";
+      el.style.transition = "opacity .55s ease, transform .55s ease";
+      el.style.willChange = "opacity, transform";
+    });
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          el.style.opacity = "1";
+          // Clearing the inline transform hands the card back to the
+          // stylesheet, so the tilt and hover lift still work afterwards.
+          el.style.transform = "";
+          io.unobserve(el);
+        });
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+  }
+
+  // Hand-drawn drop shadow behind every button ------------------------------
+  // A polygon offset behind the face; on hover each vertex wanders on its own
+  // sine so the shadow looks inked rather than printed.
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const cfg = [
+    [2.0, 1.7, 0.0, 2.0, 1.3, 1.1], // top-left, mostly tucked behind the face
+    [4.0, 1.1, 2.0, 2.0, 1.9, 0.4], // top-right
+    [8.0, 1.45, 0.7, 6.0, 1.15, 3.0], // bottom-right, the loosest corner
+    [5.0, 1.3, 4.2, 7.5, 1.55, 0.9], // bottom-left
+  ];
+  const fmt = (pts: number[][]) =>
+    pts.map((p) => `${Math.round(p[0] * 10) / 10},${Math.round(p[1] * 10) / 10}`).join(" ");
+
+  function buildDrop(el: HTMLElement) {
+    const face = el.querySelector<HTMLElement>("a, button");
+    if (!face) return;
+    const [ox, oy] = (el.dataset.off || "9,11").split(",").map(Number);
+    const w = face.offsetWidth;
+    const h = face.offsetHeight;
+    if (!w || !h) return;
+
+    const svg = document.createElementNS(SVGNS, "svg");
+    const vw = w + ox + 16;
+    const vh = h + oy + 14;
+    svg.setAttribute("width", String(vw));
+    svg.setAttribute("height", String(vh));
+    svg.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+    svg.style.cssText =
+      "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:0;";
+
+    const poly = document.createElementNS(SVGNS, "polygon");
+    poly.setAttribute("fill", el.dataset.drop || "#15121d");
+    const rest = [
+      [ox, oy],
+      [ox + w, oy],
+      [ox + w, oy + h],
+      [ox, oy + h],
+    ];
+    poly.setAttribute("points", fmt(rest));
+    svg.appendChild(poly);
+    el.insertBefore(svg, el.firstChild);
+
+    if (reduce) return; // static offset rectangle, no wander
+
+    let raf: number | null = null;
+    let t0 = 0;
+    let last = 0;
+    let amp = 0;
+    let target = 0;
+
+    const frame = (ts: number) => {
+      if (!t0) {
+        t0 = ts;
+        last = ts;
+      }
+      const t = (ts - t0) / 1000;
+      const dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      // Ease the amplitude rather than the vertices, so the wander fades in
+      // and out smoothly instead of snapping on hover.
+      amp += (target - amp) * (1 - Math.exp(-dt / 0.16));
+      poly.setAttribute(
+        "points",
+        fmt(
+          rest.map((b, i) => {
+            const c = cfg[i];
+            return [
+              b[0] + amp * c[0] * Math.sin(t * c[1] + c[2]),
+              b[1] + amp * c[3] * Math.sin(t * c[4] + c[5]),
+            ];
+          })
+        )
+      );
+      if (target === 0 && amp < 0.003) {
+        poly.setAttribute("points", fmt(rest));
+        raf = null;
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+
+    const run = () => {
+      if (raf === null) {
+        t0 = 0;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    el.addEventListener("mouseenter", () => {
+      target = 1;
+      run();
+    });
+    el.addEventListener("mouseleave", () => {
+      target = 0;
+      run();
+    });
+  }
+
+  // Wait for webfonts: the shadow is sized off the rendered face, and Anton
+  // swapping in after would leave every shadow the wrong width.
+  const initDrops = () =>
+    document.querySelectorAll<HTMLElement>("[data-anglebtn]").forEach(buildDrop);
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(initDrops);
+  } else {
+    initDrops();
+  }
+</script>

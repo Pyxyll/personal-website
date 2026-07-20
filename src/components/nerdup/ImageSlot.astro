@@ -1,0 +1,103 @@
+---
+/**
+ * Placeholder standing in for a photo the shop hasn't supplied yet.
+ *
+ * The design used the design tool's <image-slot> custom element, which is a
+ * drag-and-drop scaffold with a persistence sidecar — none of that machinery
+ * belongs on a static site. What matters is the slot reads as a deliberate
+ * "photo goes here", not as a broken image, so it's drawn in the same visual
+ * language as the rest of the page: triangle motif, mono label.
+ *
+ * Fills its container, so the caller owns the aspect ratio.
+ */
+interface Props {
+  /** Short description of the photo that belongs here. */
+  label: string;
+  /** Which surface it sits on, so the placeholder stays legible on both. */
+  tone?: "light" | "dark";
+  /** Stock stand-in. Omit to fall back to the empty placeholder. */
+  src?: string;
+  /** Required alongside src — the label describes the slot, not the photo. */
+  alt?: string;
+  /** Skip lazy-loading for slots above the fold. */
+  eager?: boolean;
+}
+
+const { label, tone = "light", src, alt, eager = false } = Astro.props;
+---
+
+{
+  src ? (
+    <img
+      class="photo"
+      src={src}
+      alt={alt ?? label}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+    />
+  ) : (
+    <div class:list={["slot", tone]} role="img" aria-label={`Placeholder: ${label}`}>
+      <span class="tri" aria-hidden="true" />
+      <span class="label">{label}</span>
+    </div>
+  )
+}
+
+<style>
+  .photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .slot {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 16px;
+    text-align: center;
+    /* Faint hatch so an empty slot reads as intentionally blank rather than
+       as an image that failed to load. */
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0 7px,
+      var(--hatch) 7px 8px
+    );
+  }
+  .slot.light {
+    --hatch: rgba(17, 17, 17, 0.05);
+    background-color: #efe9dc;
+  }
+  .slot.dark {
+    --hatch: rgba(247, 243, 234, 0.06);
+    background-color: #1b1a17;
+  }
+  .tri {
+    width: 26px;
+    height: 23px;
+    background: #e8b23a;
+    opacity: 0.55;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  .label {
+    font-family: "Space Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+  .light .label {
+    color: #7a756b;
+  }
+  .dark .label {
+    color: #8a8272;
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+/**
+ * Site header. Shared across the home page, the shop and product pages, so the
+ * three can't drift apart.
+ */
+import { shop } from "./data";
+
+interface Props {
+  /** Which nav item to mark as current. */
+  current?: "home" | "shop" | "about" | "visit";
+}
+
+const { current } = Astro.props;
+
+const links = [
+  { href: "/demos/nerd-up-collective/shop/", label: "Shop", key: "shop" },
+  { href: "/demos/nerd-up-collective/#find", label: "What we've got", key: "" },
+  { href: "/demos/nerd-up-collective/#about", label: "About", key: "about" },
+  { href: "/demos/nerd-up-collective/#visit", label: "Visit", key: "visit" },
+];
+---
+
+<header class="ncc-header">
+  <nav class="ncc-nav">
+    <a href="/demos/nerd-up-collective/" aria-label={`${shop.name} home`} class="ncc-brand">
+      <span aria-hidden="true" class="ncc-tri" style="width:22px;height:20px;"></span>
+      <span class="ncc-wordmark">
+        <span class="ncc-wordmark-main">NERD-UP</span>
+        <span class="ncc-wordmark-sub">COLLECTIVE</span>
+      </span>
+    </a>
+
+    <div class="ncc-desktop-nav">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          class="ncc-navlink"
+          aria-current={l.key && l.key === current ? "page" : undefined}
+        >
+          {l.label}
+        </a>
+      ))}
+      <a href="/demos/nerd-up-collective/#visit" class="ncc-btn ncc-btn-dark">Find us</a>
+    </div>
+
+    <button
+      class="ncc-mobile-btn"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="ncc-menu"
+      data-menu-toggle
+    >
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+  </nav>
+
+  <div class="ncc-menu" id="ncc-menu" hidden>
+    {links.map((l) => (
+      <a href={l.href} class="ncc-menulink" data-menu-close>
+        {l.label}
+      </a>
+    ))}
+    <a href="/demos/nerd-up-collective/#visit" class="ncc-menucta" data-menu-close>Find us</a>
+  </div>
+</header>

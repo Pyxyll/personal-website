@@ -1,0 +1,294 @@
+---
+/**
+ * Home page of the Nerd-Up Collective concept — an unsolicited design sent to
+ * the shop.
+ *
+ * Lives under /demos/ rather than in the `work` collection: nothing here was
+ * commissioned, so it must not appear in the work index alongside real client
+ * projects. Noindexed and excluded from the sitemap so it can't compete with
+ * the shop's own presence in search.
+ *
+ * Chrome, fonts and stylesheet come from Shell; content from data.ts.
+ */
+import Shell from "../../../components/nerdup/Shell.astro";
+import ProductCard from "../../../components/nerdup/ProductCard.astro";
+import StreetMap from "../../../components/nerdup/StreetMap.astro";
+import { categories, justIn, shop } from "../../../components/nerdup/data";
+
+const pageTitle = `${shop.name} · Wexford`;
+const pageDesc =
+  "Retro games, VHS, comics, vinyl and collectibles in Wexford. One-off stock that turns over constantly — inside Eclectic Avenue on North Main Street.";
+---
+
+<Shell title={pageTitle} description={pageDesc} current="home">
+  {/* ===== HERO ===== */}
+  <section class="ncc-hero" id="top">
+    {/* The brand mark blown up to full-bleed and filled with the shop itself.
+        Masked so it fades out toward the apex, leaving the headline on clean
+        paper while the base of the triangle carries the photograph. Decorative
+        — the about section holds the described version of this image. */}
+    <div aria-hidden="true" class="ncc-hero-glyph">
+      <img src="/demos/nerd-up/shane-hero.jpg" alt="" loading="eager" decoding="async" />
+    </div>
+    <div class="ncc-hero-inner">
+      <div class="ncc-kicker">
+        <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+        {shop.venue.toUpperCase()} · {shop.town.toUpperCase()}
+      </div>
+
+      <h1 class="ncc-h1">
+        The cabinet of everything worth being a <span class="ncc-h1-em">nerd</span> about.
+      </h1>
+
+      <p class="ncc-hero-lede">
+        Consoles, vinyl, VHS, comics, figures, oddities — one-off finds that turn over constantly.
+        You never know what you'll walk out with.
+      </p>
+
+      <div class="ncc-hero-btns">
+        <a href="/demos/nerd-up-collective/shop/" class="ncc-btn ncc-btn-dark ncc-btn-lg">
+          Browse the shop
+          <span aria-hidden="true" class="ncc-arrow"></span>
+        </a>
+        <a href="#visit" class="ncc-btn ncc-btn-outline ncc-btn-lg">Find us</a>
+      </div>
+    </div>
+  </section>
+
+  {/* ===== JUST IN ===== */}
+  <section id="just-in" class="ncc-justin">
+    <span aria-hidden="true" class="ncc-ghost-tri ncc-ghost-justin"></span>
+    <div class="ncc-justin-inner">
+      <div class="ncc-hd-grid" data-ncc-reveal>
+        <div>
+          <div class="ncc-kicker ncc-kicker-left">
+            <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+            JUST IN
+          </div>
+          <h2 class="ncc-h2">Fresh finds wall</h2>
+        </div>
+        <p class="ncc-hd-note">
+          Stock is one-off and always changing — the newest arrivals land here first.
+          <span style="color:#111;">{justIn.length} new this week.</span>
+        </p>
+      </div>
+
+      <div class="ncc-shop-grid">
+        {justIn.map((p, i) => (
+          <ProductCard product={p} showArrival eager={i < 4} />
+        ))}
+      </div>
+
+      <div class="ncc-social" data-ncc-reveal>
+        <span aria-hidden="true" class="ncc-tri" style="width:16px;height:14px;"></span>
+        <span class="ncc-social-text">
+          New drops land on Facebook first. Follow to catch them before they're gone.
+        </span>
+        <a href={shop.facebook} target="_blank" rel="noopener" class="ncc-btn ncc-btn-accent">
+          Follow on Facebook →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* ===== WHAT WE'VE GOT ===== */}
+  <section id="find" class="ncc-dark">
+    <span aria-hidden="true" class="ncc-ghost-tri ncc-ghost-find"></span>
+    <div class="ncc-dark-inner">
+      <div class="ncc-dark-head" data-ncc-reveal>
+        <div class="ncc-kicker ncc-kicker-left ncc-kicker-onDark">
+          <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+          WHAT WE'VE GOT
+        </div>
+        <h2 class="ncc-h2" style="margin-bottom:20px;">A bit of everything.</h2>
+        <p class="ncc-dark-lede">
+          The range is the whole point. Whatever corner of nerd culture you're into, there's a
+          decent chance it's somewhere on the shelves.
+        </p>
+      </div>
+
+      <div class="ncc-cat-grid">
+        {categories.map((c) => (
+          <a class="ncc-cat" href={`/demos/nerd-up-collective/shop/?c=${c.slug}`} data-ncc-reveal>
+            <span aria-hidden="true" class="ncc-tri" style="width:15px;height:13px;margin-bottom:24px;"></span>
+            <h3 class="ncc-cat-name">{c.name}</h3>
+            <p class="ncc-cat-line">{c.line}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ===== ABOUT ===== */}
+  <section id="about" class="ncc-about">
+    <div class="ncc-about-grid">
+      <div data-ncc-reveal>
+        <div class="ncc-kicker ncc-kicker-left">
+          <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+          THE ETHOS
+        </div>
+        <h2 class="ncc-h2 ncc-h2-sm">No two visits are the same.</h2>
+        <p class="ncc-about-body">
+          Nerd-Up is curated by collectors, for collectors. We're here for the thrill of the dig —
+          the crate you weren't expecting, the console you had as a kid, the record that turns up
+          out of nowhere.
+        </p>
+        <p class="ncc-about-body" style="margin-bottom:0;">
+          Everything is one-off and second-hand, so the shelves are never the same twice. That's
+          the fun of it.
+        </p>
+        <div aria-hidden="true" class="ncc-tri-row">
+          <span class="ncc-tri-solid"></span>
+          <span class="ncc-tri-outline-1"></span>
+          <span class="ncc-tri-outline-2"></span>
+        </div>
+      </div>
+
+      <div class="ncc-about-img" data-ncc-reveal>
+        <img
+          src="/demos/nerd-up/shane.jpg"
+          alt="The interior of Nerd-Up Collective: a pegboard wall of cartridges, framed artwork and racks of VHS"
+          loading="lazy"
+          decoding="async"
+        />
+        <span aria-hidden="true" class="ncc-about-tri"></span>
+      </div>
+    </div>
+  </section>
+
+  {/* ===== WANTS LIST =====
+      The reason to have a website rather than only a Facebook page: one-off
+      stock means the shop can't advertise what it doesn't have yet, but it can
+      remember who's looking. */}
+  <section id="wants" class="ncc-wants">
+    <span aria-hidden="true" class="ncc-ghost-tri ncc-ghost-justin"></span>
+    <div class="ncc-wants-inner">
+      <div data-ncc-reveal>
+        <div class="ncc-kicker ncc-kicker-left">
+          <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+          ★ THE WANTS LIST
+        </div>
+        <h2 class="ncc-h2 ncc-h2-sm">Tell us what you're hunting.</h2>
+        <p class="ncc-wants-lede">
+          Second-hand stock is a lottery — we never know what's coming through the door until it
+          does. So instead of you checking back every week, we'll write down what you're after and
+          get in touch the day it lands.
+        </p>
+        <ol class="ncc-steps">
+          <li class="ncc-step">
+            <div class="ncc-step-body">
+              <strong>Tell us the title</strong>
+              <span>A game, a tape, a run of issues, a console — as specific or as vague as you like.</span>
+            </div>
+          </li>
+          <li class="ncc-step">
+            <div class="ncc-step-body">
+              <strong>We keep an eye out</strong>
+              <span>Every trade-in and house clearance gets checked against the list before it hits the shelf.</span>
+            </div>
+          </li>
+          <li class="ncc-step">
+            <div class="ncc-step-body">
+              <strong>You get first refusal</strong>
+              <span>We hold it behind the counter for 48 hours and message you. No obligation.</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="ncc-wants-card" data-ncc-reveal>
+        <h3>Start your wants list</h3>
+        <p>Free, and you only hear from us when something turns up.</p>
+
+        <form class="ncc-form" data-wants-form>
+          <label class="ncc-field">
+            <span class="ncc-label">Your name</span>
+            <input name="name" type="text" required placeholder="Aoife Byrne" class="ncc-input" />
+          </label>
+          <label class="ncc-field">
+            <span class="ncc-label">Email or mobile</span>
+            <input name="contact" type="text" required placeholder="you@email.ie" class="ncc-input" />
+          </label>
+          <label class="ncc-field">
+            <span class="ncc-label">What are you after?</span>
+            <textarea
+              name="wants"
+              class="ncc-input"
+              placeholder="Boxed N64 games, Akira manga volumes, anything Sega Saturn…"></textarea>
+          </label>
+          <button type="submit" class="ncc-btn ncc-btn-dark ncc-buy-btn" style="justify-content:center;">
+            Add me to the list
+            <span aria-hidden="true" class="ncc-arrow"></span>
+          </button>
+          <p class="ncc-form-note">
+            We'd only ever use this to tell you about the things on your list.
+          </p>
+        </form>
+
+        <div class="ncc-wants-done" data-wants-done hidden aria-live="polite">
+          <div class="ncc-wants-done-title">You're on the list</div>
+          <p>
+            That'd land in the shop's inbox — we'd start checking every trade-in against it from
+            this weekend.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ===== VISIT ===== */}
+  <section id="visit" class="ncc-dark">
+    <span aria-hidden="true" class="ncc-ghost-tri ncc-ghost-visit"></span>
+    <div class="ncc-visit-grid">
+      <div data-ncc-reveal>
+        <div class="ncc-kicker ncc-kicker-left ncc-kicker-onDark">
+          <span aria-hidden="true" class="ncc-tri ncc-tri-sm"></span>
+          VISIT
+        </div>
+        <h2 class="ncc-h2 ncc-h2-sm" style="margin-bottom:34px;">Come have a dig.</h2>
+
+        <div class="ncc-visit-details">
+          <div>
+            <div class="ncc-visit-label">WHERE</div>
+            <div class="ncc-visit-where">
+              Inside {shop.venue},<br />{shop.street},<br />{shop.town}
+            </div>
+          </div>
+          <div>
+            <div class="ncc-visit-label">MARKET DAYS</div>
+            <div class="ncc-visit-hours">
+              {shop.hours.map((h) => (
+                <div>{h.days} · {h.time}</div>
+              ))}
+              <span style="font-size:14px;color:#8a8272;">— confirm with the shop —</span>
+            </div>
+          </div>
+          <div class="ncc-visit-btns">
+            <a href={shop.directions} target="_blank" rel="noopener" class="ncc-btn ncc-btn-accent">
+              Get directions
+            </a>
+            <a href={shop.facebook} target="_blank" rel="noopener" class="ncc-btn ncc-btn-outline-light">
+              Facebook
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ncc-map" data-ncc-reveal>
+        <StreetMap />
+      </div>
+    </div>
+  </section>
+</Shell>
+
+<script>
+  // Wants list — swaps to a confirmation, nothing is sent anywhere.
+  const form = document.querySelector<HTMLFormElement>("[data-wants-form]");
+  const done = document.querySelector<HTMLElement>("[data-wants-done]");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    form.reset();
+    form.hidden = true;
+    if (done) done.hidden = false;
+  });
+</script>

@@ -14,8 +14,15 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
-  /** Where "Case study" points — the write-up this demo belongs to. */
-  caseStudyHref: string;
+  /**
+   * Where "Case study" points — the write-up this demo belongs to. Omitted by
+   * demos that have no write-up (e.g. a spec concept sent to a prospect), which
+   * render the pill with the back-to-site link alone.
+   */
+  caseStudyHref?: string;
+  /** Keep the demo out of search results. Spec concepts should not outrank the
+      real business they're pitched to. */
+  noindex?: boolean;
   /** Page background, so overscroll and the edges match the demo, not the site. */
   background: string;
 }
@@ -49,8 +56,12 @@ const { caseStudyHref, background, ...head } = Astro.props;
         <span class="arrow" aria-hidden="true">←</span>
         <span>Dylan Collins</span>
       </a>
-      <span class="sep" aria-hidden="true"></span>
-      <a href={caseStudyHref}>Case study</a>
+      {caseStudyHref && (
+        <>
+          <span class="sep" aria-hidden="true"></span>
+          <a href={caseStudyHref}>Case study</a>
+        </>
+      )}
     </nav>
 
     <style>
