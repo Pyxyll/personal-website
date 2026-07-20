@@ -713,7 +713,7 @@ html:has(.ncc) {
   .ncc-mobile-btn {
     display: flex;
   }
-    .ncc-hd-grid {
+  .ncc-hd-grid {
     grid-template-columns: 1fr;
     align-items: start;
   }
@@ -730,7 +730,7 @@ html:has(.ncc) {
   }
 }
 @media (max-width: 640px) {
-    .ncc-cat-grid {
+  .ncc-cat-grid {
     grid-template-columns: 1fr;
   }
   .ncc-nav,
@@ -1198,7 +1198,10 @@ textarea.ncc-input {
 @media (max-width: 640px) {
   .ncc-shop-inner,
   .ncc-product-inner,
-  .ncc-wants-inner,
+  .ncc-wants-inner {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
   .ncc-shop-grid {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
