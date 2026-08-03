@@ -1,0 +1,277 @@
+---
+/**
+ * Scattered tiles that drift, each cycling through a few icons — and that fall
+ * into formation when the panel's CTA is hovered.
+ *
+ * Placed absolutely across the panel rather than stacked in a column. A column
+ * with horizontal offsets still reads as a column: the eye picks up the even
+ * vertical rhythm long before it picks up the nudges. Real scatter needs both
+ * axes free, so each tile carries its own coordinates.
+ *
+ * Purely decorative — it sits behind the copy and says nothing the copy
+ * doesn't — so the layer is hidden from the accessibility tree and takes no
+ * pointer events.
+ *
+ * Icons are lucide SVGs inlined at build time via `?raw`, so nothing about
+ * this ships JavaScript: the drift, the cross-fade and the formation are all
+ * CSS. Placeholder set for now; swapping one is a line in TILES.
+ */
+import CornerNodes from "./CornerNodes.astro";
+import globe from "lucide-static/icons/globe.svg?raw";
+import layout from "lucide-static/icons/layout-dashboard.svg?raw";
+import plug from "lucide-static/icons/plug.svg?raw";
+import server from "lucide-static/icons/server.svg?raw";
+import code from "lucide-static/icons/code.svg?raw";
+import zap from "lucide-static/icons/zap.svg?raw";
+import gauge from "lucide-static/icons/gauge.svg?raw";
+import database from "lucide-static/icons/database.svg?raw";
+import workflow from "lucide-static/icons/workflow.svg?raw";
+
+/**
+ * Two positions per tile, both as percentages of the panel so they hold their
+ * shape as it resizes:
+ *
+ *   x / y    scattered — clustered in the group's upper corner, fanning down
+ *            and inward, above the headline and out to the side of it.
+ *   px / py  in formation — apex over two base tiles, a pyramid per side.
+ *
+ * Everything is `left`, never `right`, so one pair of properties drives both
+ * sides and the formation maths stays comparable between them.
+ *
+ * `slot` — how long each icon holds — differs per tile on purpose. A shared
+ * rate makes six tiles blink in unison, which reads as one mechanism rather
+ * than six loose objects.
+ */
+const TILES = {
+  left: [
+    { icons: [globe, code, workflow], x: 15, y: 9, px: 15.7, py: 22, rotate: -13, delay: 0, drift: 7.4, slot: 8.6, in: 0.16, dur: 0.6 },
+    { icons: [layout, gauge, database], x: 8, y: 27, px: 13.2, py: 35.7, rotate: 9, delay: 0.9, drift: 8.8, slot: 10.4, in: 0, dur: 0.52 },
+    { icons: [plug, zap, server], x: 23, y: 36, px: 18.2, py: 35.7, rotate: -7, delay: 1.7, drift: 6.6, slot: 7.9, in: 0.06, dur: 0.56 },
+  ],
+  right: [
+    { icons: [server, database, globe], x: 81, y: 12, px: 79.7, py: 22, rotate: 12, delay: 0.5, drift: 8.2, slot: 11.3, in: 0.21, dur: 0.63 },
+    { icons: [zap, workflow, plug], x: 73, y: 30, px: 77.2, py: 35.7, rotate: -8, delay: 1.4, drift: 7, slot: 9.2, in: 0.03, dur: 0.54 },
+    { icons: [gauge, code, layout], x: 87, y: 40, px: 82.2, py: 35.7, rotate: 15, delay: 2.1, drift: 9.2, slot: 9.8, in: 0.1, dur: 0.58 },
+  ],
+} as const;
+
+/** The box drawn round each formation, padded off the pyramid's bounds. */
+const BOX = { left: { x: 11 }, right: { x: 75 } } as const;
+
+interface Props {
+  side: "left" | "right";
+  class?: string;
+}
+const { side, class: className = "" } = Astro.props;
+const tiles = TILES[side];
+---
+
+<div class:list={["ftiles", className]} aria-hidden="true">
+  <span class="fbox" style={`left:${BOX[side].x}%`}>
+    <CornerNodes size={10} radius={0} color="var(--color-rule-strong)" />
+  </span>
+
+  {tiles.map((tile) => (
+    <span
+      class="ftile"
+      style={`--x:${tile.x}%;--y:${tile.y}%;--px:${tile.px}%;--py:${tile.py}%;--r:${tile.rotate}deg;--d:${tile.delay}s;--t:${tile.drift}s;--in:${tile.in}s;--dur:${tile.dur}s`}
+    >
+      <span class="fface">
+        {tile.icons.map((svg, i) => (
+          <span
+            class="fico"
+            style={`--cycle:${tile.icons.length * tile.slot}s;--slot:${i * tile.slot}s`}
+            set:html={svg}
+          />
+        ))}
+      </span>
+    </span>
+  ))}
+</div>
+
+<style>
+  /* Rotation and drift live on separate elements.
+     They used to share one: the drift animation set `transform`, and the
+     straightening was done by transitioning a custom property the keyframes
+     read. An element only gets one transform, and a keyframe that depends on a
+     transitioning variable does not reliably re-resolve while the animation is
+     running — which is why some tiles straightened and others snapped. Now the
+     outer element rotates and the inner one drifts, so neither touches the
+     other's property. */
+  @property --lift {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  .ftiles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Outer: where the tile is, and which way up it is. Plain `transform`, so
+     the straightening is an ordinary transition with nothing to contend with.
+     Travel and delay come from the tile, so no two arrive together. */
+  .ftile {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 4rem;
+    height: 4rem;
+    --ease: cubic-bezier(0.2, 0.8, 0.25, 1);
+    transform: rotate(var(--r));
+    transition: left var(--dur) var(--ease) var(--in),
+      top var(--dur) var(--ease) var(--in),
+      transform var(--dur) var(--ease) var(--in);
+  }
+
+  /* Inner: the face, and the drift. Only ever translates. */
+  .fface {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    --lift: -12px;
+    border: 2px dashed var(--color-rule-strong);
+    border-radius: 10px;
+    /* Glass: the fill has to be part transparent for the backdrop blur to have
+       anything to show, and what it shows is the shader drifting behind. */
+    background: color-mix(in srgb, var(--color-paper-2) 45%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: ftile-drift var(--t) ease-in-out var(--d) infinite;
+    /* Collapses far quicker than the tile travels. Winding the bob down over
+       the whole journey leaves it still bobbing mid-flight, and when its phase
+       happens to be rising while the tile is heading down the two fight — a
+       hitch, landing differently on each tile because each drifts at its own
+       period. Killed inside the first third instead, so the rest of the
+       journey is clean. Still eased rather than cancelled: cancelling snaps
+       the tile back from wherever in the rise it was. */
+    transition: --lift 0.2s ease-out var(--in);
+  }
+
+  @keyframes ftile-drift {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(var(--lift));
+    }
+  }
+
+  /* The formation.
+     Triggered from the panel rather than from the tiles: :has() lets an
+     ancestor react to the CTA being hovered, which is the only way a sibling
+     subtree can respond to it in CSS. */
+  :global(.fpanel:has(.fcta:hover)) .ftile {
+    left: var(--px);
+    top: var(--py);
+    transform: rotate(0deg);
+  }
+  /* Drift winds down to nothing rather than being cancelled, which would snap
+     the tile back from wherever in the rise it happened to be. */
+  :global(.fpanel:has(.fcta:hover)) .fface {
+    --lift: 0px;
+  }
+
+  .fbox {
+    position: absolute;
+    top: 18%;
+    width: 14%;
+    height: 34%;
+    border: 1px solid var(--color-rule-strong);
+    background: color-mix(in srgb, var(--color-paper-2) 55%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    opacity: 0;
+    transform: scale(0.94);
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
+  }
+  :global(.fpanel:has(.fcta:hover)) .fbox {
+    opacity: 1;
+    transform: scale(1);
+    transition-delay: 0.34s; /* the bases have set, the apex is still coming */
+  }
+
+  /* Joints arrive after the frame, unevenly. `scale` rather than `transform`:
+     the nodes already use transform to centre themselves on the corner, and
+     the two would overwrite each other. */
+  .fbox :global(.corner-nodes > span) {
+    opacity: 0;
+    scale: 0.35;
+    transition: opacity 0.22s ease, scale 0.34s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  :global(.fpanel:has(.fcta:hover)) .fbox :global(.corner-nodes > span) {
+    opacity: 1;
+    scale: 1;
+  }
+  :global(.fpanel:has(.fcta:hover)) .fbox :global(.corner-nodes > span:nth-child(1)) { transition-delay: 0.56s; }
+  :global(.fpanel:has(.fcta:hover)) .fbox :global(.corner-nodes > span:nth-child(2)) { transition-delay: 0.68s; }
+  :global(.fpanel:has(.fcta:hover)) .fbox :global(.corner-nodes > span:nth-child(3)) { transition-delay: 0.62s; }
+  :global(.fpanel:has(.fcta:hover)) .fbox :global(.corner-nodes > span:nth-child(4)) { transition-delay: 0.74s; }
+
+  .fico {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    animation: fico-cycle var(--cycle) ease-in-out var(--slot) infinite;
+  }
+
+  /* Percentages, so the shape holds whatever rate a tile runs at.
+     Three icons means each owns 33.3% of the cycle, and the visible window now
+     fills it: the outgoing icon is still going as the next arrives. The long
+     changeover was never the fade itself — it was the dead air after it, which
+     left the tile empty for a beat before anything replaced it.
+     On a ~26s cycle: ~0.4s up, ~8s held, ~0.4s away, no gap. */
+  @keyframes fico-cycle {
+    0% {
+      opacity: 0;
+    }
+    1.5% {
+      opacity: 1;
+    }
+    32% {
+      opacity: 1;
+    }
+    33.5%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .fico :global(svg) {
+    width: 24px;
+    height: 24px;
+    stroke: var(--color-ink-dim);
+    stroke-width: 1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fface,
+    .fico {
+      animation: none;
+    }
+    /* The formation is a state change worth keeping; it just arrives at once
+       rather than travelling there. */
+    .ftile,
+    .fface,
+    .fbox,
+    .fbox :global(.corner-nodes > span) {
+      transition: none;
+    }
+    .fbox :global(.corner-nodes > span) {
+      scale: 1;
+      opacity: 1;
+    }
+    /* Without the cycle every icon in a tile would stack on top of the others. */
+    .fico {
+      opacity: 0;
+    }
+    .fico:first-child {
+      opacity: 1;
+    }
+  }
+</style>

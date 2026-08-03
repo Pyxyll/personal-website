@@ -30,8 +30,9 @@ export default defineConfig({
       filter: (page) =>
         !page.includes("/og/") && !page.includes("/og.png") && !page.includes("/demos/"),
       serialize: (item) => {
-        // Bump home + writing list priority; lower /contact + /now slightly
+        // Bump home + the commercial pages; lower /contact, /now, /privacy.
         if (item.url === "https://dylancollins.me/") item.priority = 1.0;
+        else if (item.url.endsWith("/services/") || item.url.endsWith("/start/")) item.priority = 0.9;
         else if (item.url.endsWith("/writing/") || item.url.endsWith("/work/")) item.priority = 0.9;
         else if (item.url.includes("/writing/")) item.priority = 0.8;
         else if (item.url.includes("/work/")) item.priority = 0.8;

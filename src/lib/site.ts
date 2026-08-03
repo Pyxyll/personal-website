@@ -22,6 +22,21 @@ export const site = {
     country: "Ireland",
     countryCode: "IE",
   },
+  // The trading side of the site: services, pricing, the project brief form.
+  // Sole trader, so the legal name and the trading name are the same person.
+  business: {
+    legalName: "Dylan Collins",
+    tradingName: "dylancollins.me",
+    structure: "Sole trader registered in Ireland",
+    currency: "EUR",
+    // Flip to true once you cross the VAT registration threshold, and the
+    // pricing note on /services/ changes with it.
+    vatRegistered: false,
+    // Where you'll actually take work. Feeds the JSON-LD areaServed.
+    serviceArea: ["Ireland", "Remote worldwide"],
+    // Shown on /services/ so a prospect knows the lead time is real.
+    availability: "Taking a small number of projects",
+  },
   social: {
     github: "https://github.com/pyxyll",
     linkedin: "https://www.linkedin.com/in/dylan-c-collins/",

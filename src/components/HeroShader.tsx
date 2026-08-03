@@ -21,11 +21,13 @@ export default function HeroShader() {
       aria-hidden="true"
       className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       style={{
+        // Follows whatever radius the container is rounded to.
+        borderRadius: "inherit",
         opacity: 0.7,
         maskImage:
-          "radial-gradient(ellipse 55% 55% at 50% 45%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 85%)",
+          "radial-gradient(ellipse 68% 78% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0) 90%)",
         WebkitMaskImage:
-          "radial-gradient(ellipse 55% 55% at 50% 45%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 85%)",
+          "radial-gradient(ellipse 68% 78% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0) 90%)",
       }}
     >
       <Dithering

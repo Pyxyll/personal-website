@@ -1,0 +1,604 @@
+---
+/**
+ * A small animated diagram per service.
+ *
+ * Each one assembles itself on a loop — a page being built, a sheet becoming a
+ * tool, a route being replaced, a month being watched — then holds and takes
+ * itself apart. Hover runs a second, separate beat on top: the thing the
+ * service actually does, once and deliberately.
+ *
+ * Three rules learned the hard way, and they apply to every figure here:
+ *
+ *   1. transform-box: fill-box on anything transformed. Without it
+ *      transform-origin resolves against the viewBox origin rather than the
+ *      element's own box, and parts fly toward the top-left corner.
+ *   2. Delayed parts need fill-mode `both`, or they show their finished self
+ *      during the wait and the drawing is complete before it starts building.
+ *      It has to sit inside the `animation` shorthand — a separate declaration
+ *      before it just gets reset.
+ *   3. Hover never touches an element the loop is animating. It drives its own
+ *      elements, invisible the rest of the time, so the two never fight over
+ *      the same property mid-cycle.
+ *
+ * Everything animated is transform, opacity or stroke-dashoffset, so nothing
+ * touches layout. Loops are paused until the section is revealed, and the
+ * reduced-motion block stops them at the finished picture.
+ *
+ * Marked aria-hidden: where a caption is shown it carries the meaning in text;
+ * where it isn't, the pitch beside the drawing already does.
+ */
+import { services } from "../lib/services";
+
+interface Props {
+  slug: string;
+  /** Show the figure caption. Off in tight spaces like the homepage plate. */
+  caption?: boolean;
+  /**
+   * Run the loops and the hover beat. Off for now: the motion needs reworking
+   * and a static figure is better than a half-finished one. Everything is
+   * still here — turn this on to get it back.
+   */
+  animate?: boolean;
+  class?: string;
+}
+const { slug, caption = false, animate = false, class: className = "" } = Astro.props;
+
+const num = services.find((s) => s.slug === slug)?.num ?? "";
+
+const captions: Record<string, string> = {
+  website: "One page, one thing you want them to do.",
+  app: "The shared sheet, and the thing that replaces it.",
+  automation: "The step in the middle, deleted.",
+  hosting: "Watched, and answered at 03:14.",
+};
+---
+
+<figure class:list={["sketch", `is-${slug}`, animate && "is-live", className]}>
+  <svg viewBox="0 0 200 120" fill="none" aria-hidden="true" focusable="false">
+    {slug === "website" && (
+      <>
+        {/* A page assembling itself, ending on the one block worth clicking. */}
+        <rect class="s-edge draw" x="10.5" y="6.5" width="179" height="107" rx="5" pathLength="1" />
+        <path class="s-edge draw d-1" d="M10 30h180" pathLength="1" />
+        <rect class="s-dim pop p-2" x="22" y="15" width="20" height="5" rx="2" />
+        <rect class="s-dim pop p-3" x="166" y="16" width="12" height="3" rx="1.5" />
+        <rect class="s-dim pop p-2b" x="148" y="16" width="12" height="3" rx="1.5" />
+
+        <rect class="s-ink ext e-1" x="22" y="42" width="118" height="9" rx="2.5" />
+        <rect class="s-ink ext e-2" x="22" y="56" width="76" height="9" rx="2.5" />
+        <rect class="s-dim ext e-3" x="22" y="74" width="140" height="3.5" rx="1.75" />
+        <rect class="s-dim ext e-4" x="22" y="82" width="152" height="3.5" rx="1.75" />
+
+        <rect class="s-accent-fill drop" x="22" y="93" width="70" height="15" rx="5" />
+
+        {/* Hover only. Nothing above is touched. */}
+        <g class="hov">
+          <circle class="ring" cx="57" cy="100.5" r="10" />
+          <path
+            class="cursor"
+            d="M0 0l0 11 2.6-2.8 1.8 3.9 2.1-1-1.9-3.9 3.8-.3z"
+            fill="currentColor"
+          />
+        </g>
+      </>
+    )}
+
+    {slug === "app" && (
+      <>
+        {/* The shared sheet on the left feeding the thing that replaced it. */}
+        <rect class="s-edge draw" x="6.5" y="14.5" width="74" height="90" rx="4" pathLength="1" />
+        <path class="s-edge draw d-1" d="M6 37h75M6 60h75M6 82h75M25 14v91M43 14v91M62 14v91" pathLength="1" />
+
+        <rect class="s-dim pop p-2" x="8" y="16" width="16" height="20" rx="1.5" />
+        <rect class="s-dim pop p-2b" x="44" y="61" width="17" height="20" rx="1.5" />
+        <rect class="s-dim pop p-3" x="26" y="38" width="16" height="21" rx="1.5" />
+        <path class="s-dim-stroke draw d-3" d="M28 86l13 16M41 86l-13 16" pathLength="1" />
+
+        <path class="s-accent draw d-4" d="M88 59h20m0 0l-6-5m6 5l-6 5" pathLength="1" />
+
+        <rect class="s-edge draw d-4b" x="119.5" y="14.5" width="74" height="90" rx="4" pathLength="1" />
+        <path class="s-edge draw d-5" d="M141 14v91" pathLength="1" />
+        <rect class="s-dim pop p-6" x="126" y="26" width="9" height="3" rx="1.5" />
+        <rect class="s-dim pop p-6b" x="126" y="37" width="9" height="3" rx="1.5" />
+        <rect class="s-dim pop p-6c" x="126" y="48" width="9" height="3" rx="1.5" />
+
+        <rect class="s-dim ext e-6" x="149" y="28" width="38" height="5" rx="2.5" />
+        <rect class="s-dim ext e-7" x="149" y="45" width="28" height="5" rx="2.5" />
+        <rect class="s-dim ext e-8" x="149" y="62" width="34" height="5" rx="2.5" />
+        <rect class="s-accent-fill drop" x="149" y="83" width="20" height="8" rx="4" />
+
+        <g class="hov">
+          <rect class="spark" x="88" y="55" width="8" height="8" rx="2.5" />
+        </g>
+      </>
+    )}
+
+    {slug === "automation" && (
+      <>
+        {/* Two systems, the route through a person struck out, and the packet
+            that now makes the trip on its own. */}
+        <rect class="s-edge draw" x="6.5" y="54.5" width="52" height="36" rx="4" pathLength="1" />
+        <rect class="s-edge draw d-1" x="141.5" y="54.5" width="52" height="36" rx="4" pathLength="1" />
+        <rect class="s-dim ext e-2" x="15" y="65" width="34" height="4" rx="2" />
+        <rect class="s-dim ext e-2b" x="15" y="74" width="22" height="4" rx="2" />
+        <rect class="s-dim ext e-3" x="150" y="65" width="34" height="4" rx="2" />
+        <rect class="s-dim ext e-3b" x="150" y="74" width="22" height="4" rx="2" />
+
+        <path class="s-edge s-dashed draw d-3" d="M59 62C82 14 118 14 141 62" pathLength="1" />
+        <rect class="s-edge pop p-4" x="91.5" y="14.5" width="17" height="17" rx="3" />
+        <path class="s-dim-stroke draw d-5" d="M85 8l30 30" pathLength="1" />
+
+        <path class="s-accent draw d-5b" d="M59 82h76m0 0l-7-5m7 5l-7 5" pathLength="1" />
+        <rect class="s-accent-fill cross" x="-6" y="76" width="12" height="12" rx="3" />
+
+        <g class="hov">
+          <rect class="burst b-1" x="-6" y="76" width="12" height="12" rx="3" />
+          <rect class="burst b-2" x="-6" y="76" width="12" height="12" rx="3" />
+        </g>
+      </>
+    )}
+
+    {slug === "hosting" && (
+      <>
+        {/* A month of days, and the trace someone is watching over them. */}
+        <path class="s-edge draw" d="M6 108h188" pathLength="1" />
+        {Array.from({ length: 24 }, (_, i) => (
+          <rect
+            class={`grow ${i === 7 ? "s-ink incident" : "s-dim"}`}
+            x={8 + i * 7.8}
+            y={i === 7 ? 74 : 88}
+            width="2"
+            height={i === 7 ? 34 : 20}
+            rx="1"
+            style={`animation-delay:${(0.18 + i * 0.045).toFixed(3)}s`}
+          />
+        ))}
+        <path class="s-accent draw d-6" d="M6 44h50l8-28 9 56 8-28h113" pathLength="1" />
+
+        <g class="hov">
+          <circle class="alert" cx="72" cy="64" r="4" />
+          <rect class="flare" x="62.6" y="70" width="2" height="38" rx="1" />
+        </g>
+      </>
+    )}
+  </svg>
+
+  {caption && (
+    <figcaption class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint mt-4">
+      Fig. {num} <span class="text-ink-dim ml-1">{captions[slug]}</span>
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .sketch {
+    margin: 0;
+  }
+  .sketch svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ── Palette ─────────────────────────────────────────────────────────── */
+  .sketch .s-edge {
+    stroke: var(--color-rule-strong);
+    stroke-width: 1;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+  .sketch .s-dashed {
+    stroke-dasharray: 3 3;
+  }
+  .sketch .s-dim {
+    fill: #2b2b2b;
+  }
+  .sketch .s-ink {
+    fill: var(--color-ink-faint);
+  }
+  .sketch .s-dim-stroke {
+    stroke: var(--color-ink-faint);
+    stroke-width: 1;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+  .sketch .s-accent {
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+  .sketch .s-accent-fill {
+    fill: var(--color-accent);
+  }
+
+  /* Rule 1. Every transformed element, no exceptions. */
+  .sketch .draw,
+  .sketch .pop,
+  .sketch .ext,
+  .sketch .drop,
+  .sketch .grow,
+  .sketch .cross,
+  .sketch .hov > * {
+    transform-box: fill-box;
+  }
+
+  /* ── Shared motion ───────────────────────────────────────────────────────
+     Five verbs across four figures, staggered by delay. Keeping the vocabulary
+     small is what makes the plate read as one set rather than four unrelated
+     animations.
+
+     Timing lives inside the keyframes rather than on the shorthand. A single
+     curve applied between every pair of stops is what makes this sort of thing
+     feel mechanical, because arrivals, impacts and departures all want
+     different shapes: fast-in for a fall, sharp for an impact, slow-out for a
+     settle. */
+
+  /* Lines draw themselves on. */
+  @keyframes sk-draw {
+    /* Opacity as well as the dash. A path with more than one subpath — an
+       arrowhead tacked onto a line — does not hide cleanly on dashoffset
+       alone, and a fragment of it shows up before its turn. */
+    0% {
+      opacity: 0;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.65, 0, 0.2, 1);
+    }
+    0.5% {
+      opacity: 1;
+    }
+    14%,
+    82% {
+      stroke-dashoffset: 0;
+    }
+    94% {
+      opacity: 1;
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.8, 0, 0.9, 0.4);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* Small parts arrive past themselves and recoil. */
+  @keyframes sk-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.2);
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    5% {
+      opacity: 1;
+    }
+    9% {
+      transform: scale(1.32);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    14% {
+      transform: scale(0.93);
+    }
+    19%,
+    82% {
+      transform: scale(1);
+    }
+    92%,
+    100% {
+      opacity: 0;
+      transform: scale(0.2);
+      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
+    }
+  }
+
+  /* Bars extend from their leading edge: stretch along travel, squash across. */
+  @keyframes sk-ext {
+    0% {
+      opacity: 0;
+      transform: scale(0, 0.45);
+      animation-timing-function: cubic-bezier(0.15, 0.85, 0.3, 1);
+    }
+    3% {
+      opacity: 1;
+    }
+    11% {
+      transform: scale(1.09, 1.26);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.35, 1);
+    }
+    16% {
+      transform: scale(0.968, 0.83);
+    }
+    21% {
+      transform: scale(1.011, 1.05);
+    }
+    26%,
+    82% {
+      transform: scale(1, 1);
+    }
+    92%,
+    100% {
+      opacity: 0;
+      transform: scale(0, 0.45);
+      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
+    }
+  }
+
+  /* The one accent block per figure falls in and lands hard. */
+  @keyframes sk-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.78, 1.3);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
+    }
+    5% {
+      opacity: 1;
+    }
+    11% {
+      transform: translateY(0) scale(1.2, 0.68);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.25, 1);
+    }
+    18% {
+      transform: translateY(-5px) scale(0.92, 1.14);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.4, 1);
+    }
+    25% {
+      transform: translateY(0) scale(1.07, 0.93);
+    }
+    31% {
+      transform: translateY(-1.5px) scale(0.98, 1.03);
+    }
+    37%,
+    82% {
+      transform: translateY(0) scale(1, 1);
+    }
+    92%,
+    100% {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.78, 1.3);
+      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
+    }
+  }
+
+  /* Bars that rise off a baseline. */
+  @keyframes sk-grow {
+    0% {
+      opacity: 0;
+      transform: scale(1, 0);
+      animation-timing-function: cubic-bezier(0.15, 0.9, 0.3, 1);
+    }
+    4% {
+      opacity: 1;
+    }
+    10% {
+      transform: scale(0.8, 1.22);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    15% {
+      transform: scale(1.1, 0.92);
+    }
+    21%,
+    82% {
+      transform: scale(1, 1);
+    }
+    92%,
+    100% {
+      opacity: 0;
+      transform: scale(1, 0);
+      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
+    }
+  }
+
+  .sketch.is-live .draw {
+    animation: sk-draw var(--dur) linear infinite both;
+  }
+  .sketch.is-live .pop {
+    transform-origin: 50% 50%;
+    animation: sk-pop var(--dur) linear infinite both;
+  }
+  .sketch.is-live .ext {
+    transform-origin: 0% 50%;
+    animation: sk-ext var(--dur) linear infinite both;
+  }
+  .sketch.is-live .drop {
+    transform-origin: 50% 100%;
+    animation: sk-drop var(--dur) linear infinite both;
+  }
+  .sketch.is-live .grow {
+    transform-origin: 50% 100%;
+    animation: sk-grow var(--dur) linear infinite both;
+  }
+
+  /* Stagger. Uneven on purpose — evenly spaced delays are a metronome, and a
+     metronome is most of what makes a sequence feel stilted. */
+  .sketch .d-1 { animation-delay: 0.34s; }
+  .sketch .d-3 { animation-delay: 0.72s; }
+  .sketch .d-4 { animation-delay: 1.08s; }
+  .sketch .d-4b { animation-delay: 1.24s; }
+  .sketch .d-5 { animation-delay: 1.5s; }
+  .sketch .d-5b { animation-delay: 1.42s; }
+  .sketch .d-6 { animation-delay: 1.66s; }
+  .sketch .p-2 { animation-delay: 0.52s; }
+  .sketch .p-2b { animation-delay: 0.6s; }
+  .sketch .p-3 { animation-delay: 0.66s; }
+  .sketch .p-4 { animation-delay: 1.02s; }
+  .sketch .p-6 { animation-delay: 1.72s; }
+  .sketch .p-6b { animation-delay: 1.8s; }
+  .sketch .p-6c { animation-delay: 1.88s; }
+  .sketch .e-1 { animation-delay: 0.78s; }
+  .sketch .e-2 { animation-delay: 0.9s; }
+  .sketch .e-2b { animation-delay: 0.98s; }
+  .sketch .e-3 { animation-delay: 1.06s; }
+  .sketch .e-3b { animation-delay: 1.14s; }
+  .sketch .e-4 { animation-delay: 1.2s; }
+  .sketch .e-6 { animation-delay: 2.02s; }
+  .sketch .e-7 { animation-delay: 2.16s; }
+  .sketch .e-8 { animation-delay: 2.28s; }
+
+  .sketch.is-website { --dur: 6s; }
+  .sketch.is-website .drop { animation-delay: 1.62s; }
+  .sketch.is-app { --dur: 6.6s; }
+  .sketch.is-app .drop { animation-delay: 2.5s; }
+  .sketch.is-automation { --dur: 5.4s; }
+  .sketch.is-hosting { --dur: 5.8s; }
+
+  /* automation: the packet crossing once per cycle, after the route is laid.
+     It stretches along the run and squashes into the far box. */
+  @keyframes sk-cross {
+    0%,
+    36% {
+      opacity: 0;
+      transform: translate(62px, 0) scale(0.5, 1.2);
+    }
+    41% {
+      opacity: 1;
+      transform: translate(70px, 0) scale(1.3, 0.82);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    62% {
+      transform: translate(126px, 0) scale(1.3, 0.82);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+    }
+    68% {
+      opacity: 1;
+      transform: translate(136px, 0) scale(0.72, 1.24);
+    }
+    76%,
+    100% {
+      opacity: 0;
+      transform: translate(139px, 0) scale(0.5, 1);
+    }
+  }
+  .sketch .cross {
+    transform: translate(99px, 0);
+  }
+  .sketch.is-live .cross {
+    transform-origin: 50% 50%;
+    animation: sk-cross var(--dur) linear infinite both;
+  }
+
+  /* ── Hover ───────────────────────────────────────────────────────────────
+     Rule 3: dedicated elements, invisible otherwise. The loop underneath is
+     never interrupted, so there is nothing to jump back from.
+
+     Two triggers: the card on the homepage plate, which is one big link, and
+     the figure itself on /services/, where it sits in a static panel. */
+  .sketch .hov > * {
+    opacity: 0;
+  }
+  .sketch .cursor {
+    color: var(--color-ink);
+    transform: translate(150px, 74px);
+  }
+  .sketch .ring {
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    transform-origin: 50% 50%;
+  }
+  .sketch .spark,
+  .sketch .burst {
+    fill: var(--color-accent);
+  }
+  .sketch .alert {
+    fill: var(--color-accent);
+    transform-origin: 50% 50%;
+  }
+  .sketch .flare {
+    fill: var(--color-accent);
+    transform-origin: 50% 100%;
+  }
+
+  @keyframes hv-cursor {
+    0% { opacity: 0; transform: translate(150px, 74px); }
+    20% { opacity: 1; }
+    100% { opacity: 1; transform: translate(66px, 96px); }
+  }
+  @keyframes hv-ring {
+    0%, 55% { opacity: 0; transform: scale(0.35); }
+    70% { opacity: 0.9; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+  @keyframes hv-spark {
+    0% { opacity: 0; transform: translateX(0) scale(0.6, 1.2); }
+    15% { opacity: 1; transform: translateX(4px) scale(1.25, 0.85); }
+    75% { opacity: 1; transform: translateX(20px) scale(1.25, 0.85); }
+    100% { opacity: 0; transform: translateX(26px) scale(0.6, 1.1); }
+  }
+  @keyframes hv-burst {
+    0% { opacity: 0; transform: translate(62px, 0) scale(0.6, 1.2); }
+    12% { opacity: 1; transform: translate(74px, 0) scale(1.3, 0.82); }
+    82% { opacity: 1; transform: translate(130px, 0) scale(1.3, 0.82); }
+    100% { opacity: 0; transform: translate(138px, 0) scale(0.7, 1.2); }
+  }
+  @keyframes hv-alert {
+    0% { opacity: 0; transform: scale(0.3); }
+    55% { opacity: 1; transform: scale(1.35); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes hv-flare {
+    0% { opacity: 0; transform: scaleY(0.2); }
+    45% { opacity: 1; transform: scaleY(1.12); }
+    100% { opacity: 1; transform: scaleY(1); }
+  }
+
+  .sketch.is-live.is-website:hover .cursor,
+  :global(.group:hover) .sketch.is-live.is-website .cursor {
+    animation: hv-cursor 0.7s cubic-bezier(0.25, 0.9, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-website:hover .ring,
+  :global(.group:hover) .sketch.is-live.is-website .ring {
+    animation: hv-ring 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-app:hover .spark,
+  :global(.group:hover) .sketch.is-live.is-app .spark {
+    animation: hv-spark 0.8s cubic-bezier(0.35, 0, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-automation:hover .b-1,
+  :global(.group:hover) .sketch.is-live.is-automation .b-1 {
+    animation: hv-burst 0.95s cubic-bezier(0.4, 0, 0.4, 1) forwards;
+  }
+  .sketch.is-live.is-automation:hover .b-2,
+  :global(.group:hover) .sketch.is-live.is-automation .b-2 {
+    animation: hv-burst 0.95s cubic-bezier(0.4, 0, 0.4, 1) 0.16s forwards;
+  }
+  .sketch.is-live.is-hosting:hover .alert,
+  :global(.group:hover) .sketch.is-live.is-hosting .alert {
+    animation: hv-alert 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s forwards;
+  }
+  .sketch.is-live.is-hosting:hover .flare,
+  :global(.group:hover) .sketch.is-live.is-hosting .flare {
+    animation: hv-flare 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  }
+
+  /* Nothing runs until the section holding it has been revealed, so four
+     diagrams below the fold are not animating at people who never scroll.
+     Gated on .js: without it .is-visible never arrives and they would freeze. */
+  :global(html.js [data-reveal]:not(.is-visible)) .sketch * {
+    animation-play-state: paused !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sketch * {
+      animation: none !important;
+    }
+    /* Resting state has to be the finished picture, not a half-built one. */
+    .sketch .pop,
+    .sketch .ext,
+    .sketch .drop,
+    .sketch .grow {
+      opacity: 1;
+      transform: none;
+    }
+    .sketch .draw {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+    .sketch .cross {
+      transform: translate(99px, 0);
+    }
+  }
+</style>

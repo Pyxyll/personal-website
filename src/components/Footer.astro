@@ -1,9 +1,75 @@
 ---
+/**
+ * Two sections.
+ *
+ * The panel mirrors the hero — same shell measure, same rounded box, same
+ * dashed rules above and below, same shader behind it — so the page opens and
+ * closes on the same object. Content in it is a placeholder for now.
+ *
+ * Below that, the full-width strip that was already here: credits, trading
+ * details, secondary links.
+ */
+import HeroShader from "./HeroShader";
+import FloatingIcons from "./FloatingIcons.astro";
+import { site } from "../lib/site";
+
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-32 border-t border-rule">
-  <div class="mx-auto max-w-6xl px-6 lg:px-10 py-10">
+<footer class="mt-3 sm:mt-4">
+  {/* ── 1. Panel ─────────────────────────────────────────────────────── */}
+  <section class="flex flex-col gap-3 sm:gap-4">
+    <div class="rule-dashed" aria-hidden="true"></div>
+
+    <div class="mx-auto w-full max-w-shell px-6 lg:px-10">
+      <div class="fpanel relative isolate flex flex-col justify-end min-h-[32rem] overflow-hidden rounded-[20px] border border-rule">
+        {/* client:visible, not client:load: this sits at the foot of every
+            page on the site, and a WebGL context per page is not worth paying
+            for before someone has scrolled to it. */}
+        <HeroShader client:visible />
+
+        <div
+          class="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-t from-paper from-0% via-paper/65 via-38% to-transparent to-72%"
+          aria-hidden="true"
+        >
+        </div>
+
+        {/* Behind the copy, above the scrim. Only from lg up: on narrower
+            panels there is no margin to scatter into. */}
+        <FloatingIcons side="left" class="hidden lg:block z-[2]" />
+        <FloatingIcons side="right" class="hidden lg:block z-[2]" />
+
+        <div class="relative z-10 w-full px-6 sm:px-10 lg:px-14 py-20 sm:py-24">
+          <div class="flex justify-center">
+            <div class="flex flex-col items-center gap-6 text-center">
+              <p class="display text-[clamp(2.5rem,7vw,5rem)] m-0">
+                Let's build<span class="text-accent">.</span>
+              </p>
+              <p class="text-base sm:text-lg text-ink-dim max-w-md">
+                Websites, internal tools and automation for small businesses in
+                Ireland.
+              </p>
+              <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="/start/" class="nav-cta fcta">Hire me</a>
+                <a
+                  href="/contact/"
+                  class="link inline-flex items-baseline gap-2 font-mono text-xs uppercase tracking-widest text-ink-dim"
+                >
+                  Say hi
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-dashed" aria-hidden="true"></div>
+  </section>
+
+  {/* ── 2. The strip ─────────────────────────────────────────────────── */}
+  <div class="mx-auto max-w-6xl px-6 lg:px-10 py-10 flex flex-col gap-8">
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 items-end">
       <div class="font-mono text-xs text-ink-faint tracking-widest uppercase">
         © {year} Dylan Collins
@@ -15,6 +81,19 @@ const year = new Date().getFullYear();
         <li><a href="https://github.com/pyxyll" class="link text-ink-dim" target="_blank" rel="me noopener">GitHub</a></li>
         <li><a href="https://www.linkedin.com/in/dylan-c-collins/" class="link text-ink-dim" target="_blank" rel="me noopener">LinkedIn</a></li>
         <li><a href="mailto:hello@dylancollins.me" class="link text-ink-dim" rel="author">Email</a></li>
+      </ul>
+    </div>
+
+    {/* Trading details. Someone selling services under a domain name should
+        say who is behind it, and under what. */}
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-rule pt-8">
+      <p class="font-mono text-[11px] uppercase tracking-widest text-ink-faint">
+        {site.business.legalName} trading as {site.business.tradingName} · {site.business.structure}
+      </p>
+      <ul class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest">
+        <li><a href="/services/" class="link text-ink-dim">Services</a></li>
+        <li><a href="/start/" class="link text-ink-dim">Start a project</a></li>
+        <li><a href="/privacy/" class="link text-ink-dim">Privacy</a></li>
       </ul>
     </div>
   </div>

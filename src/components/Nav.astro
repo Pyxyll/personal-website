@@ -1,61 +1,96 @@
 ---
+import { getCollection } from "astro:content";
+import NavMenu from "./NavMenu";
+import type { ServiceItem, WorkItem } from "./NavMenu";
+import { services, priceFormat } from "../lib/services";
+
 const { pathname } = Astro.url;
+
+// Top level. Writing and Now still exist as routes; they are just off the bar
+// while their purpose is being reconsidered.
 const items = [
-  { num: "001", href: "/work/", label: "Work" },
-  { num: "002", href: "/writing/", label: "Writing" },
-  { num: "003", href: "/now/", label: "Now" },
-  { num: "004", href: "/contact/", label: "Contact" },
+  // `also` covers pages that belong to a nav section without living under its
+  // path: the project brief is part of Services, not a fourth nav item.
+  { num: "001", href: "/services/", label: "Services", also: ["/start/"] },
+  { num: "002", href: "/work/", label: "Work" },
+  { num: "003", href: "/contact/", label: "Contact" },
 ];
-const isActive = (href: string) =>
-  href === "/" ? pathname === "/" : pathname.startsWith(href);
+const isActive = (item: (typeof items)[number]) =>
+  pathname.startsWith(item.href) ||
+  (item.also?.some((p) => pathname.startsWith(p)) ?? false);
+
+// Panel data, resolved at build time and handed to the island as plain props.
+const serviceItems: ServiceItem[] = services.map((s) => ({
+  slug: s.slug,
+  title: s.title,
+  tagline: s.tagline,
+  price: `${priceFormat.format(s.from)}${s.fromUnit ?? ""}`,
+}));
+
+const CATEGORY_ORDER = ["Web apps", "Sites", "COSMIC", "Homelab"];
+const PER_CATEGORY = 2; // a menu, not a directory: the rest live on /work/
+const entries = (await getCollection("work")).sort(
+  (a, b) => +b.data.publishedAt - +a.data.publishedAt
+);
+const grouped = entries.reduce<Record<string, WorkItem[]>>((acc, e) => {
+  (acc[e.data.category] ??= []).push({
+    href: `/work/${e.id}/`,
+    title: e.data.title,
+    summary: e.data.summary,
+    category: e.data.category,
+  });
+  return acc;
+}, {});
+const workGroups = [
+  ...CATEGORY_ORDER.filter((c) => grouped[c]),
+  ...Object.keys(grouped)
+    .filter((c) => !CATEGORY_ORDER.includes(c))
+    .sort(),
+].map((category) => ({ category, items: grouped[category].slice(0, PER_CATEGORY) }));
 ---
 
-<nav class="relative border-b border-rule" aria-label="Primary">
-  <div class="mx-auto max-w-6xl px-6 lg:px-10">
-    <div class="flex items-center justify-between py-5">
-      <a
-        href="/"
-        class="font-mono text-xs tracking-widest uppercase text-ink hover:text-accent transition-colors"
-      >
-        Dylan Collins
+{/* Sticky, because the scrolled state is the point: past the fold this
+    collapses to just the mark and the CTA over whatever you are reading.
+    Three-column grid so the links sit on the true centre of the page rather
+    than the centre of the space left over by the mark and the button. */}
+<nav id="site-nav" data-scrolled="false" aria-label="Primary">
+  <div class="mx-auto max-w-shell px-6 lg:px-10">
+    <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 h-20">
+      {/* Placeholder mark. Swap the square for the real logo when it exists;
+          the wordmark beside it stays either way. */}
+      <a href="/" class="nav-mark">
+        <span class="nav-mark-word">Dylan Collins</span>
+        <span class="nav-mark-square" aria-hidden="true"></span>
       </a>
 
-      {/* Desktop nav */}
-      <ul class="hidden sm:flex items-center gap-6 md:gap-10">
-        {items.map((item) => (
-          <li>
-            <a
-              href={item.href}
-              class:list={[
-                "group inline-flex items-baseline gap-2 text-sm",
-                isActive(item.href) ? "text-ink" : "text-ink-dim hover:text-ink",
-              ]}
-            >
-              <span class="font-mono text-[10px] tracking-[0.18em] text-ink-faint group-hover:text-accent transition-colors">
-                {item.num}
-              </span>
-              <span class="relative">
-                {item.label}
-                {isActive(item.href) && (
-                  <span class="absolute -bottom-[6px] left-0 right-0 h-px bg-accent" />
-                )}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      {/* client:media matches the CSS breakpoint that shows this at all, so
+          phones never download React or Radix for a menu they cannot see. The
+          triggers render as plain links server-side, so the bar is navigable
+          before (and without) hydration either way. */}
+      <div class="nav-center hidden sm:flex justify-center">
+        <NavMenu
+          client:media="(min-width: 640px)"
+          services={serviceItems}
+          workGroups={workGroups}
+          pathname={pathname}
+        />
+      </div>
 
-      {/* Mobile trigger */}
-      <button
-        id="nav-toggle"
-        type="button"
-        class="sm:hidden font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-1 -mr-2"
-        aria-expanded="false"
-        aria-controls="nav-overlay"
-        aria-label="Open menu"
-      >
-        Menu
-      </button>
+      <div class="flex items-center gap-3 sm:gap-4 justify-self-end">
+        <a href="/start/" class="nav-cta">Hire me</a>
+
+        {/* Mobile trigger */}
+        <button
+          id="nav-toggle"
+          type="button"
+          class="sm:hidden font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-2 -mr-2"
+          aria-expanded="false"
+          aria-controls="nav-overlay"
+          aria-label="Open menu"
+        >
+          Menu
+        </button>
+      </div>
     </div>
   </div>
 
@@ -67,18 +102,15 @@ const isActive = (href: string) =>
     data-open="false"
     style="visibility: hidden; opacity: 0; transition: opacity 0.25s ease, visibility 0s linear 0.25s;"
   >
-    <div class="flex items-center justify-between px-6 py-5 border-b border-rule">
-      <a
-        href="/"
-        class="font-mono text-xs tracking-widest uppercase text-ink"
-        data-nav-link
-      >
-        Dylan Collins
+    <div class="flex items-center justify-between px-6 h-20 border-b border-rule">
+      <a href="/" class="nav-mark" data-nav-link>
+        <span class="nav-mark-word">Dylan Collins</span>
+        <span class="nav-mark-square" aria-hidden="true"></span>
       </a>
       <button
         id="nav-close"
         type="button"
-        class="font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-1 -mr-2"
+        class="font-mono text-xs uppercase tracking-widest text-ink-dim hover:text-ink transition-colors px-2 py-2 -mr-2"
         aria-label="Close menu"
       >
         Close
@@ -93,22 +125,28 @@ const isActive = (href: string) =>
             data-nav-link
             class:list={[
               "group flex items-baseline gap-4 py-4 border-b border-rule",
-              isActive(item.href) ? "text-ink" : "text-ink-dim",
+              isActive(item) ? "text-ink" : "text-ink-dim",
             ]}
           >
-            <span class="font-mono text-xs tracking-[0.18em] text-ink-faint group-hover:text-accent transition-colors">
+            <span class="font-mono text-xs tracking-[0.18em] text-ink-faint group-hover:text-accent-text transition-colors">
               {item.num}
             </span>
             <span class="text-3xl tracking-tight font-medium">
               {item.label}
             </span>
-            {isActive(item.href) && (
-              <span class="ml-auto h-1 w-1 rounded-full bg-accent self-center" />
+            {isActive(item) && (
+              <span class="ml-auto h-1 w-1 rounded-full bg-accent self-center"></span>
             )}
           </a>
         </li>
       ))}
     </ul>
+
+    <div class="px-6 pb-6">
+      <a href="/start/" data-nav-link class="nav-cta w-full justify-center py-4">
+        Hire me
+      </a>
+    </div>
 
     <footer class="px-6 py-6 border-t border-rule flex justify-between font-mono text-xs uppercase tracking-widest text-ink-faint">
       <a href="mailto:hello@dylancollins.me" data-nav-link class="hover:text-ink transition-colors">Email</a>
@@ -117,7 +155,567 @@ const isActive = (href: string) =>
   </div>
 </nav>
 
+{/* Global, not scoped: Astro's scoping cannot reach inside the React island's
+    DOM, and the bar and the panels have to be styled as one thing. */}
+<style is:global>
+  #site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--color-paper);
+    transition: background-color 0.3s ease;
+  }
+
+
+  /* Scrolled: the links step aside and the bar gets out of the way of the
+     page. visibility, not just opacity, so the hidden links leave the tab
+     order too rather than becoming invisible focus traps. */
+  #site-nav[data-scrolled="true"] {
+    background: transparent;
+  }
+
+  .nav-center {
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0s;
+  }
+  #site-nav[data-scrolled="true"] .nav-center {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .nav-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: -0.5rem;
+    padding: 0.5rem;
+  }
+  .nav-mark-square {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: var(--color-accent);
+    transition: background-color 0.2s ease;
+  }
+  .nav-mark-word {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    transition: color 0.2s ease;
+  }
+  /* Between the breakpoint where the mega menu appears and the one where the
+     bar has room for everything, the wordmark is what gives. Below 640px the
+     centre nav is hidden entirely, so it comes back. */
+  @media (min-width: 640px) and (max-width: 767px) {
+    .nav-mark-word {
+      display: none;
+    }
+  }
+  .nav-mark:hover .nav-mark-square {
+    background: var(--color-accent-deep);
+  }
+  .nav-mark:hover .nav-mark-word {
+    color: var(--color-ink-dim);
+  }
+
+  /* Outline at rest, filled on hover. The only pill on the site, so it reads
+     as the one thing the bar is asking you to do. */
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .nav-cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    /* White, not paper: on the brand pink white is 4.7:1 and paper only 4.2:1.
+       That flips the other way on a lighter accent, so it tracks the token. */
+    color: #ffffff;
+  }
+
+  /* ── Mega menu ──────────────────────────────────────────────────────── */
+
+  /* Static, so the sticky nav is the containing block for the panel and it can
+     centre on the page rather than on the trigger group. */
+  .nav-menu {
+    position: static;
+  }
+  .nav-menu-list {
+    position: relative; /* the highlight positions against this */
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-menu-list > li {
+    position: relative;
+    z-index: 1; /* above the highlight */
+  }
+
+  /* One highlight for the whole group. Transitioning transform and width means
+     it travels between items instead of fading out and back in; opacity only
+     handles arriving at and leaving the group. */
+  .nav-pill {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    z-index: 0;
+    height: 2.125rem;
+    border-radius: 8px;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+    margin-top: -1.0625rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+      width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease;
+  }
+  .nav-pill[data-visible="true"] {
+    opacity: 1;
+  }
+
+  .nav-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-dim);
+    transition: color 0.2s ease;
+  }
+  .nav-trigger:hover,
+  .nav-trigger[data-state="open"],
+  .nav-trigger.is-active {
+    color: var(--color-ink);
+  }
+
+  /* Underline marks the current page only. The highlight covers hover and
+     open, so using it for those too would say the same thing twice. */
+  .nav-trigger-label {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 3px;
+  }
+  .nav-trigger-label::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-trigger.is-active .nav-trigger-label::after {
+    transform: scaleX(1);
+  }
+
+  .nav-chevron {
+    flex: none;
+    color: var(--color-ink-faint);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+  }
+  .nav-trigger:hover .nav-chevron,
+  .nav-trigger[data-state="open"] .nav-chevron {
+    color: var(--color-ink-dim);
+  }
+  .nav-trigger[data-state="open"] .nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* The panel surface. Full width of the bar, so the viewport can centre the
+     measured panel on the page. */
+  .nav-viewport-slot {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .nav-viewport {
+    position: relative;
+    overflow: hidden;
+    pointer-events: auto;
+    background: var(--color-paper);
+    border: 1px solid var(--color-rule);
+    /* Detached from the bar so all four corners can round. Radix keeps the
+       menu open while the pointer crosses this gap. */
+    margin-top: 0.5rem;
+    border-radius: 14px;
+    transform-origin: top center;
+    /* Radix measures each panel and publishes its box here; transitioning
+       these is what makes one surface morph between Services and Work. */
+    width: var(--radix-navigation-menu-viewport-width);
+    height: var(--radix-navigation-menu-viewport-height);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-viewport[data-state="open"] {
+    animation: navViewportIn 0.2s ease;
+  }
+  .nav-viewport[data-state="closed"] {
+    animation: navViewportOut 0.2s ease;
+  }
+  @keyframes navViewportIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+  @keyframes navViewportOut {
+    to {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  /* Deliberately no width here. Radix sizes the viewport by measuring this
+     element, so giving it width:100% makes the two size off each other and
+     both collapse to zero: you get the viewport's border and nothing inside
+     it. Left to shrink-to-fit, it takes its width from .nav-panel-inner. */
+  .nav-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  /* Direction of travel, so the incoming panel slides in from the side you
+     came from rather than appearing. */
+  .nav-panel[data-motion="from-start"] {
+    animation: navFromLeft 0.25s ease;
+  }
+  .nav-panel[data-motion="from-end"] {
+    animation: navFromRight 0.25s ease;
+  }
+  .nav-panel[data-motion="to-start"] {
+    animation: navToLeft 0.25s ease;
+  }
+  .nav-panel[data-motion="to-end"] {
+    animation: navToRight 0.25s ease;
+  }
+  @keyframes navFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-14px);
+    }
+  }
+  @keyframes navFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(14px);
+    }
+  }
+  @keyframes navToLeft {
+    to {
+      opacity: 0;
+      transform: translateX(-14px);
+    }
+  }
+  @keyframes navToRight {
+    to {
+      opacity: 0;
+      transform: translateX(14px);
+    }
+  }
+
+  .nav-panel-inner {
+    width: min(64rem, calc(100vw - 3rem));
+    padding: 1.75rem;
+  }
+
+  /* The hairlines between cells are the 1px gap showing the container's own
+     background through, so the grid rounds and clips as one block. */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--color-rule);
+    border: 1px solid var(--color-rule);
+    border-radius: 10px;
+    overflow: hidden;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The grid clips to a 10px radius but the cards inside it are square, so at
+     the four corners the edge light was getting sliced off along the curve.
+     Rounding the corner cells to match lets the ring follow it. 9px, not 10:
+     the grid's own 1px border sits outside these.
+
+     Tied to the 3-column layout above — a card is a corner because of where it
+     lands in a row of three. */
+  .nav-grid > li:first-child > .nav-card {
+    border-top-left-radius: 9px;
+  }
+  .nav-grid > li:nth-child(3) > .nav-card {
+    border-top-right-radius: 9px;
+  }
+  .nav-grid > li:nth-child(3n + 1):nth-last-child(-n + 3) > .nav-card {
+    border-bottom-left-radius: 9px;
+  }
+  .nav-grid > li:last-child:nth-child(3n) > .nav-card {
+    border-bottom-right-radius: 9px;
+  }
+
+  .nav-card,
+  .nav-group {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-paper);
+    padding: 1rem 1.125rem;
+  }
+  .nav-card {
+    position: relative;
+    overflow: hidden;
+    /* Own stacking context, so the glow and the ghost can sit at z-index -1:
+       above the card's background, below its text. */
+    isolation: isolate;
+    gap: 0.3rem;
+    --glow-x: 50%;
+    --glow-y: 40%;
+    transition: background-color 0.2s ease;
+  }
+  .nav-card:hover {
+    background: var(--color-paper-2);
+  }
+
+  /* Interior wash. Centre point is written per card by the grid, in that
+     card's own coordinates, so it can sit well outside the box. */
+  .nav-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(
+      250px circle at var(--glow-x) var(--glow-y),
+      color-mix(in srgb, var(--color-accent) 20%, transparent),
+      transparent 72%
+    );
+  }
+  .nav-card:hover::before,
+  .nav-card:focus-visible::before {
+    opacity: 1;
+  }
+
+  /* Edge light. This is the one that ties the cards together: it is on every
+     card whenever the pointer is anywhere in the grid, not just the card being
+     hovered, so the light carries across the divider onto a neighbour's edge
+     and falls off with distance.
+
+     The gradient is painted over the whole card, then masked down to a 1px
+     ring by XOR-ing a full-box mask against a content-box one. */
+  .nav-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    padding: 1px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      360px circle at var(--glow-x) var(--glow-y),
+      color-mix(in srgb, var(--color-accent) 85%, transparent),
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  .nav-grid[data-glow] .nav-card::after {
+    opacity: 1;
+  }
+
+  /* The same icon again, oversized and cropped by the card. Reads as a
+     watermark of the thing the card is about. */
+  .nav-card-ghost {
+    position: absolute;
+    right: -14px;
+    bottom: -18px;
+    z-index: -1;
+    pointer-events: none;
+    color: var(--color-accent);
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+    transform-origin: bottom right;
+    transition: opacity 0.35s ease,
+      transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .nav-card:hover .nav-card-ghost,
+  .nav-card:focus-visible .nav-card-ghost {
+    opacity: 0.18;
+    transform: scale(1) translateY(0);
+  }
+
+  .nav-card-icon {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-ink-faint);
+    transition: color 0.2s ease;
+  }
+  .nav-card:hover .nav-card-icon {
+    color: var(--color-accent);
+  }
+  .nav-card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .nav-card-desc {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-ink-dim);
+  }
+  .nav-card-meta {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  .nav-group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .nav-group-title {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+    margin: 0 0 0.875rem;
+  }
+  .nav-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .nav-row-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .nav-row:hover .nav-row-title {
+    color: var(--color-accent-text);
+  }
+  .nav-row-desc {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-ink-dim);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Secondary zone. Its own rounded container so the panel reads as two
+     things: the top-level items above, everything else in here. */
+  .nav-secondary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 0.75rem;
+    padding: 0.875rem 1.125rem;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+    border-radius: 10px;
+  }
+  .nav-secondary-label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+  .nav-secondary-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-secondary-action {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+    transition: color 0.2s ease;
+  }
+  .nav-secondary-action:hover {
+    color: var(--color-ink);
+  }
+  .nav-secondary-action.is-accent {
+    color: var(--color-accent-text);
+  }
+</style>
+
 <script>
+  // Collapse the bar once you are past the top of the page. The links come
+  // back at the top, so they are never permanently out of reach for anyone
+  // navigating by keyboard.
+  const nav = document.getElementById("site-nav");
+  if (nav) {
+    const THRESHOLD = 24;
+    let ticking = false;
+
+    const sync = () => {
+      nav.dataset.scrolled = String(window.scrollY > THRESHOLD);
+      ticking = false;
+    };
+
+    sync(); // a restored scroll position or an #anchor load starts mid-page
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(sync);
+      },
+      { passive: true }
+    );
+  }
+
   // Mobile nav overlay. Vanilla JS, no React island needed.
   const toggle = document.getElementById("nav-toggle");
   const overlay = document.getElementById("nav-overlay");

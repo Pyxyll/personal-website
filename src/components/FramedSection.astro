@@ -1,0 +1,114 @@
+---
+/**
+ * A section that shows the page's two measures as dashed vertical rails.
+ *
+ * Outer rails sit on the shell measure, level with the hero panel's border and
+ * the nav's wordmark. Inner rails sit on the content measure — and because
+ * this section has no marginalia column, that edge is also where the content
+ * itself begins. One line, not two: the rail is the copy's left margin.
+ *
+ * At 1480 / 1260 there is 110px between them on each side.
+ *
+ * The rails are drawn by two absolutely-positioned layers rather than
+ * calculated offsets. Each one is a real centred container with the site's own
+ * gutters, so the browser resolves where the edges fall — which keeps them
+ * correct at widths where the containers are narrower than their max and the
+ * two measures start to converge.
+ *
+ * Empty for now: the slot is where content goes once the shape is settled.
+ */
+interface Props {
+  /** Height while there is nothing in it. */
+  minHeight?: string;
+  class?: string;
+}
+const { minHeight = "28rem", class: className = "" } = Astro.props;
+---
+
+<section class:list={["framed", className]} style={`--framed-min-h:${minHeight}`}>
+  <div class="framed-rail framed-rail-shell" aria-hidden="true"><div></div></div>
+  <div class="framed-rail framed-rail-content" aria-hidden="true"><div></div></div>
+
+  <div class="relative mx-auto w-full max-w-content px-6 lg:px-10">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .framed {
+    position: relative;
+    min-height: var(--framed-min-h);
+  }
+
+  /* Each rail layer is the same centred, guttered container the page uses, laid
+     over the section. Its inner div therefore spans exactly one measure. */
+  .framed-rail {
+    position: absolute;
+    inset: 0;
+    margin-inline: auto;
+    padding-inline: 1.5rem; /* px-6 */
+    pointer-events: none;
+  }
+  @media (min-width: 1024px) {
+    .framed-rail {
+      padding-inline: 2.5rem; /* lg:px-10 */
+    }
+  }
+  .framed-rail-shell {
+    max-width: var(--container-shell);
+  }
+  .framed-rail-content {
+    max-width: var(--container-content);
+  }
+
+  /* The margin fill.
+     Dots are painted right across the shell box and the content box is then
+     laid over them in page colour, so what survives is exactly the two gutters
+     between the measures. No arithmetic, and it stays correct at widths where
+     the two measures converge and the gutters close to nothing.
+
+     9px grid with 1.5px dots: dense and fine enough to read as a texture
+     rather than as countable marks. 9 divides into the rails' 36px dash pitch,
+     so every fourth row of the field lands level with a dash. */
+  .framed-rail-shell > div {
+    background-image: radial-gradient(
+      circle at center,
+      var(--color-rule) 0.75px,
+      transparent 0.85px
+    );
+    background-size: 9px 9px;
+  }
+  .framed-rail-content > div {
+    background: var(--color-paper);
+  }
+
+  .framed-rail > div {
+    position: relative;
+    height: 100%;
+  }
+
+  /* Same dash rhythm as the rule under the nav, turned on its side: 20px on,
+     16px off, 2px thick, in the hairline token. The dot field between them is
+     the texture; these stay lines so they read as the edges holding it. */
+  .framed-rail > div::before,
+  .framed-rail > div::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-rule) 20px,
+      transparent 20px
+    );
+    background-size: 2px 36px;
+    background-repeat: repeat-y;
+  }
+  .framed-rail > div::before {
+    left: 0;
+  }
+  .framed-rail > div::after {
+    right: 0;
+  }
+</style>

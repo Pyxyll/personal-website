@@ -1,0 +1,102 @@
+---
+/**
+ * A sequence, drawn as a track rather than stacked as a list.
+ *
+ * Numbering earns its place here: these steps happen in this order, and the
+ * order is the information. The spine runs horizontally on wide screens so the
+ * whole process is one object you can take in at a glance, and folds to a
+ * vertical timeline on narrow ones.
+ */
+interface Step {
+  step: string;
+  title: string;
+  body: string;
+}
+interface Props {
+  steps: Step[];
+  class?: string;
+}
+const { steps, class: className = "" } = Astro.props;
+---
+
+<ol class:list={["track", className]} style={`--cols:${steps.length}`}>
+  {steps.map((s) => (
+    <li class="track-step">
+      <span class="track-node" aria-hidden="true"></span>
+      <span class="track-num">{s.step}</span>
+      <h3 class="track-title">{s.title}</h3>
+      <p class="track-body">{s.body}</p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .track {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+
+  .track-step {
+    position: relative;
+    padding: 0 0 2rem 1.75rem;
+    border-left: 1px solid var(--color-rule);
+  }
+  .track-step:last-child {
+    padding-bottom: 0;
+    border-left-color: transparent;
+  }
+
+  /* The node sits on the spine, whichever direction the spine runs. */
+  .track-node {
+    position: absolute;
+    left: -4px;
+    top: 4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-accent);
+  }
+
+  .track-num {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    color: var(--color-accent-text);
+    margin-bottom: 0.5rem;
+  }
+
+  .track-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.4rem;
+  }
+
+  .track-body {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--color-ink-dim);
+  }
+
+  @media (min-width: 768px) {
+    .track {
+      grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+      border-top: 1px solid var(--color-rule);
+    }
+    .track-step {
+      padding: 1.75rem 1.5rem 0 0;
+      border-left: 0;
+    }
+    .track-step:last-child {
+      padding-right: 0;
+    }
+    .track-node {
+      left: 0;
+      top: -4px;
+    }
+  }
+</style>

@@ -24,9 +24,12 @@
     "@fontsource/geist": "^5.2.9",
     "@fontsource/instrument-sans": "^5.2.8",
     "@paper-design/shaders-react": "^0.0.76",
+    "@radix-ui/react-navigation-menu": "^1.2.22",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.2",
+    "lucide-static": "^1.28.0",
+    "motion": "^12.43.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.3.0"

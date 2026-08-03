@@ -155,6 +155,85 @@ export function collectionPageSchema(args: {
   };
 }
 
+/**
+ * The trading entity behind the site, with its services as an offer catalog.
+ * Separate @id from #person so search engines can tell the human apart from
+ * the business, while `founder` ties the two together.
+ */
+export function professionalServiceSchema(args: {
+  url: string;
+  services: {
+    slug: string;
+    title: string;
+    tagline: string;
+    from: number;
+    fromUnit?: string;
+  }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${site.url}/#business`,
+    name: site.business.tradingName,
+    legalName: site.business.legalName,
+    url: args.url,
+    image: DEFAULT_OG,
+    email: `mailto:${site.author.email}`,
+    description:
+      "Websites, custom web apps, automation and hosting for small businesses in Ireland.",
+    founder: { "@id": `${site.url}/#person` },
+    priceRange: "€€",
+    currenciesAccepted: site.business.currency,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: site.author.countryCode,
+    },
+    areaServed: site.business.serviceArea.map((name) => ({
+      "@type": "AdministrativeArea",
+      name,
+    })),
+    knowsLanguage: site.language,
+    sameAs: [...site.sameAs],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Services",
+      itemListElement: args.services.map((s) => ({
+        "@type": "Offer",
+        "@id": `${args.url}#${s.slug}`,
+        name: s.title,
+        description: s.tagline,
+        url: `${args.url}#${s.slug}`,
+        priceSpecification: {
+          "@type": "PriceSpecification",
+          price: s.from,
+          priceCurrency: site.business.currency,
+          // "from" pricing: the published figure is the floor, not the quote.
+          minPrice: s.from,
+          valueAddedTaxIncluded: false,
+        },
+        itemOffered: {
+          "@type": "Service",
+          name: s.title,
+          serviceType: s.title,
+          provider: { "@id": `${site.url}/#business` },
+        },
+      })),
+    },
+  };
+}
+
+export function faqSchema(items: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}
+
 export function contactPageSchema(args: { url: string }) {
   return {
     "@context": "https://schema.org",

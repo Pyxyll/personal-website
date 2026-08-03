@@ -1,0 +1,74 @@
+---
+/**
+ * Four small rounded squares, one centred on each corner of the parent.
+ *
+ * The parent must be positioned. Each node is filled with the page background
+ * so it masks whatever rule passes underneath, and carries its own border, so
+ * a hairline reads as running *into* a joint rather than simply crossing.
+ *
+ * Cards that share an edge also share corners, and the nodes land exactly on
+ * top of each other — opaque fill, identical geometry, so a stack of two is
+ * indistinguishable from one.
+ *
+ * Decorative: hidden from the accessibility tree.
+ */
+interface Props {
+  /** Node size in px. */
+  size?: number;
+  /** Corner radius in px. 0 for a hard square. */
+  radius?: number;
+  /** Border colour. Defaults to the hairline the service plate's grid uses;
+      pass whatever the line it is jointing is drawn in. */
+  color?: string;
+  class?: string;
+}
+const {
+  size = 10,
+  radius = 3,
+  color = "var(--color-rule)",
+  class: className = "",
+} = Astro.props;
+---
+
+<span class:list={["corner-nodes", className]} aria-hidden="true" style={`--node:${size}px;--node-radius:${radius}px;--node-color:${color}`}>
+  <span></span><span></span><span></span><span></span>
+</span>
+
+<style>
+  .corner-nodes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .corner-nodes > span {
+    position: absolute;
+    width: var(--node);
+    height: var(--node);
+    border: 1px solid var(--node-color);
+    border-radius: var(--node-radius);
+    background: var(--color-paper);
+  }
+
+  /* Centred on the corner, so half of each node sits outside the box. */
+  .corner-nodes > span:nth-child(1) {
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+  }
+  .corner-nodes > span:nth-child(2) {
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+  }
+  .corner-nodes > span:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    transform: translate(-50%, 50%);
+  }
+  .corner-nodes > span:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    transform: translate(50%, 50%);
+  }
+</style>

@@ -50,11 +50,12 @@ interface OgInput {
 }
 
 export async function renderOg({ title, subtitle, eyebrow }: OgInput): Promise<Uint8Array<ArrayBuffer>> {
-  const ACCENT = "#da2862";
+  const ACCENT = "#e5417d";
   const PAPER = "#0a0a0a";
   const INK = "#fafafa";
   const INK_DIM = "#a1a1aa";
-  const INK_FAINT = "#525252";
+  // Text baked into an image still has to be readable: 2.5:1 -> 4.8:1.
+  const INK_FAINT = "#7d7d7d";
   const RULE = "#262626";
 
   const SANS = "Inter, 'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif";

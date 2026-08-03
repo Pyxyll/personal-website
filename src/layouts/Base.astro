@@ -25,6 +25,10 @@ const props = Astro.props;
     <Head {...props}>
       <slot name="head" />
     </Head>
+    {/* Marks the document as script-capable before first paint. Everything that
+        hides content until JS runs (the scroll reveal) hangs off this class, so
+        a failed or blocked bundle degrades to a plain, readable page. */}
+    <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body class="min-h-screen flex flex-col bg-paper text-ink antialiased">
     {/* Skip-to-main for keyboard + screen reader users */}

@@ -1,0 +1,354 @@
+---
+/**
+ * The qualifying lead-capture form.
+ *
+ * /contact/ stays the lightweight "say hi" door. This one is for people with a
+ * project: it asks for service, budget and timeline up front so the first reply
+ * can be a real answer rather than three rounds of email working out whether
+ * the thing is even affordable.
+ *
+ * Posts to the same Cloudflare Worker as /contact/, with formType=brief, which
+ * is what makes the Worker render the extra fields into the notification.
+ */
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import StepTrack from "../../components/StepTrack.astro";
+import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+import { services, budgetBands, timelines } from "../../lib/services";
+
+// What the sender can expect, on the same track device as /services/. Local to
+// this page: it describes the reply, not the engagement.
+const next = [
+  {
+    step: "01",
+    title: "Confirmation",
+    body: "An email lands straight away with a copy of everything you sent, so you have a record of it too.",
+  },
+  {
+    step: "02",
+    title: "A real reply",
+    body: "Within two working days, with questions or a time to talk. If it is not a fit, I say so and point you at someone better placed.",
+  },
+  {
+    step: "03",
+    title: "Scope and price",
+    body: "If it is a fit, you get a written scope with a fixed price against it before anything begins.",
+  },
+];
+
+const pageUrl = new URL("/start/", site.url).toString();
+const pageTitle = "Start a project · Dylan Collins";
+const pageDesc =
+  "Send a short project brief: what you need, roughly what you can spend, and when. You get a straight answer on cost and timing.";
+
+// Shared field chrome, so the inputs and selects stay in step with each other.
+// No focus:outline-none: the accent border is a colour change on a 1px line,
+// which is not a focus indicator on its own. The global ring does that job.
+const field =
+  "bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent transition-colors";
+const label = "font-mono text-xs uppercase tracking-widest text-ink-dim";
+---
+
+<Base title={pageTitle} description={pageDesc}>
+  <Schema
+    slot="head"
+    data={[
+      webPageSchema({ url: pageUrl, name: pageTitle, description: pageDesc }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Services", url: site.url + "/services/" },
+        { name: "Start a project", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-16 lg:mb-24">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">001 / Brief</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          Start a project<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
+          Five minutes here saves us both a week of email. Tell me what you need
+          and roughly what you can spend, and you get back a straight answer on
+          cost, timing, and whether I am the right person for it.
+        </p>
+        <p class="text-sm text-ink-dim max-w-2xl lift lift-3">
+          Not a project? <a href="/contact/" class="ilink">The short contact form</a> is
+          over here, and <a href="/services/" class="ilink">the services and prices</a> are
+          here.
+        </p>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <h2 class="col-span-12 lg:col-span-2 section-num font-normal m-0">Brief</h2>
+      <div class="col-span-12 lg:col-span-10">
+        <form
+          id="brief-form"
+          action={site.contactEndpoint}
+          method="POST"
+          class="grid gap-10 max-w-2xl"
+        >
+          <input type="hidden" name="formType" value="brief" />
+
+          {/* ── YOU ──────────────────────────────────────────────── */}
+          <fieldset class="grid gap-6 border-0 p-0 m-0">
+            <legend class="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-text mb-2 p-0">
+              01 / You
+            </legend>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+              <label class="grid gap-2">
+                <span class={label}>Name *</span>
+                <input type="text" name="name" required maxlength="100" autocomplete="name" class={field} />
+              </label>
+              <label class="grid gap-2">
+                <span class={label}>Email *</span>
+                <input type="email" name="email" required maxlength="200" autocomplete="email" class={field} />
+              </label>
+              <label class="grid gap-2">
+                <span class={label}>Business or organisation</span>
+                <input
+                  type="text"
+                  name="organisation"
+                  maxlength="120"
+                  autocomplete="organization"
+                  class={field}
+                />
+              </label>
+              <label class="grid gap-2">
+                <span class={label}>Current website</span>
+                <input
+                  type="text"
+                  name="website"
+                  maxlength="200"
+                  inputmode="url"
+                  placeholder="If you have one"
+                  autocomplete="url"
+                  class={`${field} placeholder:text-ink-faint placeholder:text-base`}
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          {/* ── THE PROJECT ──────────────────────────────────────── */}
+          <fieldset class="grid gap-6 border-0 p-0 m-0">
+            <legend class="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-text mb-2 p-0">
+              02 / The project
+            </legend>
+
+            <label class="grid gap-2">
+              <span class={label}>What do you need? *</span>
+              <span class="select-wrap">
+                {/* data-slug lets the ?service= deep link resolve without the
+                    script needing its own copy of the service titles. */}
+                <select id="service-select" name="service" required class={field}>
+                  {services.map((s) => (
+                    <option value={s.title} data-slug={s.slug}>{s.title}</option>
+                  ))}
+                  <option value="Not sure yet">Not sure yet, help me work it out</option>
+                </select>
+              </span>
+            </label>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+              <label class="grid gap-2">
+                <span class={label}>Budget *</span>
+                <span class="select-wrap">
+                  <select name="budget" required class={field}>
+                    {budgetBands.map((b) => (
+                      <option value={b}>{b}</option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+              <label class="grid gap-2">
+                <span class={label}>Timeline *</span>
+                <span class="select-wrap">
+                  <select name="timeline" required class={field}>
+                    {timelines.map((t) => (
+                      <option value={t}>{t}</option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+            </div>
+
+            <label class="grid gap-2">
+              <span class={label}>Tell me about it *</span>
+              <textarea
+                name="message"
+                rows="6"
+                required
+                maxlength="5000"
+                placeholder="What are you trying to do, who is it for, and what is going wrong with how it works now?"
+                class={`${field} resize-y placeholder:text-ink-faint placeholder:text-base`}></textarea>
+              <span class="font-mono text-[11px] text-ink-faint">
+                Rough notes are fine. I would rather have the messy version than a tidy one.
+              </span>
+            </label>
+
+            <label class="grid gap-2">
+              <span class={label}>How did you find me?</span>
+              <input
+                type="text"
+                name="heard"
+                maxlength="200"
+                placeholder="Optional"
+                class={`${field} placeholder:text-ink-faint placeholder:text-base`}
+              />
+            </label>
+          </fieldset>
+
+          {/* Honeypot: hidden from humans, catches bots. Never fill this. */}
+          <div aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 overflow-hidden" hidden>
+            <label>
+              Company
+              <input type="text" name="company" tabindex="-1" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-wrap items-center gap-4">
+              <button
+                type="submit"
+                class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span data-label>Send the brief</span>
+                <span aria-hidden="true">→</span>
+              </button>
+              <p
+                id="brief-status"
+                role="status"
+                aria-live="polite"
+                class="font-mono text-xs uppercase tracking-widest"
+              >
+              </p>
+            </div>
+
+            <p class="text-xs text-ink-faint max-w-lg leading-relaxed">
+              I use what you send here to reply to you and nothing else. No list,
+              no sequence, no passing it on. See the
+              <a href="/privacy/" class="ilink">privacy notice</a> for
+              how it is stored and how to have it deleted.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {/* ── WHAT HAPPENS NEXT ────────────────────────────────────────── */}
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <h2 class="col-span-12 lg:col-span-2 section-num font-normal m-0">What happens next</h2>
+      <div class="col-span-12 lg:col-span-10">
+        <StepTrack steps={next} />
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* Native select chrome doesn't match the hairline fields, so the arrow is
+       drawn here instead. The wrapper is inline-grid so the select keeps the
+       label's full width. */
+    .select-wrap {
+      position: relative;
+      display: grid;
+    }
+    .select-wrap select {
+      appearance: none;
+      cursor: pointer;
+      padding-right: 1.75rem;
+      width: 100%;
+    }
+    /* Popup list: styled where supported, and inherits the page's dark
+       color-scheme everywhere else. */
+    .select-wrap option {
+      background: var(--color-paper-2);
+      color: var(--color-ink);
+    }
+    .select-wrap::after {
+      content: "";
+      position: absolute;
+      right: 0.4rem;
+      top: 50%;
+      width: 0.45rem;
+      height: 0.45rem;
+      margin-top: -0.35rem;
+      border-right: 1px solid var(--color-ink-faint);
+      border-bottom: 1px solid var(--color-ink-faint);
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+    .select-wrap:focus-within::after {
+      border-color: var(--color-accent);
+    }
+  </style>
+
+  <script>
+    // Preselect the service when arriving from a /services/ card link
+    // (/start/?service=app). Unknown or absent slug leaves the default.
+    const select = document.getElementById("service-select") as HTMLSelectElement | null;
+    const slug = new URLSearchParams(location.search).get("service");
+    if (select && slug) {
+      const match = Array.from(select.options).find((o) => o.dataset.slug === slug);
+      if (match) select.value = match.value;
+    }
+
+    // Progressive enhancement, same contract as /contact/: POST JSON to the
+    // Worker and report inline. Without JS the form still POSTs natively
+    // (form-encoded), which the Worker also accepts.
+    const form = document.getElementById("brief-form") as HTMLFormElement | null;
+    const status = document.getElementById("brief-status");
+    const button = form?.querySelector("button[type=submit]") as HTMLButtonElement | null;
+    const buttonLabel = form?.querySelector("[data-label]");
+
+    if (form && status && button && buttonLabel) {
+      const setStatus = (msg: string, tone: "ok" | "err" | "") => {
+        status.textContent = msg;
+        status.style.color =
+          tone === "ok"
+            ? "var(--color-accent-text)"
+            : tone === "err"
+              ? "#f87171"
+              : "var(--color-ink-faint)";
+      };
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+
+        button.disabled = true;
+        buttonLabel.textContent = "Sending";
+        setStatus("", "");
+
+        try {
+          const res = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const body = await res.json().catch(() => ({}));
+
+          if (res.ok) {
+            form.reset();
+            buttonLabel.textContent = "Sent";
+            setStatus("Got it. I'll come back to you within two working days.", "ok");
+          } else {
+            button.disabled = false;
+            buttonLabel.textContent = "Send the brief";
+            setStatus(body.error ?? "Something went wrong. Try again?", "err");
+          }
+        } catch {
+          button.disabled = false;
+          buttonLabel.textContent = "Send the brief";
+          setStatus("Network error. Try again?", "err");
+        }
+      });
+    }
+  </script>
+</Base>

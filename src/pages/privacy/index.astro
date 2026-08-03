@@ -1,0 +1,214 @@
+---
+/**
+ * Privacy notice.
+ *
+ * Written to match what this site actually does, not from a generator: the
+ * only personal data collected is what someone types into /contact/ or
+ * /start/, which the Worker hands to Resend and drops into an inbox.
+ *
+ * If the stack changes (analytics added, a CRM introduced, the Worker starts
+ * storing submissions in KV or D1) this page has to change with it, or it
+ * stops being true. It is a plain-language description of the processing, not
+ * legal advice: worth a read-through by someone qualified before you lean on
+ * it commercially.
+ */
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+
+const updatedDate = new Date("2026-08-02");
+const updated = new Intl.DateTimeFormat("en-IE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}).format(updatedDate);
+const isoUpdated = updatedDate.toISOString().split("T")[0];
+
+const pageUrl = new URL("/privacy/", site.url).toString();
+const pageTitle = "Privacy · Dylan Collins";
+const pageDesc =
+  "What happens to the details you send through this site, who processes them, and how to have them deleted.";
+---
+
+<Base title={pageTitle} description={pageDesc}>
+  <Schema
+    slot="head"
+    data={[
+      webPageSchema({ url: pageUrl, name: pageTitle, description: pageDesc }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Privacy", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-16 lg:mb-24">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">Legal / Privacy</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          Privacy<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
+          The short version: the only thing this site collects is what you type
+          into a form, I use it to reply to you, and you can have it deleted by
+          asking. The longer version is below.
+        </p>
+        <div class="font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
+          Last updated · <time datetime={isoUpdated}>{updated}</time>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Who</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          This site is run by {site.business.legalName}, trading as
+          {site.business.tradingName}. {site.business.structure}. For anything on
+          this page, the contact is
+          <a href={`mailto:${site.author.email}`}>{site.author.email}</a>.
+        </p>
+        <p>
+          I am the data controller for the details you send me here, which under
+          the GDPR means the decisions about what happens to them are mine, and
+          so is the responsibility.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">What</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>Two forms on this site collect personal data, and nothing else does.</p>
+        <p>
+          <strong>The contact form</strong> takes your name, your email address
+          and your message.
+        </p>
+        <p>
+          <strong>The project brief</strong> takes the same, plus your business
+          name, your website, which service you are asking about, your budget
+          band, your timeline, and how you found me. Everything after the name,
+          email and description is optional in practice: leave anything blank
+          that you would rather not share, and I will ask if I genuinely need it.
+        </p>
+        <p>
+          There is no analytics on this site, no advertising, no tracking pixels
+          and no cookies set by me. I do not know who visits, only that someone
+          did.
+        </p>
+        <p>
+          One exception worth naming: a couple of the concept pages under
+          <code>/demos/</code> load fonts from Google Fonts, which means your
+          browser makes a request to Google when you open them. No other page
+          does this.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Why</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          To reply to you. That is the whole purpose. Where you are asking about
+          hiring me, the lawful basis is that the processing is necessary to take
+          steps at your request before entering a contract. For a general message
+          it is my legitimate interest in answering people who write to me.
+        </p>
+        <p>
+          I do not add you to a mailing list, I do not run a follow-up sequence,
+          and I do not sell, rent or share your details with anyone for marketing.
+          If you never reply to me, you will not hear from me again.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Where</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          A form submission passes through three services before it reaches me,
+          and each one is a processor acting on my instructions.
+        </p>
+        <ul>
+          <li>
+            <strong>Cloudflare</strong> hosts the site and runs the small
+            function that receives the form. It sees your submission in transit
+            and your IP address, which it uses to block abuse and rate limit the
+            form. It does not store the submission.
+          </li>
+          <li>
+            <strong>Resend</strong> turns the submission into the two emails: the
+            notification to me, and the confirmation to you. It holds a copy of
+            those emails as part of delivering them.
+          </li>
+          <li>
+            <strong>My email provider</strong> holds the message from the point
+            it lands in my inbox.
+          </li>
+        </ul>
+        <p>
+          Some of these providers process data outside the European Economic
+          Area, principally in the United States. Where they do, the transfer
+          relies on the safeguards in their own data processing terms, such as
+          the European Commission's standard contractual clauses.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">How long</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          Enquiries that do not turn into work are deleted within two years, and
+          usually a lot sooner. If we do end up working together, the records
+          that go with that become business records, and Irish tax law requires
+          me to keep those for six years.
+        </p>
+        <p>Ask me to delete something sooner and I will, unless the law says otherwise.</p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Your rights</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          Under the GDPR you can ask me for a copy of what I hold about you, ask
+          me to correct it, ask me to delete it, ask me to restrict what I do
+          with it, object to my processing it, or ask for it in a portable
+          format. Email
+          <a href={`mailto:${site.author.email}`}>{site.author.email}</a> and I
+          will come back to you within a month. There is no charge.
+        </p>
+        <p>
+          If you are not happy with how I handle it, you can complain to the
+          Irish Data Protection Commission at
+          <a href="https://www.dataprotection.ie" target="_blank" rel="noopener">dataprotection.ie</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16"></div>
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <div class="col-span-12 lg:col-span-2 section-num">Changes</div>
+      <div class="col-span-12 lg:col-span-10 prose">
+        <p>
+          If what this site does with your data changes, this page changes on the
+          same day, and the date at the top moves with it.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -2,10 +2,15 @@
 import Base from "../layouts/Base.astro";
 import HeroShader from "../components/HeroShader";
 import SectionHeader from "../components/SectionHeader.astro";
+import FramedSection from "../components/FramedSection.astro";
+import CornerNodes from "../components/CornerNodes.astro";
+import RotatingWord from "../components/RotatingWord";
 import EmptyState from "../components/EmptyState.astro";
 import Schema from "../components/Schema.astro";
+import ServiceSketch from "../components/ServiceSketch.astro";
 import { getCollection } from "astro:content";
 import { personSchema, websiteSchema } from "../lib/schema";
+import { services, priceFormat } from "../lib/services";
 
 const writingEntries = (await getCollection("writing", ({ data }) => !data.draft))
   .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt)
@@ -24,53 +29,122 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
 <Base>
   <Schema slot="head" data={[personSchema(), websiteSchema()]} />
   {/* ── HERO ───────────────────────────────────────────────────────── */}
-  <section class="relative isolate min-h-[88vh] flex flex-col justify-end overflow-hidden">
-    <HeroShader client:load />
+  {/* The section runs the full width so the rules above and below can cross
+      the whole browser; the panel inside stays on the shell measure, level
+      with the nav and with the rails further down. */}
+  <section class="pt-5 sm:pt-7 flex flex-col gap-3 sm:gap-4">
+    <div class="rule-dashed" aria-hidden="true"></div>
 
-    <div class="relative z-10 mx-auto w-full max-w-6xl px-6 lg:px-10 pb-16 sm:pb-24">
-      <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
-        <div class="hidden lg:block lg:col-span-2 section-num lift">000 / Index</div>
+    <div class="mx-auto w-full max-w-shell px-6 lg:px-10">
+      <div class="relative isolate flex flex-col justify-end min-h-[26rem] overflow-hidden rounded-[20px] border border-rule">
+      {/* Clipped by the box: overflow-hidden plus the radius crops the shader's
+          canvas to the rounded corners, and the box is positioned so it counts
+          as the containing block for it. */}
+      <HeroShader client:load />
 
-        <div class="col-span-12 lg:col-span-10 flex flex-col gap-8 sm:gap-10">
-          <h1 class="display text-[clamp(3.5rem,13vw,10.5rem)] lift lift-1">
-            <span class="block">Dylan</span>
-            <span class="block">Collins<span class="text-accent">.</span></span>
-          </h1>
+      {/* Scrim. The shader's pink drifts under the hero copy, and at its densest
+          it drags the secondary line down to roughly 3:1. This holds the type on
+          near-solid paper without touching the part of the field you actually
+          see, which sits higher up. */}
+      <div
+        class="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-t from-paper from-0% via-paper/65 via-38% to-transparent to-72%"
+        aria-hidden="true"
+      >
+      </div>
 
-          <div class="flex flex-col gap-6 max-w-2xl">
-            <p class="text-lg sm:text-xl text-ink-dim lift lift-2">
-              Engineer, builder, curious.
-            </p>
+      <div class="relative z-10 w-full px-6 sm:px-10 lg:px-14 pt-20 sm:pt-28 pb-16 sm:pb-20">
+        <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
+          <div class="hidden lg:block lg:col-span-2"></div>
 
-            <div class="flex flex-wrap items-baseline gap-x-8 gap-y-3 lift lift-3">
-              <a
-                href="/contact/"
-                class="link group inline-flex items-baseline gap-2 text-base sm:text-lg text-ink"
-              >
-                Building something? Let's talk
-                <span aria-hidden="true" class="text-accent transition-transform group-hover:translate-x-1">→</span>
-              </a>
-              <a
-                href="/work/"
-                class="link inline-flex items-baseline gap-2 text-sm text-ink-dim"
-              >
-                See work
-                <span aria-hidden="true">→</span>
-              </a>
+          <div class="col-span-12 lg:col-span-10 flex flex-col gap-8 sm:gap-10">
+            <h1 class="display text-[clamp(3.25rem,11vw,9rem)] lift lift-1">
+              <span class="block">Dylan</span>
+              <span class="block">Collins<span class="text-accent">.</span></span>
+            </h1>
+
+            <div class="flex flex-col gap-6 max-w-2xl">
+              <div class="flex flex-col gap-2 lift lift-2">
+                <p class="text-lg sm:text-xl text-ink-dim">
+                  Engineer, builder, curious.
+                </p>
+                <p class="text-base sm:text-lg text-ink-dim">
+                  I build websites, internal tools and automation for small
+                  businesses in Ireland.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-baseline gap-x-8 gap-y-3 lift lift-3">
+                <a
+                  href="/services/"
+                  class="link group inline-flex items-baseline gap-2 text-base sm:text-lg text-ink"
+                >
+                  Work with me
+                  <span aria-hidden="true" class="text-accent transition-transform group-hover:translate-x-1">→</span>
+                </a>
+                <a
+                  href="/work/"
+                  class="link inline-flex items-baseline gap-2 text-sm text-ink-dim"
+                >
+                  See work
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
+
+    <div class="rule-dashed" aria-hidden="true"></div>
   </section>
 
-  {/* ── 001 SELECTED WORK ──────────────────────────────────────────── */}
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
-    <SectionHeader num="001" eyebrow="Selected work" title="Things I've built." />
+  {/* ── THE RUN ────────────────────────────────────────────────────────
+      One continuous framed region rather than five separate sections: the
+      rails run unbroken from here to the foot of the page, and the content
+      inside is divided by internal breaks. The blocks below are stacked on a
+      plain gap for now — that gap is where the break goes once we know what
+      it looks like. */}
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="flex flex-col gap-24 sm:gap-32 py-20 sm:py-28">
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10">
-      <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
-      <div class="col-span-12 lg:col-span-10">
+      {/* ── Services ─────────────────────────────────────────────────── */}
+      <div data-reveal>
+        <SectionHeader eyebrow="Services">
+          What I can <RotatingWord client:visible words={["build", "fix", "deploy", "automate", "host"]} /> for you<span class="text-accent">.</span>
+        </SectionHeader>
+
+        {/* A plate of four, divided by hairlines, rather than a fourth stacked
+            list on a page that already has work and writing in that shape.
+            Cells draw their own bottom and right edge; the container supplies
+            the top and left, so the box closes at any column count. */}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-rule">
+          {services.map((service) => (
+            <a
+              href={`/services/#${service.slug}`}
+              class="group relative flex flex-col gap-5 border-b border-r border-rule p-5 transition-colors hover:bg-paper-2"
+            >
+              <CornerNodes />
+              <ServiceSketch slug={service.slug} class="opacity-90 transition-opacity group-hover:opacity-100" />
+              <div class="flex flex-col gap-1.5">
+                <h3 class="text-lg font-semibold tracking-tight leading-snug m-0">
+                  {service.title}
+                </h3>
+                <p class="text-sm text-ink-dim leading-relaxed m-0">{service.tagline}</p>
+              </div>
+              <div class="mt-auto flex items-baseline justify-between gap-3 border-t border-rule pt-4 font-mono text-xs uppercase tracking-widest text-ink-faint">
+                <span>From {priceFormat.format(service.from)}{service.fromUnit}</span>
+                <span aria-hidden="true" class="text-accent transition-transform group-hover:translate-x-1">→</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Selected work ────────────────────────────────────────────── */}
+      <div data-reveal>
+        <SectionHeader eyebrow="Selected work" title="Things I've built." />
+
         {workEntries.length === 0 ? (
           <EmptyState
             label="In progress"
@@ -79,47 +153,100 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
             ctaLabel="Get in touch"
           />
         ) : (
-        <>
-        <ul class="divide-y divide-rule border-y border-rule">
-          {workEntries.map((entry, i) => (
-            <li>
-              <a
-                href={`/work/${entry.id}/`}
-                class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 sm:py-6 items-baseline transition-colors hover:bg-paper-2 px-2 -mx-2"
-              >
-                <span class="col-span-2 sm:col-span-1 font-mono text-xs text-ink-faint tracking-widest">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span class="col-span-7 sm:col-span-5 text-[clamp(1.125rem,2.5vw,1.5rem)] font-semibold tracking-tight">
-                  {entry.data.title}
-                  <span class="ml-2 text-accent group-hover:translate-x-1 inline-block transition-transform">→</span>
-                </span>
-                <time datetime={entry.data.publishedAt.toISOString().split("T")[0]} class="col-span-3 sm:col-span-1 sm:col-start-12 sm:row-start-1 text-right font-mono text-xs text-ink-faint tracking-widest">
-                  {entry.data.publishedAt.getFullYear()}
-                </time>
-                <span class="col-span-12 sm:col-span-5 sm:col-start-7 sm:row-start-1 text-ink-dim text-sm sm:text-base">
-                  {entry.data.summary}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
-          <a href="/work/" class="link text-ink-dim">All work →</a>
-        </div>
-        </>
+          <>
+            {/* Bento on the same three columns as the services plate: two
+                thirds then one third, and the next row the other way round.
+                Unlike the plate these are separate cards with air between
+                them, each carrying its own border — so the joints belong to
+                the grid as a whole, not to every cell. Absolutely positioned,
+                so CornerNodes does not take a grid cell. */}
+            <div class="relative grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <CornerNodes />
+              {workEntries.map((entry, i) => {
+                const wide = i % 3 === 0;
+                /* Top right carries the accent fill. Text on it is solid
+                   white throughout: on the brand pink only pure white clears
+                   4.5:1 — 90% white is 4.0:1 — so the hierarchy inside this
+                   one comes from size and weight rather than tone. */
+                const filled = i === 1;
+                return (
+                  <a
+                    href={`/work/${entry.id}/`}
+                    class:list={[
+                      "group flex flex-col gap-5 min-h-[20rem] rounded-[6px] border p-7 sm:p-8 transition-colors",
+                      filled
+                        ? "bg-accent border-accent text-white hover:bg-accent-deep"
+                        : "border-rule hover:bg-paper-2",
+                      wide && "lg:col-span-2",
+                    ]}
+                  >
+                    <div class="flex flex-col gap-2">
+                      <span
+                        class:list={[
+                          "font-mono text-[10px] uppercase tracking-[0.18em]",
+                          filled ? "text-white" : "text-ink-faint",
+                        ]}
+                      >
+                        {entry.data.category}
+                      </span>
+                      <h3
+                        class:list={[
+                          "font-semibold tracking-tight leading-snug m-0",
+                          wide
+                            ? "text-[clamp(1.5rem,3vw,2.125rem)]"
+                            : "text-[clamp(1.25rem,2.2vw,1.5rem)]",
+                        ]}
+                      >
+                        {entry.data.title}
+                      </h3>
+                      <p
+                        class:list={[
+                          "leading-relaxed m-0",
+                          filled ? "text-white" : "text-ink-dim",
+                          wide ? "text-base max-w-xl" : "text-sm",
+                        ]}
+                      >
+                        {entry.data.summary}
+                      </p>
+                    </div>
+
+                    <div
+                      class:list={[
+                        "mt-auto flex items-baseline justify-between gap-4 border-t pt-4 font-mono text-xs uppercase tracking-widest",
+                        filled ? "border-white/30 text-white" : "border-rule text-ink-faint",
+                      ]}
+                    >
+                      <span class="truncate">
+                        {entry.data.stack.slice(0, wide ? 3 : 2).join(" · ")}
+                      </span>
+                      <span class="flex items-baseline gap-3 shrink-0">
+                        <time datetime={entry.data.publishedAt.toISOString().split("T")[0]}>
+                          {entry.data.publishedAt.getFullYear()}
+                        </time>
+                        <span
+                          aria-hidden="true"
+                          class:list={[
+                            "transition-transform group-hover:translate-x-1",
+                            filled ? "text-white" : "text-accent",
+                          ]}
+                        >→</span>
+                      </span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+            <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+              <a href="/work/" class="link text-ink-dim">All work <span aria-hidden="true">→</span></a>
+            </div>
+          </>
         )}
       </div>
-    </div>
-  </section>
 
-  {/* ── 002 WRITING ────────────────────────────────────────────────── */}
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
-    <SectionHeader num="002" eyebrow="Recent writing" title="Notes from the keyboard." />
+      {/* ── Writing ──────────────────────────────────────────────────── */}
+      <div data-reveal>
+        <SectionHeader eyebrow="Recent writing" title="Notes from the keyboard." />
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10">
-      <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
-      <div class="col-span-12 lg:col-span-10">
         {writingEntries.length === 0 ? (
           <EmptyState
             label="Coming soon"
@@ -128,72 +255,71 @@ const dateShort = new Intl.DateTimeFormat("en-IE", {
             ctaLabel="The writing page"
           />
         ) : (
-        <>
-          <ul class="divide-y divide-rule border-y border-rule">
-            {writingEntries.map((entry) => (
-              <li>
-                <a
-                  href={`/writing/${entry.id}/`}
-                  class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 sm:py-6 items-baseline transition-colors hover:bg-paper-2 px-2 -mx-2"
-                >
-                  <time
-                    datetime={entry.data.publishedAt.toISOString().split("T")[0]}
-                    class="col-span-6 sm:col-span-2 font-mono text-xs text-ink-faint tracking-widest uppercase"
+          <>
+            <ul class="divide-y divide-rule border-y border-rule">
+              {writingEntries.map((entry) => (
+                <li>
+                  <a
+                    href={`/writing/${entry.id}/`}
+                    class="group grid grid-cols-12 gap-x-3 gap-y-2 py-5 sm:py-6 items-baseline transition-colors hover:bg-paper-2 px-2 -mx-2"
                   >
-                    {dateShort.format(entry.data.publishedAt)}
-                  </time>
-                  <span class="col-span-6 sm:col-span-3 sm:col-start-10 text-right font-mono text-xs text-ink-faint tracking-widest uppercase">
-                    {entry.data.tags.slice(0, 2).join(" · ")}
-                  </span>
-                  <span class="col-span-12 sm:col-span-7 sm:col-start-3 sm:row-start-1 text-[clamp(1.05rem,2.2vw,1.375rem)] tracking-tight">
-                    {entry.data.title}
-                    <span class="ml-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <div class="mt-6 font-mono text-xs uppercase tracking-widest">
-            <a href="/writing/" class="link text-ink-dim">All writing →</a>
-          </div>
-        </>
+                    <time
+                      datetime={entry.data.publishedAt.toISOString().split("T")[0]}
+                      class="col-span-6 sm:col-span-2 font-mono text-xs text-ink-faint tracking-widest uppercase"
+                    >
+                      {dateShort.format(entry.data.publishedAt)}
+                    </time>
+                    <span class="col-span-6 sm:col-span-3 sm:col-start-10 text-right font-mono text-xs text-ink-faint tracking-widest uppercase">
+                      {entry.data.tags.slice(0, 2).join(" · ")}
+                    </span>
+                    <span class="col-span-12 sm:col-span-7 sm:col-start-3 sm:row-start-1 text-[clamp(1.05rem,2.2vw,1.375rem)] tracking-tight">
+                      {entry.data.title}
+                      <span aria-hidden="true" class="ml-2 text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+              <a href="/writing/" class="link text-ink-dim">All writing <span aria-hidden="true">→</span></a>
+            </div>
+          </>
         )}
       </div>
-    </div>
-  </section>
 
-  {/* ── 003 NOW ────────────────────────────────────────────────────── */}
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-20 sm:py-28" data-reveal>
-    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-start">
-      <div class="hidden lg:block lg:col-span-2 section-num">003</div>
-      <div class="col-span-12 lg:col-span-10">
+      {/* ── Now ──────────────────────────────────────────────────────── */}
+      <div data-reveal>
         <div class="eyebrow mb-3">Now</div>
         <p class="text-[clamp(1.5rem,3.5vw,1.875rem)] font-medium tracking-tight leading-snug max-w-3xl">
           A day job, a few side projects, and a long list I never quite get to.
         </p>
         <div class="mt-6 font-mono text-xs uppercase tracking-widest">
-          <a href="/now/" class="link text-ink-dim">What I'm doing now →</a>
+          <a href="/now/" class="link text-ink-dim">What I'm doing now <span aria-hidden="true">→</span></a>
         </div>
       </div>
-    </div>
-  </section>
 
-  {/* ── 004 CTA ────────────────────────────────────────────────────── */}
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-24 sm:py-32 border-t border-rule" data-reveal>
-    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
-      <div class="hidden lg:block lg:col-span-2 section-num">004</div>
-      <div class="col-span-12 lg:col-span-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
-        <h2 class="display text-[clamp(2.75rem,7vw,4.5rem)]">
-          Say hi<span class="text-accent">.</span>
-        </h2>
+      {/* ── Say hi ───────────────────────────────────────────────────── */}
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8" data-reveal>
+        <div class="flex flex-col gap-3">
+          <h2 class="display text-[clamp(2.75rem,7vw,4.5rem)] m-0">
+            Say hi<span class="text-accent">.</span>
+          </h2>
+          <p class="text-ink-dim max-w-md">
+            Got a project? <a href="/start/" class="ilink">Send a brief</a> and
+            you'll have an answer on cost and timing. Anything else, the
+            <a href="/contact/" class="ilink">contact form</a> is two fields and a message.
+          </p>
+        </div>
         <a
-          href="/contact/"
-          class="inline-flex items-center gap-3 self-start sm:self-end border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent transition-colors"
+          href="/start/"
+          class="inline-flex items-center gap-3 self-start sm:self-end shrink-0 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
         >
-          Start a conversation
+          Start a project
           <span aria-hidden="true">→</span>
         </a>
       </div>
+
     </div>
-  </section>
+  </FramedSection>
+
 </Base>

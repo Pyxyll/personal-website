@@ -1,0 +1,245 @@
+---
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import ServiceSketch from "../../components/ServiceSketch.astro";
+import StepTrack from "../../components/StepTrack.astro";
+import {
+  professionalServiceSchema,
+  faqSchema,
+  breadcrumbSchema,
+} from "../../lib/schema";
+import { site } from "../../lib/site";
+import { services, process, faqs, priceFormat } from "../../lib/services";
+
+const pageUrl = new URL("/services/", site.url).toString();
+const pageTitle = "Services · Dylan Collins";
+const pageDesc =
+  "Websites, custom web apps, automation and hosting for small businesses in Ireland. Fixed quotes against a written scope.";
+
+// Sketch and pitch swap sides down the page, so four services read as four
+// spreads rather than four rows of the same table. Both need an explicit row,
+// or the pitch drops below the sketch on the flipped ones.
+const sketchCols = (i: number) =>
+  i % 2 === 0
+    ? "lg:col-span-5 lg:col-start-1 lg:row-start-1"
+    : "lg:col-span-5 lg:col-start-8 lg:row-start-1";
+const pitchCols = (i: number) =>
+  i % 2 === 0
+    ? "lg:col-span-6 lg:col-start-7 lg:row-start-1"
+    : "lg:col-span-6 lg:col-start-1 lg:row-start-1";
+---
+
+<Base title={pageTitle} description={pageDesc}>
+  <Schema
+    slot="head"
+    data={[
+      professionalServiceSchema({ url: pageUrl, services }),
+      faqSchema(faqs),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "Services", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
+    {/* ── HEADER ───────────────────────────────────────────────────── */}
+    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-20 lg:mb-28">
+      <div class="hidden lg:block lg:col-span-2 section-num lift">001 / Services</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          Services<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
+          I build websites, internal tools and automation for small businesses,
+          trading as <strong class="text-ink font-medium">{site.business.tradingName}</strong>.
+          One person, so you talk to the person doing the work. Fixed price
+          against a written scope, so you know the number before anything starts.
+        </p>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 lift lift-3">
+          <a
+            href="/start/"
+            class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
+          >
+            Start a project
+            <span aria-hidden="true">→</span>
+          </a>
+          <span class="font-mono text-xs uppercase tracking-widest text-ink-faint">
+            <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent mr-2 align-middle"></span>
+            {site.business.availability}
+          </span>
+        </div>
+      </div>
+    </header>
+
+    {/* ── WHAT I DO ────────────────────────────────────────────────── */}
+    {services.map((service, i) => (
+      <article
+        id={service.slug}
+        aria-labelledby={`${service.slug}-title`}
+        class="scroll-mt-8 mb-20 lg:mb-28"
+        data-reveal
+      >
+        <div class="grid grid-cols-12 gap-6 lg:gap-10 mb-8 items-baseline">
+          <span class="col-span-12 lg:col-span-2 section-num">{service.num}</span>
+          <div class="col-span-12 lg:col-span-10 rule"></div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-x-6 gap-y-10 lg:gap-x-10">
+          <div class={`col-span-12 sm:col-span-8 ${sketchCols(i)}`}>
+            <div class="border border-rule bg-paper-2 p-6 sm:p-7">
+              <ServiceSketch slug={service.slug} caption />
+            </div>
+          </div>
+
+          <div class={`col-span-12 ${pitchCols(i)} flex flex-col gap-5`}>
+            <div>
+              <h2
+                id={`${service.slug}-title`}
+                class="text-[clamp(1.625rem,3.5vw,2.25rem)] font-semibold tracking-tight leading-tight m-0"
+              >
+                {service.title}
+              </h2>
+              <p class="text-accent-text text-base sm:text-lg mt-1.5">{service.tagline}</p>
+            </div>
+
+            <p class="text-ink-dim text-base leading-relaxed max-w-xl">{service.body}</p>
+
+            {/* Deliverables run as one caption line. As a bulleted list this
+                was six more bullets on a page that already had plenty. */}
+            <p class="text-sm leading-relaxed text-ink-faint max-w-xl">
+              <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim mr-2">
+                Included
+              </span>
+              {service.deliverables.join(" · ")}
+            </p>
+
+            <div class="flex flex-wrap items-start gap-x-12 gap-y-6 border-t border-rule pt-6">
+              <span class="flex flex-col gap-1">
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
+                  From
+                </span>
+                {/* Kept on one line: a newline here becomes a space between the
+                    figure and its unit, and "€95 /month" reads as a typo. */}
+                <span class="text-[clamp(1.75rem,4vw,2.375rem)] font-bold tracking-tight leading-none">{priceFormat.format(service.from)}{service.fromUnit && <span class="text-ink-faint text-lg font-normal">{service.fromUnit}</span>}</span>
+                <span class="text-sm text-ink-dim mt-1 max-w-[22ch]">{service.fromNote}</span>
+              </span>
+
+              <span class="flex flex-col gap-1">
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
+                  Typically
+                </span>
+                <span class="text-base">{service.timeline}</span>
+              </span>
+
+              {service.proof && (
+                <span class="flex flex-col gap-1">
+                  <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
+                    Examples
+                  </span>
+                  <span class="flex flex-wrap gap-x-4 gap-y-1 text-base">
+                    {service.proof.map((p) => (
+                      <a href={p.href} class="ilink">{p.label}</a>
+                    ))}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            <a
+              href={`/start/?service=${service.slug}`}
+              class="link self-start font-mono text-xs uppercase tracking-widest text-ink"
+            >
+              Brief me on this <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    ))}
+
+    {/* ── PRICING NOTE ─────────────────────────────────────────────── */}
+    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
+      <h2 class="col-span-12 lg:col-span-2 section-num font-normal m-0">Note</h2>
+      <p class="col-span-12 lg:col-span-10 text-sm text-ink-faint max-w-2xl">
+        Starting prices, not quotes. What a job actually costs depends on what it
+        has to do, and you will have that number in writing before you commit to
+        anything. Prices are in euro.{" "}
+        {site.business.vatRegistered
+          ? "VAT is added at the applicable rate."
+          : "I am not VAT registered, so there is no VAT to add."}
+      </p>
+    </div>
+
+    <div class="rule my-16 lg:my-20"></div>
+
+    {/* ── HOW IT WORKS ─────────────────────────────────────────────── */}
+    <section data-reveal>
+      <div class="grid grid-cols-12 gap-6 lg:gap-10 mb-10 items-baseline">
+        <div class="hidden lg:block lg:col-span-2 section-num">005</div>
+        <div class="col-span-12 lg:col-span-10 flex flex-col gap-3">
+          <div class="eyebrow">How it works</div>
+          <h2 class="text-[clamp(1.75rem,5vw,3rem)] font-bold tracking-tight leading-[0.95] m-0">
+            No surprises, either direction.
+          </h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6 lg:gap-10">
+        <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+        <StepTrack steps={process} class="col-span-12 lg:col-span-10" />
+      </div>
+    </section>
+
+    <div class="rule my-16 lg:my-20"></div>
+
+    {/* ── QUESTIONS ────────────────────────────────────────────────── */}
+    <section data-reveal>
+      <div class="grid grid-cols-12 gap-6 lg:gap-10 mb-10 items-baseline">
+        <div class="hidden lg:block lg:col-span-2 section-num">006</div>
+        <div class="col-span-12 lg:col-span-10 flex flex-col gap-3">
+          <div class="eyebrow">Questions</div>
+          <h2 class="text-[clamp(1.75rem,5vw,3rem)] font-bold tracking-tight leading-[0.95] m-0">
+            Asked before every enquiry.
+          </h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6 lg:gap-10">
+        <div class="col-span-12 lg:col-span-2 hidden lg:block"></div>
+        <dl class="col-span-12 lg:col-span-10 grid sm:grid-cols-2 gap-x-10 gap-y-10 m-0">
+          {faqs.map((item) => (
+            <div class="flex flex-col gap-2">
+              <dt class="text-base font-semibold tracking-tight">{item.q}</dt>
+              <dd class="text-ink-dim text-sm sm:text-base leading-relaxed m-0">
+                {item.a}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    {/* ── CTA ──────────────────────────────────────────────────────── */}
+    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end mt-20 sm:mt-28 pt-16 border-t border-rule" data-reveal>
+      <div class="hidden lg:block lg:col-span-2 section-num">007</div>
+      <div class="col-span-12 lg:col-span-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+        <div class="flex flex-col gap-3">
+          <h2 class="display text-[clamp(2.25rem,6vw,3.75rem)] m-0">
+            Tell me what you need<span class="text-accent">.</span>
+          </h2>
+          <p class="text-ink-dim max-w-md">
+            Five minutes on the brief gets you a straight answer on cost, timing
+            and whether I am the right person for it.
+          </p>
+        </div>
+        <a
+          href="/start/"
+          class="inline-flex items-center gap-3 self-start sm:self-end shrink-0 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
+        >
+          Start a project
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

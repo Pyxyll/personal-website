@@ -2,16 +2,42 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 
+/* Contrast ratios below are against --color-paper (#0a0a0a). WCAG 2.2 wants
+   4.5:1 for body text, 3:1 for large text and for the edges of a control.
+   Every value here is measured, not eyeballed: dark themes flatter low
+   contrast on a good monitor and hide it completely on a bad one. */
 @theme {
-  --color-ink: #fafafa;
-  --color-ink-dim: #a1a1aa;
-  --color-ink-faint: #525252;
+  --color-ink: #fafafa; /* 19.3:1 — body */
+  --color-ink-dim: #a1a1aa; /* 7.7:1  — secondary copy */
+  --color-ink-faint: #7d7d7d; /* 4.8:1  — labels, marginalia, timestamps */
   --color-paper: #0a0a0a;
   --color-paper-2: #111111;
-  --color-rule: #1f1f1f;
-  --color-rule-strong: #2a2a2a;
-  --color-accent: #da2862;
+  --color-rule: #1f1f1f; /* decorative hairlines only, never an edge you must see */
+  --color-rule-strong: #616161; /* 3.2:1 on paper, 3.1:1 on paper-2 — the visible edge of inputs, buttons and diagrams */
+  --color-accent: #da2862; /* the brand. 4.2:1 — see --color-accent-text */
+  /* The brand pink lands just under the 4.5:1 that small text needs, so accent
+     text uses this instead: same hue, lifted to 5.1:1. Everything else — fills,
+     borders, glows, the focus ring — is the brand colour, and all of those only
+     need 3:1. */
+  --color-accent-text: #e5417d;
+  --color-accent-deep: #b31d4f; /* pressed/hover state under the brand pink */
   --color-accent-dim: #9f1239;
+
+  /* Two measures. The shell — the nav bar and the hero panel — is the frame of
+     the page; the content measure sits inside it. Both carry the same 40px
+     gutter, so the visible edge of each is 80px narrower than its container:
+     shell 1480, content 1260, 110px between them on each side.
+
+     Pages not yet moved onto these still use max-w-6xl (1152px). */
+  /* 1560px so the hero's border lands at 1480: the container carries the same
+     40px gutter as everything else, so the visible box is always 80px narrower
+     than the measure. Change this if you want the *border* somewhere else. */
+  --container-shell: 97.5rem;
+
+  /* 1340px, landing content at 1260 once the gutter comes off — 110px inside
+     the shell on each side. Paragraphs still cap themselves at max-w-2xl; this
+     is the measure the grids, plates and lists span. */
+  --container-content: 83.75rem;
 
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
@@ -30,6 +56,9 @@
   }
 
   html {
+    /* Clears the sticky nav. Without this every in-page anchor, including the
+       skip link's #main, lands underneath the bar. */
+    scroll-padding-top: 6rem;
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -46,7 +75,16 @@
 
   ::selection {
     background: var(--color-accent);
-    color: white;
+    /* White on the brand pink is 4.7:1; paper is 4.2:1. */
+    color: #ffffff;
+  }
+
+  /* One focus ring for the whole site. Individual components may add to it,
+     but nothing is allowed to turn it off: keyboard users need to see where
+     they are, and a 1px border colour change on its own is not enough. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
 
   ::-webkit-scrollbar {
@@ -103,9 +141,24 @@
   transform-origin: right;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.link:hover::after {
+.link:hover::after,
+.link:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* Links inside a sentence. `.link` only draws its underline on hover, which is
+   fine for a standalone call to action but not for a link buried in a
+   paragraph: colour alone can't be the thing that marks it (WCAG 1.4.1), and
+   ink against ink-dim is nowhere near the 3:1 that would let it try. */
+.ilink {
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-accent);
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.ilink:hover {
+  color: var(--color-accent-text);
 }
 
 /* Display headline, used on home for DYLAN / COLLINS */
@@ -114,6 +167,20 @@
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 0.88;
+}
+
+/* Dashed horizontal rule. Same rhythm as the vertical rails in a framed
+   section — 20px on, 16px off, 2px thick — so a horizontal and a vertical
+   meeting at a corner read as the same line turning. */
+.rule-dashed {
+  height: 2px;
+  background-image: linear-gradient(
+    to right,
+    var(--color-rule) 20px,
+    transparent 20px
+  );
+  background-size: 36px 2px;
+  background-repeat: repeat-x;
 }
 
 /* Hairline rule (used everywhere we'd have a border) */
@@ -141,17 +208,71 @@
 .lift-3 { animation-delay: 0.20s; }
 .lift-4 { animation-delay: 0.30s; }
 
-/* Reveal-on-scroll observer target */
-[data-reveal] {
+/* Reveal-on-scroll observer target.
+   Gated behind .js (set on <html> in Base.astro) so that if the script never
+   arrives, the page is simply visible rather than a column of invisible
+   sections. Content must not depend on JavaScript to be readable. */
+.js [data-reveal] {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
     transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
   will-change: opacity, transform;
 }
-[data-reveal].is-visible {
+.js [data-reveal].is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Reduced motion: honour it globally rather than per-effect, so a new
+   animation can't quietly opt itself out of the preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Belt and braces on the two effects that start from invisible. Shortening
+     the duration is not enough on its own: an element whose from-state is
+     opacity 0 can still be caught at that state, and a page you cannot read is
+     a worse outcome than one that does not animate. */
+  .lift {
+    animation: none;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Headline word that cycles. The canvas only sits over the text during a
+   swap; the rest of the time what you see is the DOM text underneath it. */
+.rotword {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: baseline;
+  transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.rotword-text {
+  display: inline-block;
+}
+.rotword-canvas {
+  /* left and top are set from the measured baseline, not centred. */
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotword {
+    transition: none;
+  }
 }
 
 /* Prose for MDX writing pages */
@@ -184,7 +305,7 @@
   transition: color 0.2s ease;
 }
 .prose a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .prose strong {
   color: var(--color-ink);

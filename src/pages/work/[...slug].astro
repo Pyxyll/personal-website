@@ -56,10 +56,10 @@ const year = entry.data.publishedAt.getFullYear();
           {entry.data.role && <span>{entry.data.role}</span>}
           {entry.data.stack.length > 0 && <span>{entry.data.stack.join(" · ")}</span>}
           {entry.data.url && (
-            <a href={entry.data.url} target="_blank" rel="noopener" class="link text-ink-dim">Visit ↗</a>
+            <a href={entry.data.url} target="_blank" rel="noopener" class="link text-ink-dim">Visit <span aria-hidden="true">↗</span></a>
           )}
           {entry.data.repo && (
-            <a href={entry.data.repo} target="_blank" rel="noopener" class="link text-ink-dim">Code ↗</a>
+            <a href={entry.data.repo} target="_blank" rel="noopener" class="link text-ink-dim">Code <span aria-hidden="true">↗</span></a>
           )}
         </div>
       </div>
