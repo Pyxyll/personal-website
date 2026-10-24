@@ -120,6 +120,44 @@ export const services: Service[] = [
     timeline: "Ongoing",
     proof: [{ label: "Self-hosted media server", href: "/work/media-server/" }],
   },
+  {
+    slug: "ai",
+    num: "005",
+    title: "AI assistants and document work",
+    tagline: "The jobs that were never going to fit a rules engine.",
+    body:
+      "Automation handles the steps you can write down. This is for the rest: the inbox nobody has time to read, the invoices that arrive in forty different layouts, the same five questions your staff keep asking about your own paperwork. I build one narrow tool that does one of those jobs properly, with a person still checking the parts where being wrong is expensive.",
+    deliverables: [
+      "A short list of the jobs worth handing over, and the ones that are not",
+      "An assistant that answers from your documents, not from the internet",
+      "Invoices, forms and email read into the systems you already use",
+      "A human check on anything costly to get wrong",
+      "Running costs worked out before we start, not after",
+      "Hosted in Europe, or on your own hardware if the data cannot leave",
+    ],
+    from: 2400,
+    fromNote: "One job, scoped narrowly and in daily use.",
+    timeline: "3 to 5 weeks",
+  },
+  {
+    slug: "audit",
+    num: "006",
+    title: "Audits and second opinions",
+    tagline: "Find out where the money should go before you spend it.",
+    body:
+      "A fixed piece of work that looks at what you already run: the site, the tools, the manual steps, and the quote somebody else has sent you. You get back what is worth doing, in what order, and what it should cost. The AI question gets a straight answer too, and for most businesses that answer is two of those tools rather than twenty.",
+    deliverables: [
+      "A walk through what you run now and what it costs you",
+      "Your current site checked for speed, search and accessibility",
+      "Manual work ranked by hours lost, not by how easy it is to fix",
+      "Where AI helps, where it does not, and what it costs to run",
+      "A written plan you can hand to anyone, including someone who is not me",
+      "An hour to talk it through once you have read it",
+    ],
+    from: 450,
+    fromNote: "A fixed-scope review, back with you inside a week.",
+    timeline: "About a week",
+  },
 ];
 
 /** How an engagement actually runs, start to finish. Shown on /services/. */
@@ -169,6 +207,10 @@ export const faqs = [
   {
     q: "How do you charge?",
     a: "Fixed price against a written scope for project work, and a flat monthly fee for care plans. Where a project genuinely cannot be scoped up front, I will say so and we agree a day rate instead.",
+  },
+  {
+    q: "Is the AI part actually worth it?",
+    a: "Sometimes. It earns its keep on reading, sorting and summarising the work nobody enjoys and no script can pin down. It is a poor fit for anything that has to be exactly right every time with nobody checking. I will tell you which one you have before you spend anything on it.",
   },
   {
     q: "What if I already have a site?",

@@ -1,31 +1,47 @@
 ---
 /**
- * A small animated diagram per service.
+ * One mark per service.
  *
- * Each one assembles itself on a loop — a page being built, a sheet becoming a
- * tool, a route being replaced, a month being watched — then holds and takes
- * itself apart. Hover runs a second, separate beat on top: the thing the
- * service actually does, once and deliberately.
+ * These are marks, not diagrams: a single large shape built from a handful of
+ * heavy primitives, closer to a logo than to an illustration of the work. The
+ * old set drew literal little interfaces, which meant six figures competing on
+ * detail at 200px wide and losing. Six silhouettes compete on shape instead —
+ * frame, quadrants, ring, slabs, hub, lens — and stay legible at any size.
  *
- * Three rules learned the hard way, and they apply to every figure here:
+ * ── The timeline ─────────────────────────────────────────────────────────
+ * Every part runs the same cycle length and differs only in *when inside that
+ * cycle* it appears. That is the whole trick, and it is why the lanes are
+ * separate keyframe sets rather than one set plus animation-delay.
  *
- *   1. transform-box: fill-box on anything transformed. Without it
- *      transform-origin resolves against the viewBox origin rather than the
- *      element's own box, and parts fly toward the top-left corner.
- *   2. Delayed parts need fill-mode `both`, or they show their finished self
- *      during the wait and the drawing is complete before it starts building.
- *      It has to sit inside the `animation` shorthand — a separate declaration
- *      before it just gets reset.
- *   3. Hover never touches an element the loop is animating. It drives its own
- *      elements, invisible the rest of the time, so the two never fight over
- *      the same property mid-cycle.
+ * A delay shifts an element's entire build → hold → teardown, so the last part
+ * in was still holding while the first was already leaving, and the figure was
+ * only fully assembled for about a second in six. Here the entry is staggered
+ * and the exit is very nearly not, so the mark spends about three quarters of
+ * the cycle standing complete:
  *
- * Everything animated is transform, opacity or stroke-dashoffset, so nothing
- * touches layout. Loops are paused until the section is revealed, and the
- * reduced-motion block stops them at the finished picture.
+ *   lane 1   ▓▓▓░░░░░░░░░░░░░░░░░░░▓▓▓
+ *   lane 3     ▓▓▓░░░░░░░░░░░░░░░░░░▓▓▓
+ *   lane 5       ▓▓▓░░░░░░░░░░░░░░░░░▓▓▓
+ *                └──── assembled ────┘
  *
- * Marked aria-hidden: where a caption is shown it carries the meaning in text;
- * where it isn't, the pitch beside the drawing already does.
+ * Five lanes, .l1 to .l5. Parts that should arrive together share one.
+ *
+ * ── Rules that still apply ───────────────────────────────────────────────
+ *   1. transform-box: fill-box on anything transformed, or transform-origin
+ *      resolves against the viewBox and parts fly at the top-left corner.
+ *   2. Every stroked element needs pathLength="1". The stroke classes set
+ *      stroke-dasharray: 1, which with pathLength 1 is a single dash covering
+ *      the whole path — solid at rest, and drawable by offsetting it. Miss the
+ *      attribute and you get a 1-unit dotted line instead.
+ *   3. Hover drives its own elements, invisible the rest of the time, so it
+ *      never fights the loop for a property mid-cycle.
+ *
+ * Only transform, opacity and stroke-dashoffset are animated, so nothing here
+ * touches layout. Loops are paused until the section is revealed, and reduced
+ * motion stops everything at the finished mark.
+ *
+ * aria-hidden: where a caption shows it carries the meaning in text, and where
+ * it doesn't the pitch beside the mark already does.
  */
 import { services } from "../lib/services";
 
@@ -33,23 +49,21 @@ interface Props {
   slug: string;
   /** Show the figure caption. Off in tight spaces like the homepage plate. */
   caption?: boolean;
-  /**
-   * Run the loops and the hover beat. Off for now: the motion needs reworking
-   * and a static figure is better than a half-finished one. Everything is
-   * still here — turn this on to get it back.
-   */
+  /** Run the loop and the hover beat. */
   animate?: boolean;
   class?: string;
 }
-const { slug, caption = false, animate = false, class: className = "" } = Astro.props;
+const { slug, caption = false, animate = true, class: className = "" } = Astro.props;
 
 const num = services.find((s) => s.slug === slug)?.num ?? "";
 
 const captions: Record<string, string> = {
-  website: "One page, one thing you want them to do.",
-  app: "The shared sheet, and the thing that replaces it.",
-  automation: "The step in the middle, deleted.",
-  hosting: "Watched, and answered at 03:14.",
+  website: "One page, one thing worth clicking.",
+  app: "The spreadsheet, given a shape.",
+  automation: "It runs itself, on its own clock.",
+  hosting: "Stacked, watched, answered at 03:14.",
+  ai: "Forty layouts in, one shape out.",
+  audit: "What it costs you now, in order.",
 };
 ---
 
@@ -57,107 +71,107 @@ const captions: Record<string, string> = {
   <svg viewBox="0 0 200 120" fill="none" aria-hidden="true" focusable="false">
     {slug === "website" && (
       <>
-        {/* A page assembling itself, ending on the one block worth clicking. */}
-        <rect class="s-edge draw" x="10.5" y="6.5" width="179" height="107" rx="5" pathLength="1" />
-        <path class="s-edge draw d-1" d="M10 30h180" pathLength="1" />
-        <rect class="s-dim pop p-2" x="22" y="15" width="20" height="5" rx="2" />
-        <rect class="s-dim pop p-3" x="166" y="16" width="12" height="3" rx="1.5" />
-        <rect class="s-dim pop p-2b" x="148" y="16" width="12" height="3" rx="1.5" />
+        {/* A page, reduced to its frame and the one block worth clicking. */}
+        <rect class="m-line l1" x="52" y="12" width="96" height="96" rx="14" pathLength="1" />
+        <path class="m-line-2 l2" d="M52 42h96" pathLength="1" />
+        <circle class="m-dim l3" cx="66" cy="27" r="4" />
+        <circle class="m-dim l3" cx="80" cy="27" r="4" />
+        <rect class="m-dim l4" x="68" y="56" width="64" height="10" rx="5" />
+        <rect class="m-accent l5" x="68" y="78" width="44" height="18" rx="9" />
 
-        <rect class="s-ink ext e-1" x="22" y="42" width="118" height="9" rx="2.5" />
-        <rect class="s-ink ext e-2" x="22" y="56" width="76" height="9" rx="2.5" />
-        <rect class="s-dim ext e-3" x="22" y="74" width="140" height="3.5" rx="1.75" />
-        <rect class="s-dim ext e-4" x="22" y="82" width="152" height="3.5" rx="1.75" />
-
-        <rect class="s-accent-fill drop" x="22" y="93" width="70" height="15" rx="5" />
-
-        {/* Hover only. Nothing above is touched. */}
         <g class="hov">
-          <circle class="ring" cx="57" cy="100.5" r="10" />
-          <path
-            class="cursor"
-            d="M0 0l0 11 2.6-2.8 1.8 3.9 2.1-1-1.9-3.9 3.8-.3z"
-            fill="currentColor"
-          />
+          <circle class="tap" cx="90" cy="87" r="15" />
         </g>
       </>
     )}
 
     {slug === "app" && (
       <>
-        {/* The shared sheet on the left feeding the thing that replaced it. */}
-        <rect class="s-edge draw" x="6.5" y="14.5" width="74" height="90" rx="4" pathLength="1" />
-        <path class="s-edge draw d-1" d="M6 37h75M6 60h75M6 82h75M25 14v91M43 14v91M62 14v91" pathLength="1" />
-
-        <rect class="s-dim pop p-2" x="8" y="16" width="16" height="20" rx="1.5" />
-        <rect class="s-dim pop p-2b" x="44" y="61" width="17" height="20" rx="1.5" />
-        <rect class="s-dim pop p-3" x="26" y="38" width="16" height="21" rx="1.5" />
-        <path class="s-dim-stroke draw d-3" d="M28 86l13 16M41 86l-13 16" pathLength="1" />
-
-        <path class="s-accent draw d-4" d="M88 59h20m0 0l-6-5m6 5l-6 5" pathLength="1" />
-
-        <rect class="s-edge draw d-4b" x="119.5" y="14.5" width="74" height="90" rx="4" pathLength="1" />
-        <path class="s-edge draw d-5" d="M141 14v91" pathLength="1" />
-        <rect class="s-dim pop p-6" x="126" y="26" width="9" height="3" rx="1.5" />
-        <rect class="s-dim pop p-6b" x="126" y="37" width="9" height="3" rx="1.5" />
-        <rect class="s-dim pop p-6c" x="126" y="48" width="9" height="3" rx="1.5" />
-
-        <rect class="s-dim ext e-6" x="149" y="28" width="38" height="5" rx="2.5" />
-        <rect class="s-dim ext e-7" x="149" y="45" width="28" height="5" rx="2.5" />
-        <rect class="s-dim ext e-8" x="149" y="62" width="34" height="5" rx="2.5" />
-        <rect class="s-accent-fill drop" x="149" y="83" width="20" height="8" rx="4" />
+        {/* Four panels, one of them the thing you opened it for. */}
+        <rect class="m-line l1" x="48" y="10" width="44" height="44" rx="9" pathLength="1" />
+        <rect class="m-line l2" x="108" y="10" width="44" height="44" rx="9" pathLength="1" />
+        <rect class="m-line l3" x="48" y="64" width="44" height="44" rx="9" pathLength="1" />
+        <rect class="m-accent l4" x="108" y="64" width="44" height="44" rx="9" />
 
         <g class="hov">
-          <rect class="spark" x="88" y="55" width="8" height="8" rx="2.5" />
+          <rect class="sweep" x="44" y="6" width="5" height="106" rx="2.5" />
         </g>
       </>
     )}
 
     {slug === "automation" && (
       <>
-        {/* Two systems, the route through a person struck out, and the packet
-            that now makes the trip on its own. */}
-        <rect class="s-edge draw" x="6.5" y="54.5" width="52" height="36" rx="4" pathLength="1" />
-        <rect class="s-edge draw d-1" x="141.5" y="54.5" width="52" height="36" rx="4" pathLength="1" />
-        <rect class="s-dim ext e-2" x="15" y="65" width="34" height="4" rx="2" />
-        <rect class="s-dim ext e-2b" x="15" y="74" width="22" height="4" rx="2" />
-        <rect class="s-dim ext e-3" x="150" y="65" width="34" height="4" rx="2" />
-        <rect class="s-dim ext e-3b" x="150" y="74" width="22" height="4" rx="2" />
-
-        <path class="s-edge s-dashed draw d-3" d="M59 62C82 14 118 14 141 62" pathLength="1" />
-        <rect class="s-edge pop p-4" x="91.5" y="14.5" width="17" height="17" rx="3" />
-        <path class="s-dim-stroke draw d-5" d="M85 8l30 30" pathLength="1" />
-
-        <path class="s-accent draw d-5b" d="M59 82h76m0 0l-7-5m7 5l-7 5" pathLength="1" />
-        <rect class="s-accent-fill cross" x="-6" y="76" width="12" height="12" rx="3" />
+        {/* A closed loop with a gap and an arrowhead: it comes back round on
+            its own. The square on the ring is the thing being carried. */}
+        <path class="m-line l1" d="M129.7 89.7A42 42 0 1 1 129.7 30.3" pathLength="1" />
+        <path class="m-line l2" d="M113.4 26.8L129.7 30.3L126.2 14" pathLength="1" />
+        <rect class="m-accent l3" x="91" y="93" width="18" height="18" rx="5" />
+        <circle class="m-dim l4" cx="58" cy="60" r="5" />
+        <circle class="m-dim l4" cx="100" cy="18" r="5" />
 
         <g class="hov">
-          <rect class="burst b-1" x="-6" y="76" width="12" height="12" rx="3" />
-          <rect class="burst b-2" x="-6" y="76" width="12" height="12" rx="3" />
+          {/* Rotated about the ring's centre rather than its own, so it rides
+              the ring. view-box, because the box being rotated about is the
+              drawing's, not this square's. */}
+          <g class="orbit">
+            <rect x="93" y="11" width="14" height="14" rx="4" />
+          </g>
         </g>
       </>
     )}
 
     {slug === "hosting" && (
       <>
-        {/* A month of days, and the trace someone is watching over them. */}
-        <path class="s-edge draw" d="M6 108h188" pathLength="1" />
-        {Array.from({ length: 24 }, (_, i) => (
-          <rect
-            class={`grow ${i === 7 ? "s-ink incident" : "s-dim"}`}
-            x={8 + i * 7.8}
-            y={i === 7 ? 74 : 88}
-            width="2"
-            height={i === 7 ? 34 : 20}
-            rx="1"
-            style={`animation-delay:${(0.18 + i * 0.045).toFixed(3)}s`}
-          />
-        ))}
-        <path class="s-accent draw d-6" d="M6 44h50l8-28 9 56 8-28h113" pathLength="1" />
+        {/* Three tiers and three lights, one of which is the one you would
+            ring someone about. */}
+        <rect class="m-line l1" x="44" y="18" width="112" height="24" rx="7" pathLength="1" />
+        <rect class="m-line l2" x="44" y="48" width="112" height="24" rx="7" pathLength="1" />
+        <rect class="m-line l3" x="44" y="78" width="112" height="24" rx="7" pathLength="1" />
+        <circle class="m-dim l4" cx="62" cy="60" r="5" />
+        <circle class="m-dim l4" cx="62" cy="90" r="5" />
+        <circle class="m-accent l5" cx="62" cy="30" r="6" />
 
         <g class="hov">
-          <circle class="alert" cx="72" cy="64" r="4" />
-          <rect class="flare" x="62.6" y="70" width="2" height="38" rx="1" />
+          <circle class="pulse" cx="62" cy="30" r="9" />
+        </g>
+      </>
+    )}
+
+    {slug === "ai" && (
+      <>
+        {/* Three hollow things in on one side, one solid thing out the other,
+            and the part doing the work in the middle. */}
+        <circle class="m-line l1" cx="100" cy="60" r="34" pathLength="1" />
+        <path
+          class="m-line-2 l2"
+          d="M66 60H45M70.6 77L52.4 87.5M70.6 43L52.4 32.5M134 60h21"
+          pathLength="1"
+        />
+        <rect class="m-line-2 l3" x="31" y="53" width="14" height="14" rx="4" pathLength="1" />
+        <rect class="m-line-2 l3" x="39.3" y="84" width="14" height="14" rx="4" pathLength="1" />
+        <rect class="m-line-2 l3" x="39.3" y="22" width="14" height="14" rx="4" pathLength="1" />
+        <rect class="m-ink l4" x="155" y="53" width="14" height="14" rx="4" />
+        <circle class="m-accent l5" cx="100" cy="60" r="13" />
+
+        <g class="hov">
+          <circle class="feed" cx="66" cy="60" r="5" />
+        </g>
+      </>
+    )}
+
+    {slug === "audit" && (
+      <>
+        {/* A lens, and under it the findings in the order they cost you. */}
+        <circle class="m-line l1" cx="86" cy="50" r="34" pathLength="1" />
+        <path class="m-line-heavy l2" d="M110 74L148 112" pathLength="1" />
+        {/* Widest at the top, and the widest is the accent: the findings in
+            the order they cost you, which is the whole pitch. */}
+        <rect class="m-accent l3" x="68" y="28" width="42" height="12" rx="6" />
+        <rect class="m-ink l4" x="68" y="46" width="34" height="10" rx="5" />
+        <rect class="m-dim l5" x="68" y="62" width="24" height="10" rx="5" />
+
+        <g class="hov">
+          <circle class="probe" cx="86" cy="50" r="34" />
         </g>
       </>
     )}
@@ -178,427 +192,369 @@ const captions: Record<string, string> = {
     display: block;
     width: 100%;
     height: auto;
+    /* The hover beats leave the box: the orbit rides the ring's outside and
+       the taps expand past their shape. */
     overflow: visible;
   }
 
-  /* ── Palette ─────────────────────────────────────────────────────────── */
-  .sketch .s-edge {
+  /* ── Palette ─────────────────────────────────────────────────────────────
+     Strokes scale with the figure rather than holding a pixel width. These are
+     marks: at the size they run on the services page a hairline would read as
+     a diagram again, which is the thing we moved away from. */
+  .sketch .m-line,
+  .sketch .m-line-2,
+  .sketch .m-line-heavy {
     stroke: var(--color-rule-strong);
-    stroke-width: 1;
     fill: none;
-    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* Rule 2. One dash covering the whole path, so at rest the shape is solid
+       and the build is a matter of offsetting it. */
+    stroke-dasharray: 1;
   }
-  .sketch .s-dashed {
-    stroke-dasharray: 3 3;
+  .sketch .m-line {
+    stroke-width: 5;
   }
-  .sketch .s-dim {
+  .sketch .m-line-2 {
+    stroke-width: 4;
+  }
+  .sketch .m-line-heavy {
+    stroke-width: 7;
+  }
+  .sketch .m-dim {
     fill: #2b2b2b;
   }
-  .sketch .s-ink {
+  .sketch .m-ink {
     fill: var(--color-ink-faint);
   }
-  .sketch .s-dim-stroke {
-    stroke: var(--color-ink-faint);
-    stroke-width: 1;
-    fill: none;
-    vector-effect: non-scaling-stroke;
-  }
-  .sketch .s-accent {
-    stroke: var(--color-accent);
-    stroke-width: 1.5;
-    fill: none;
-    vector-effect: non-scaling-stroke;
-  }
-  .sketch .s-accent-fill {
+  .sketch .m-accent {
     fill: var(--color-accent);
   }
 
-  /* Rule 1. Every transformed element, no exceptions. */
-  .sketch .draw,
-  .sketch .pop,
-  .sketch .ext,
-  .sketch .drop,
-  .sketch .grow,
-  .sketch .cross,
+  /* Rule 1, and every part scales about its own middle. */
+  .sketch .l1,
+  .sketch .l2,
+  .sketch .l3,
+  .sketch .l4,
+  .sketch .l5,
   .sketch .hov > * {
     transform-box: fill-box;
+    transform-origin: 50% 50%;
   }
 
-  /* ── Shared motion ───────────────────────────────────────────────────────
-     Five verbs across four figures, staggered by delay. Keeping the vocabulary
-     small is what makes the plate read as one set rather than four unrelated
-     animations.
+  /* ── The five lanes ──────────────────────────────────────────────────────
+     Identical shape, shifted entry, near-shared exit:
 
-     Timing lives inside the keyframes rather than on the shorthand. A single
-     curve applied between every pair of stops is what makes this sort of thing
-     feel mechanical, because arrivals, impacts and departures all want
-     different shapes: fast-in for a fall, sharp for an impact, slow-out for a
-     settle. */
+       lane   in     complete   out    gone
+       1       1%       8.5%     91%    95%
+       2       3%      10.5%     92%    96%
+       3       5%      12.5%     93%    97%
+       4       7%      14.5%     94%    98%
+       5       9%      16.5%     95%    99%
 
-  /* Lines draw themselves on. */
-  @keyframes sk-draw {
-    /* Opacity as well as the dash. A path with more than one subpath — an
-       arrowhead tacked onto a line — does not hide cleanly on dashoffset
-       alone, and a fragment of it shows up before its turn. */
-    0% {
+     Which leaves every mark standing complete from 16.5% to 91% of its cycle:
+     on an 11 second loop, about a second building, eight standing, half a
+     second leaving.
+
+     The windows are deliberately a small slice of a long cycle rather than a
+     big slice of a short one. Six of these run on the homepage at once, and
+     the difference between them being alive and being a nuisance is almost
+     entirely how much of the time anything is moving.
+
+     Timing sits inside the keyframes rather than on the shorthand: an arrival,
+     an impact and a departure all want different curves, and one curve across
+     all three is most of what makes a build read as mechanical. Each part
+     comes in under its own size, punches past it, and settles back. */
+  @keyframes mark-1 {
+    0%,
+    1% {
       opacity: 0;
-      stroke-dasharray: 1;
+      transform: scale(0.4);
       stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.65, 0, 0.2, 1);
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
     }
-    0.5% {
+    2% {
       opacity: 1;
     }
-    14%,
-    82% {
+    5.5% {
+      opacity: 1;
+      transform: scale(1.13);
+      stroke-dashoffset: 0.18;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    7% {
+      transform: scale(0.955);
       stroke-dashoffset: 0;
     }
-    94% {
+    8.5%,
+    91% {
       opacity: 1;
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.8, 0, 0.9, 0.4);
+      transform: scale(1);
+      stroke-dashoffset: 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
     }
     95%,
     100% {
       opacity: 0;
+      transform: scale(0.5);
       stroke-dashoffset: 1;
     }
   }
-
-  /* Small parts arrive past themselves and recoil. */
-  @keyframes sk-pop {
-    0% {
-      opacity: 0;
-      transform: scale(0.2);
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    5% {
-      opacity: 1;
-    }
-    9% {
-      transform: scale(1.32);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    14% {
-      transform: scale(0.93);
-    }
-    19%,
-    82% {
-      transform: scale(1);
-    }
-    92%,
-    100% {
-      opacity: 0;
-      transform: scale(0.2);
-      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
-    }
-  }
-
-  /* Bars extend from their leading edge: stretch along travel, squash across. */
-  @keyframes sk-ext {
-    0% {
-      opacity: 0;
-      transform: scale(0, 0.45);
-      animation-timing-function: cubic-bezier(0.15, 0.85, 0.3, 1);
-    }
+  @keyframes mark-2 {
+    0%,
     3% {
-      opacity: 1;
-    }
-    11% {
-      transform: scale(1.09, 1.26);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.35, 1);
-    }
-    16% {
-      transform: scale(0.968, 0.83);
-    }
-    21% {
-      transform: scale(1.011, 1.05);
-    }
-    26%,
-    82% {
-      transform: scale(1, 1);
-    }
-    92%,
-    100% {
       opacity: 0;
-      transform: scale(0, 0.45);
-      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
-    }
-  }
-
-  /* The one accent block per figure falls in and lands hard. */
-  @keyframes sk-drop {
-    0% {
-      opacity: 0;
-      transform: translateY(-12px) scale(0.78, 1.3);
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    5% {
-      opacity: 1;
-    }
-    11% {
-      transform: translateY(0) scale(1.2, 0.68);
-      animation-timing-function: cubic-bezier(0.3, 0, 0.25, 1);
-    }
-    18% {
-      transform: translateY(-5px) scale(0.92, 1.14);
-      animation-timing-function: cubic-bezier(0.5, 0, 0.4, 1);
-    }
-    25% {
-      transform: translateY(0) scale(1.07, 0.93);
-    }
-    31% {
-      transform: translateY(-1.5px) scale(0.98, 1.03);
-    }
-    37%,
-    82% {
-      transform: translateY(0) scale(1, 1);
-    }
-    92%,
-    100% {
-      opacity: 0;
-      transform: translateY(-12px) scale(0.78, 1.3);
-      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
-    }
-  }
-
-  /* Bars that rise off a baseline. */
-  @keyframes sk-grow {
-    0% {
-      opacity: 0;
-      transform: scale(1, 0);
-      animation-timing-function: cubic-bezier(0.15, 0.9, 0.3, 1);
+      transform: scale(0.4);
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
     }
     4% {
       opacity: 1;
     }
+    7.5% {
+      opacity: 1;
+      transform: scale(1.13);
+      stroke-dashoffset: 0.18;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    9% {
+      transform: scale(0.955);
+      stroke-dashoffset: 0;
+    }
+    10.5%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+      stroke-dashoffset: 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
+    }
+    96%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+      stroke-dashoffset: 1;
+    }
+  }
+  @keyframes mark-3 {
+    0%,
+    5% {
+      opacity: 0;
+      transform: scale(0.4);
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    6% {
+      opacity: 1;
+    }
+    9.5% {
+      opacity: 1;
+      transform: scale(1.13);
+      stroke-dashoffset: 0.18;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    11% {
+      transform: scale(0.955);
+      stroke-dashoffset: 0;
+    }
+    12.5%,
+    93% {
+      opacity: 1;
+      transform: scale(1);
+      stroke-dashoffset: 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
+    }
+    97%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+      stroke-dashoffset: 1;
+    }
+  }
+  @keyframes mark-4 {
+    0%,
+    7% {
+      opacity: 0;
+      transform: scale(0.4);
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    8% {
+      opacity: 1;
+    }
+    11.5% {
+      opacity: 1;
+      transform: scale(1.13);
+      stroke-dashoffset: 0.18;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
+    }
+    13% {
+      transform: scale(0.955);
+      stroke-dashoffset: 0;
+    }
+    14.5%,
+    94% {
+      opacity: 1;
+      transform: scale(1);
+      stroke-dashoffset: 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
+    }
+    98%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+      stroke-dashoffset: 1;
+    }
+  }
+  @keyframes mark-5 {
+    0%,
+    9% {
+      opacity: 0;
+      transform: scale(0.4);
+      stroke-dashoffset: 1;
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
     10% {
-      transform: scale(0.8, 1.22);
+      opacity: 1;
+    }
+    13.5% {
+      opacity: 1;
+      transform: scale(1.13);
+      stroke-dashoffset: 0.18;
       animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
     }
     15% {
-      transform: scale(1.1, 0.92);
+      transform: scale(0.955);
+      stroke-dashoffset: 0;
     }
-    21%,
-    82% {
-      transform: scale(1, 1);
+    16.5%,
+    95% {
+      opacity: 1;
+      transform: scale(1);
+      stroke-dashoffset: 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
     }
-    92%,
+    99%,
     100% {
       opacity: 0;
-      transform: scale(1, 0);
-      animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.3);
+      transform: scale(0.5);
+      stroke-dashoffset: 1;
     }
   }
 
-  .sketch.is-live .draw {
-    animation: sk-draw var(--dur) linear infinite both;
-  }
-  .sketch.is-live .pop {
-    transform-origin: 50% 50%;
-    animation: sk-pop var(--dur) linear infinite both;
-  }
-  .sketch.is-live .ext {
-    transform-origin: 0% 50%;
-    animation: sk-ext var(--dur) linear infinite both;
-  }
-  .sketch.is-live .drop {
-    transform-origin: 50% 100%;
-    animation: sk-drop var(--dur) linear infinite both;
-  }
-  .sketch.is-live .grow {
-    transform-origin: 50% 100%;
-    animation: sk-grow var(--dur) linear infinite both;
-  }
+  .sketch.is-live .l1 { animation: mark-1 var(--dur) linear infinite both; }
+  .sketch.is-live .l2 { animation: mark-2 var(--dur) linear infinite both; }
+  .sketch.is-live .l3 { animation: mark-3 var(--dur) linear infinite both; }
+  .sketch.is-live .l4 { animation: mark-4 var(--dur) linear infinite both; }
+  .sketch.is-live .l5 { animation: mark-5 var(--dur) linear infinite both; }
 
-  /* Stagger. Uneven on purpose — evenly spaced delays are a metronome, and a
-     metronome is most of what makes a sequence feel stilted. */
-  .sketch .d-1 { animation-delay: 0.34s; }
-  .sketch .d-3 { animation-delay: 0.72s; }
-  .sketch .d-4 { animation-delay: 1.08s; }
-  .sketch .d-4b { animation-delay: 1.24s; }
-  .sketch .d-5 { animation-delay: 1.5s; }
-  .sketch .d-5b { animation-delay: 1.42s; }
-  .sketch .d-6 { animation-delay: 1.66s; }
-  .sketch .p-2 { animation-delay: 0.52s; }
-  .sketch .p-2b { animation-delay: 0.6s; }
-  .sketch .p-3 { animation-delay: 0.66s; }
-  .sketch .p-4 { animation-delay: 1.02s; }
-  .sketch .p-6 { animation-delay: 1.72s; }
-  .sketch .p-6b { animation-delay: 1.8s; }
-  .sketch .p-6c { animation-delay: 1.88s; }
-  .sketch .e-1 { animation-delay: 0.78s; }
-  .sketch .e-2 { animation-delay: 0.9s; }
-  .sketch .e-2b { animation-delay: 0.98s; }
-  .sketch .e-3 { animation-delay: 1.06s; }
-  .sketch .e-3b { animation-delay: 1.14s; }
-  .sketch .e-4 { animation-delay: 1.2s; }
-  .sketch .e-6 { animation-delay: 2.02s; }
-  .sketch .e-7 { animation-delay: 2.16s; }
-  .sketch .e-8 { animation-delay: 2.28s; }
-
-  .sketch.is-website { --dur: 6s; }
-  .sketch.is-website .drop { animation-delay: 1.62s; }
-  .sketch.is-app { --dur: 6.6s; }
-  .sketch.is-app .drop { animation-delay: 2.5s; }
-  .sketch.is-automation { --dur: 5.4s; }
-  .sketch.is-hosting { --dur: 5.8s; }
-
-  /* automation: the packet crossing once per cycle, after the route is laid.
-     It stretches along the run and squashes into the far box. */
-  @keyframes sk-cross {
-    0%,
-    36% {
-      opacity: 0;
-      transform: translate(62px, 0) scale(0.5, 1.2);
-    }
-    41% {
-      opacity: 1;
-      transform: translate(70px, 0) scale(1.3, 0.82);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
-    }
-    62% {
-      transform: translate(126px, 0) scale(1.3, 0.82);
-      animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
-    }
-    68% {
-      opacity: 1;
-      transform: translate(136px, 0) scale(0.72, 1.24);
-    }
-    76%,
-    100% {
-      opacity: 0;
-      transform: translate(139px, 0) scale(0.5, 1);
-    }
-  }
-  .sketch .cross {
-    transform: translate(99px, 0);
-  }
-  .sketch.is-live .cross {
-    transform-origin: 50% 50%;
-    animation: sk-cross var(--dur) linear infinite both;
-  }
+  /* Six loops on one page. Prime-ish durations so they drift apart rather than
+     falling into step and turning the plate into one big pulse. */
+  .sketch.is-website { --dur: 11s; }
+  .sketch.is-app { --dur: 10.6s; }
+  .sketch.is-automation { --dur: 12s; }
+  .sketch.is-hosting { --dur: 11.4s; }
+  .sketch.is-ai { --dur: 12.6s; }
+  .sketch.is-audit { --dur: 11.8s; }
 
   /* ── Hover ───────────────────────────────────────────────────────────────
-     Rule 3: dedicated elements, invisible otherwise. The loop underneath is
-     never interrupted, so there is nothing to jump back from.
+     Rule 3: dedicated elements, invisible otherwise, so the loop underneath is
+     never interrupted and there is nothing to jump back from.
 
-     Two triggers: the card on the homepage plate, which is one big link, and
-     the figure itself on /services/, where it sits in a static panel. */
+     Two triggers: the homepage plate, where the card is one big link, and the
+     services page, where the mark sits in a static panel. */
   .sketch .hov > * {
     opacity: 0;
   }
-  .sketch .cursor {
-    color: var(--color-ink);
-    transform: translate(150px, 74px);
-  }
-  .sketch .ring {
+  .sketch .tap,
+  .sketch .pulse,
+  .sketch .probe {
     stroke: var(--color-accent);
-    stroke-width: 1.5;
+    stroke-width: 3;
     fill: none;
-    vector-effect: non-scaling-stroke;
-    transform-origin: 50% 50%;
   }
-  .sketch .spark,
-  .sketch .burst {
+  .sketch .sweep,
+  .sketch .feed,
+  .sketch .orbit rect {
     fill: var(--color-accent);
   }
-  .sketch .alert {
-    fill: var(--color-accent);
-    transform-origin: 50% 50%;
-  }
-  .sketch .flare {
-    fill: var(--color-accent);
-    transform-origin: 50% 100%;
+  .sketch .orbit {
+    /* The centre it turns about is the ring's, not its own, so this one reads
+       against the drawing rather than against its own little box. */
+    transform-box: view-box;
+    transform-origin: 100px 60px;
   }
 
-  @keyframes hv-cursor {
-    0% { opacity: 0; transform: translate(150px, 74px); }
-    20% { opacity: 1; }
-    100% { opacity: 1; transform: translate(66px, 96px); }
+  @keyframes hv-tap {
+    0% { opacity: 0; transform: scale(0.35); }
+    45% { opacity: 0.9; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.75); }
   }
-  @keyframes hv-ring {
-    0%, 55% { opacity: 0; transform: scale(0.35); }
-    70% { opacity: 0.9; transform: scale(1.1); }
-    100% { opacity: 0; transform: scale(1.9); }
+  @keyframes hv-sweep {
+    0% { opacity: 0; transform: translateX(0); }
+    12% { opacity: 0.85; }
+    82% { opacity: 0.85; }
+    100% { opacity: 0; transform: translateX(104px); }
   }
-  @keyframes hv-spark {
-    0% { opacity: 0; transform: translateX(0) scale(0.6, 1.2); }
-    15% { opacity: 1; transform: translateX(4px) scale(1.25, 0.85); }
-    75% { opacity: 1; transform: translateX(20px) scale(1.25, 0.85); }
-    100% { opacity: 0; transform: translateX(26px) scale(0.6, 1.1); }
+  @keyframes hv-orbit {
+    0% { opacity: 0; transform: rotate(0deg); }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(360deg); }
   }
-  @keyframes hv-burst {
-    0% { opacity: 0; transform: translate(62px, 0) scale(0.6, 1.2); }
-    12% { opacity: 1; transform: translate(74px, 0) scale(1.3, 0.82); }
-    82% { opacity: 1; transform: translate(130px, 0) scale(1.3, 0.82); }
-    100% { opacity: 0; transform: translate(138px, 0) scale(0.7, 1.2); }
+  @keyframes hv-pulse {
+    0% { opacity: 0; transform: scale(0.5); }
+    40% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2.1); }
   }
-  @keyframes hv-alert {
-    0% { opacity: 0; transform: scale(0.3); }
-    55% { opacity: 1; transform: scale(1.35); }
-    100% { opacity: 1; transform: scale(1); }
+  @keyframes hv-feed {
+    0% { opacity: 0; transform: translateX(-22px) scale(0.6); }
+    18% { opacity: 1; transform: translateX(-14px) scale(1); }
+    76% { opacity: 1; transform: translateX(20px) scale(1); }
+    100% { opacity: 0; transform: translateX(26px) scale(0.4); }
   }
-  @keyframes hv-flare {
-    0% { opacity: 0; transform: scaleY(0.2); }
-    45% { opacity: 1; transform: scaleY(1.12); }
-    100% { opacity: 1; transform: scaleY(1); }
-  }
-
-  .sketch.is-live.is-website:hover .cursor,
-  :global(.group:hover) .sketch.is-live.is-website .cursor {
-    animation: hv-cursor 0.7s cubic-bezier(0.25, 0.9, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-website:hover .ring,
-  :global(.group:hover) .sketch.is-live.is-website .ring {
-    animation: hv-ring 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-app:hover .spark,
-  :global(.group:hover) .sketch.is-live.is-app .spark {
-    animation: hv-spark 0.8s cubic-bezier(0.35, 0, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-automation:hover .b-1,
-  :global(.group:hover) .sketch.is-live.is-automation .b-1 {
-    animation: hv-burst 0.95s cubic-bezier(0.4, 0, 0.4, 1) forwards;
-  }
-  .sketch.is-live.is-automation:hover .b-2,
-  :global(.group:hover) .sketch.is-live.is-automation .b-2 {
-    animation: hv-burst 0.95s cubic-bezier(0.4, 0, 0.4, 1) 0.16s forwards;
-  }
-  .sketch.is-live.is-hosting:hover .alert,
-  :global(.group:hover) .sketch.is-live.is-hosting .alert {
-    animation: hv-alert 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s forwards;
-  }
-  .sketch.is-live.is-hosting:hover .flare,
-  :global(.group:hover) .sketch.is-live.is-hosting .flare {
-    animation: hv-flare 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  @keyframes hv-probe {
+    0% { opacity: 0; transform: scale(1.16); }
+    35% { opacity: 0.95; transform: scale(1.04); }
+    100% { opacity: 0; transform: scale(0.94); }
   }
 
-  /* Nothing runs until the section holding it has been revealed, so four
-     diagrams below the fold are not animating at people who never scroll.
-     Gated on .js: without it .is-visible never arrives and they would freeze. */
+  .sketch.is-live.is-website:hover .tap,
+  :global(.group:hover) .sketch.is-live.is-website .tap {
+    animation: hv-tap 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-app:hover .sweep,
+  :global(.group:hover) .sketch.is-live.is-app .sweep {
+    animation: hv-sweep 1s cubic-bezier(0.4, 0, 0.35, 1) forwards;
+  }
+  .sketch.is-live.is-automation:hover .orbit,
+  :global(.group:hover) .sketch.is-live.is-automation .orbit {
+    animation: hv-orbit 1.4s cubic-bezier(0.45, 0, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-hosting:hover .pulse,
+  :global(.group:hover) .sketch.is-live.is-hosting .pulse {
+    animation: hv-pulse 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-ai:hover .feed,
+  :global(.group:hover) .sketch.is-live.is-ai .feed {
+    animation: hv-feed 0.95s cubic-bezier(0.35, 0, 0.3, 1) forwards;
+  }
+  .sketch.is-live.is-audit:hover .probe,
+  :global(.group:hover) .sketch.is-live.is-audit .probe {
+    animation: hv-probe 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
+  }
+
+  /* Nothing runs until the section holding it has been revealed, so six marks
+     below the fold are not looping at people who never scroll. Gated on .js:
+     without it .is-visible never arrives and they would freeze mid-build. */
   :global(html.js [data-reveal]:not(.is-visible)) .sketch * {
     animation-play-state: paused !important;
   }
 
+  /* The finished mark is the resting state — solid strokes, no transform — so
+     stopping the animations is the whole of what this needs to do. */
   @media (prefers-reduced-motion: reduce) {
     .sketch * {
       animation: none !important;
-    }
-    /* Resting state has to be the finished picture, not a half-built one. */
-    .sketch .pop,
-    .sketch .ext,
-    .sketch .drop,
-    .sketch .grow {
-      opacity: 1;
-      transform: none;
-    }
-    .sketch .draw {
-      stroke-dasharray: none;
-      stroke-dashoffset: 0;
-    }
-    .sketch .cross {
-      transform: translate(99px, 0);
     }
   }
 </style>

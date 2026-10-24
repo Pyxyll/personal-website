@@ -578,6 +578,11 @@ const workGroups = [
   .nav-card-icon {
     display: block;
     margin-bottom: 0.5rem;
+    /* The icon components bind their own hover handlers. The card already
+       drives them through a ref, and that path is the one that honours
+       reduced motion, so the icon's own is closed off rather than left as a
+       second way in that ignores the preference. */
+    pointer-events: none;
     color: var(--color-ink-faint);
     transition: color 0.2s ease;
   }
