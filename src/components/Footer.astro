@@ -105,7 +105,10 @@ const year = new Date().getFullYear();
   {/* ── 3. The wordmark ──────────────────────────────────────────────── */}
   <div class="wordmark-band mx-auto max-w-6xl px-6 lg:px-10 mt-6" aria-hidden="true">
     <div class="wordmark">
-      <span>Dylan Collins</span>
+      <span class="ink">Dylan Collins</span>
+      {/* The same word in the accent, shown only through a soft circle that
+          follows the pointer and grows as it comes near. */}
+      <span class="glow">Dylan Collins</span>
     </div>
   </div>
 </footer>
@@ -115,6 +118,7 @@ const year = new Date().getFullYear();
     container-type: inline-size;
   }
   .wordmark {
+    position: relative;
     /* The name is about 5.9em wide at this weight and tracking, so this
        makes it span the measure, whatever the measure is. */
     font-size: 16.8cqw;
@@ -133,9 +137,64 @@ const year = new Date().getFullYear();
     -webkit-text-stroke: 1.5px var(--color-rule-strong);
     user-select: none;
   }
+  /* The pointer's light. --glow is 0 far away and 1 on the band; --mx and
+     --my are the pointer's place in the band. The circle grows as the
+     pointer comes closer, so the first sign is a small patch at the edge
+     nearest the cursor and on the letters it is a broad pool. */
+  .wordmark .glow {
+    position: absolute;
+    inset: 0;
+    -webkit-text-stroke-color: var(--color-accent);
+    opacity: var(--glow, 0);
+    -webkit-mask-image: radial-gradient(
+      circle calc(8cqw + 14cqw * var(--glow, 0)) at var(--mx, 50%) var(--my, 50%),
+      #000 0%,
+      rgb(0 0 0 / 0.55) 45%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      circle calc(8cqw + 14cqw * var(--glow, 0)) at var(--mx, 50%) var(--my, 50%),
+      #000 0%,
+      rgb(0 0 0 / 0.55) 45%,
+      transparent 100%
+    );
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
   @media (max-width: 640px) {
     .wordmark span {
       -webkit-text-stroke-width: 1px;
     }
   }
 </style>
+
+<script>
+  /* Drives the wordmark's light from the pointer. Distance from the pointer
+     to the band's box sets the strength, zero beyond a reach of about 360px
+     and one on the band; the pointer's position within the band places the
+     circle. Pointer devices only, and nothing runs until the first move. */
+  const band = document.querySelector<HTMLElement>(".wordmark-band");
+  if (band && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const REACH = 360;
+    let px = -1e4, py = -1e4, raf = 0;
+    const update = () => {
+      raf = 0;
+      const r = band.getBoundingClientRect();
+      const dx = Math.max(r.left - px, 0, px - r.right);
+      const dy = Math.max(r.top - py, 0, py - r.bottom);
+      const glow = Math.max(0, 1 - Math.hypot(dx, dy) / REACH);
+      band.style.setProperty("--glow", glow.toFixed(3));
+      /* The circle sits on the nearest point of the band, not on the pointer
+         itself, so coming in from above lights the letters under the cursor
+         rather than the empty space beside them. */
+      const mx = Math.min(Math.max(px - r.left, 0), r.width);
+      const my = Math.min(Math.max(py - r.top, 0), r.height);
+      band.style.setProperty("--mx", `${mx}px`);
+      band.style.setProperty("--my", `${my}px`);
+    };
+    const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; queue(); }, { passive: true });
+    window.addEventListener("scroll", queue, { passive: true });
+    document.addEventListener("pointerleave", () => { px = -1e4; py = -1e4; queue(); });
+  }
+</script>
