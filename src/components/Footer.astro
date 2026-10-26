@@ -8,6 +8,10 @@
  *
  * Below that, the full-width strip that was already here: credits, trading
  * details, secondary links.
+ *
+ * Last, the wordmark: the name set huge in outline across the content
+ * measure, cropped by the bottom of the page so it reads as rising out of
+ * it. Sized in container units so it always spans the measure exactly.
  */
 import HeroShader from "./HeroShader";
 import FloatingIcons from "./FloatingIcons.astro";
@@ -97,4 +101,41 @@ const year = new Date().getFullYear();
       </ul>
     </div>
   </div>
+
+  {/* ── 3. The wordmark ──────────────────────────────────────────────── */}
+  <div class="wordmark-band mx-auto max-w-6xl px-6 lg:px-10 mt-6" aria-hidden="true">
+    <div class="wordmark">
+      <span>Dylan Collins</span>
+    </div>
+  </div>
 </footer>
+
+<style>
+  .wordmark-band {
+    container-type: inline-size;
+  }
+  .wordmark {
+    /* The name is about 5.9em wide at this weight and tracking, so this
+       makes it span the measure, whatever the measure is. */
+    font-size: 16.8cqw;
+    line-height: 1;
+    /* Show the top three fifths of the line box: caps in, baseline and
+       descenders under the edge of the page. */
+    height: 0.6em;
+    overflow: hidden;
+  }
+  .wordmark span {
+    display: block;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-rule-strong);
+    user-select: none;
+  }
+  @media (max-width: 640px) {
+    .wordmark span {
+      -webkit-text-stroke-width: 1px;
+    }
+  }
+</style>
