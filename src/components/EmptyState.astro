@@ -1,7 +1,14 @@
 ---
-// Brutalist-lite empty state: a hairline-bordered panel with a mono label,
-// a short line, and an optional CTA. Used wherever a collection has no entries
-// yet so the section reads as "intentionally empty", not broken.
+/**
+ * An empty collection, said plainly: a dashed hairline plate with a mono
+ * label, a short line, and an optional action. Used wherever a collection has
+ * no entries yet so the section reads as intentionally empty, not broken.
+ *
+ * Mono at 13px, sentence case, no tracking: the same metadata register as the
+ * rest of the site, and the action is the site's accent text with its arrow.
+ */
+import ArrowIcon from "./ArrowIcon.astro";
+
 interface Props {
   label?: string;
   message: string;
@@ -11,12 +18,16 @@ interface Props {
 const { label = "Coming soon", message, ctaHref, ctaLabel } = Astro.props;
 ---
 
-<div class="border border-dashed border-rule-strong px-6 py-10 sm:px-10 sm:py-12 flex flex-col gap-4">
-  <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-text">[ {label} ]</span>
-  <p class="text-ink-dim text-base sm:text-lg max-w-xl">{message}</p>
+<div class="rounded-[6px] border border-dashed border-rule-strong px-6 py-10 sm:px-10 sm:py-12 flex flex-col gap-4">
+  <span class="font-mono text-[13px] text-accent-text">{label}</span>
+  <p class="text-ink-dim text-base sm:text-lg max-w-xl m-0">{message}</p>
   {ctaHref && ctaLabel && (
-    <a href={ctaHref} class="link self-start font-mono text-xs uppercase tracking-widest text-ink-dim">
-      {ctaLabel} →
+    <a
+      href={ctaHref}
+      class="self-start inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text transition-colors duration-300 hover:text-ink"
+    >
+      {ctaLabel}
+      <ArrowIcon />
     </a>
   )}
 </div>

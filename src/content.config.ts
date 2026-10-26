@@ -16,7 +16,7 @@ const writing = defineCollection({
 
 const work = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "./src/content/work" }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     summary: z.string(),
     category: z.string(),
@@ -25,6 +25,8 @@ const work = defineCollection({
     stack: z.array(z.string()).default([]),
     url: z.url().optional(),
     repo: z.url().optional(),
+    /** Up to three 16:10 screenshots, shown as a stack on the homepage. */
+    images: z.array(image()).max(3).optional(),
   }),
 });
 

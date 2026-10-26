@@ -1,0 +1,41 @@
+---
+title: "Why I'm moving clients off WordPress"
+description: "Most of the WordPress sites I look after are a plugin away from a bad week. Cloudflare's EmDash is early, but it is built the way I already build, and I'm starting to move new work onto it."
+publishedAt: 2026-10-26
+tags: ["wordpress", "cloudflare", "clients"]
+draft: false
+---
+
+Every WordPress site I look after has the same shape. A theme somebody bought in 2019, a page builder on top of it, and somewhere between twelve and thirty plugins, each one a small piece of software written by a stranger and given the keys to the whole house. The site works. It keeps working right up until one of those plugins doesn't, and then the client's week and mine are gone.
+
+That is not a complaint about WordPress so much as a description of what it is. It powers something like two fifths of the web because anybody can extend it, and anybody did. Patchstack's figures put the large majority of WordPress vulnerabilities in plugins rather than in core, and my own experience matches that. In five years of care plans I have never had core fail a client. I have had plugins fail them more times than I want to count.
+
+## What changed
+
+On the first of April this year Cloudflare released a content management system called EmDash. I ignored it for a fortnight because the date made it sound like a joke, and because the name is a punctuation mark I have spent a year training myself not to use. Then I read the source.
+
+The short version. It is open source under the MIT licence, written in TypeScript, and built on Astro, which is the framework this site and most of my client sites already run on. It runs on Cloudflare's Workers platform or on any Node server. Content is stored as structured data rather than as blobs of HTML. Sign in is passkeys by default. There is a command line tool and a built in MCP server, so an agent can do anything the admin screens can do.
+
+The part that matters to me is the plugin model. Every plugin runs in its own sandbox and has to declare what it needs access to before it gets it. A plugin that formats dates cannot read your users table. A plugin that was fine last year and compromised this year cannot take the site with it. That is the exact failure I spend my maintenance hours defending against, designed out at the platform level.
+
+## What it is not
+
+It is a beta. Version zero point one, with no production track record, and reviewers who like it are still saying wait. I agree with them for anything that already exists and makes money.
+
+The gaps are real. There is no official importer from WordPress in the current release, and because content is stored as structured blocks rather than HTML, a migration is a proper piece of engineering work, not an afternoon. There is no page builder and no Elementor equivalent, which for a certain kind of client is the whole product. There is nothing like WooCommerce. The plugin marketplace exists but is nearly empty, which means anything you run you either wrote or audited yourself. Running the sandboxed plugins needs the paid Workers plan, which starts at five dollars a month per account.
+
+So no, I am not moving thirty sites this winter.
+
+## What I am actually doing
+
+New builds first. A brochure site for a small business is three to six pages, a contact form, and someone who needs to change the opening hours without ringing me. That is well inside what EmDash does today, and it is the kind of site I was already building static on Astro and wiring up to a headless editor. EmDash gives me the editor and the content model in one place, on the same platform I already host on, with the plugin risk gone.
+
+Existing WordPress sites stay where they are, and the care plan does what it has always done. Updates on a schedule, real backups, a managed host, a security scanner. That covers most of the plugin risk today. It just covers it with my time rather than with architecture.
+
+The trigger to move an existing site is a rebuild for other reasons. When a client comes to me because the site is slow, or the design is six years old, or the builder has started fighting them, the conversation about where it lives next now has a second option. For the right site that option is cheaper to run, faster to load, and safer to leave alone. For the wrong site, one with a shop or a mess of integrations, it is still WordPress, and I will say so.
+
+## What the client sees
+
+Less than you would think, which is the point. They get a sign in without a password, an editor for their pages, and a site that loads in under a second from a server near whoever is reading it. They do not get a dashboard with forty notices on it, and they do not get the email from me that starts with "there was a vulnerability in".
+
+I will write up the first pilot once it has been live long enough to be honest about. If you have a WordPress site and you are wondering which side of this line it falls on, the audit is the cheapest way to find out, and I will tell you if the answer is stay put.

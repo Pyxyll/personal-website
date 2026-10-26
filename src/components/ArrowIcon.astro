@@ -1,0 +1,26 @@
+---
+/**
+ * The site's arrow: a 1.5px monoline at 16px, the same weight as the service
+ * schematics. Used beside actions instead of the typographic glyph, which is
+ * too small to read at the sizes actions are set in.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+
+<svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  class={className}
+>
+  <path d="M3 8h10M9 4l4 4-4 4" />
+</svg>

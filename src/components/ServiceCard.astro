@@ -1,0 +1,129 @@
+---
+/**
+ * One cell of the homepage services plate.
+ *
+ * Three variants, and each one encodes something true about the service it
+ * holds rather than decorating it:
+ *
+ *   lead    the most common ask. Spans the width of two peers and turns
+ *           sideways: the drawing on the left with its labels showing, the
+ *           copy on the right. The brief's sidebar-and-body nest, inside one
+ *           card.
+ *   start   the cheapest, lowest-risk first step, which feeds the others. An
+ *           inversion plate: the brief's black-on-cream callout, mirrored to
+ *           light-on-dark for this site. The drawing flips its ink to match
+ *           and the pink stays pink.
+ *   peer    the body of the offer. The standard card.
+ *
+ * Every variant ends in the same footer plate: a hairline plate with a 10px
+ * radius holding the price in inline mono and the action in accent text with
+ * a 1.5px arrow. Hover shifts colour only: the plate's hairline deepens and
+ * the action lifts to ink. Nothing moves.
+ */
+import CornerNodes from "./CornerNodes.astro";
+import ServiceSketch from "./ServiceSketch.astro";
+import { priceFormat, type Service } from "../lib/services";
+
+interface Props {
+  service: Service;
+  variant?: "lead" | "start" | "peer";
+}
+const { service, variant = "peer" } = Astro.props;
+const inverted = variant === "start";
+
+const span = {
+  lead: "md:col-span-2 lg:col-span-8",
+  start: "md:col-span-2 lg:col-span-4",
+  peer: "lg:col-span-3",
+}[variant];
+
+/* How the drawing and the copy sit. The lead is sideways from small screens
+   up. The start card is sideways only at tablet width, where it spans the
+   plate, and stacks again beside the lead on large screens. Peers stack. */
+const layout = {
+  lead: "sm:grid-cols-2 sm:items-center",
+  start: "md:grid-cols-2 md:items-center lg:grid-cols-1 lg:items-start",
+  peer: "",
+}[variant];
+
+/* The light plate uses the brief's own ink and greys. They are literal here
+   rather than tokens because nothing else on the site is light. */
+const tone = inverted
+  ? {
+      card: "bg-[#fafafa] text-[#262626] hover:bg-white [--scrim:#ffffff]",
+      dim: "text-[#595959]",
+      plate: "border-[#dcdcdc] group-hover:border-[#262626]",
+      price: "text-[#595959]",
+      action: "text-accent group-hover:text-[#262626]",
+    }
+  : {
+      card: "hover:bg-paper-2",
+      dim: "text-ink-dim",
+      plate: "border-rule group-hover:border-rule-strong",
+      price: "text-ink-dim",
+      action: "text-accent-text group-hover:text-ink",
+    };
+---
+
+<a
+  href={`/services/#${service.slug}`}
+  class:list={[
+    "group @container relative flex flex-col gap-5 border-b border-r border-rule p-6 transition-colors duration-300",
+    span,
+    tone.card,
+  ]}
+>
+  <CornerNodes />
+
+  <div class:list={["grid flex-1 gap-6", layout]}>
+    <ServiceSketch
+      slug={service.slug}
+      labels={variant === "lead"}
+      inverted={inverted}
+      class="opacity-90 transition-opacity group-hover:opacity-100"
+    />
+    <div data-copy class:list={["flex flex-col", variant === "lead" ? "gap-3" : "gap-1.5"]}>
+      {inverted && <span class="font-mono text-[13px] text-accent mb-1">Start here</span>}
+      <h3 class:list={["font-semibold tracking-tight leading-snug m-0", variant === "lead" ? "text-xl" : "text-lg"]}>
+        {service.title}
+      </h3>
+      <p class:list={["text-sm leading-relaxed m-0", tone.dim]}>{service.tagline}</p>
+      {variant === "lead" && (
+        <p class:list={["hidden lg:block text-sm leading-relaxed m-0 max-w-[36ch]", tone.dim]}>{service.body}</p>
+      )}
+    </div>
+  </div>
+
+  <div
+    class:list={[
+      /* Stacked by default; a row once the card's content box is 16.5rem,
+         which is what a 12px price and a 13px action need to share a line
+         inside the plate's padding. Container queries measure the content
+         box, so that is the card width less its 48px of padding: met by the
+         three-column peers at the full content width, and below that all of
+         them stack alike. */
+      "relative mt-auto flex flex-col items-start gap-2 @[16.5rem]:flex-row @[16.5rem]:items-center @[16.5rem]:justify-between @[16.5rem]:gap-2 border rounded-[10px] px-3 py-3 transition-colors duration-300",
+      tone.plate,
+    ]}
+  >
+    <span class:list={["font-mono text-xs leading-none whitespace-nowrap", tone.price]}>
+      From {priceFormat.format(service.from)}{service.fromUnit}
+    </span>
+    <span class:list={["inline-flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-300", tone.action]}>
+      What's included
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 8h10M9 4l4 4-4 4" />
+      </svg>
+    </span>
+  </div>
+</a>
