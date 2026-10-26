@@ -107,6 +107,50 @@
   }
 }
 
+/* ── Service marks in 3D (scripts/marks3d.ts) ───────────────────────────
+   The canvas covers the card behind its content: the card isolates its own
+   stacking context (set by the script) so a negative z-index sits above the
+   card's background and below everything in it. Labels are pinned by
+   transform each frame. */
+.has-3d > canvas.gl {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.has-3d > .lbl3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-ink-faint);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+.has-3d > .lbl3d-strong {
+  color: var(--color-ink-dim);
+}
+/* While the camera is in close, lines pass behind the copy. A soft scrim in
+   the card's hover ground keeps the words readable without boxing them. */
+.has-3d [data-copy] {
+  position: relative;
+  margin: -12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.has-3d:hover [data-copy] {
+  /* --scrim is the card's own hover ground; the light plate sets it white. */
+  background-color: color-mix(in srgb, var(--scrim, var(--color-paper-2)) 82%, transparent);
+}
+
 /* Brutalist-lite display number, used as the marginalia "001 / 002 / 003" */
 .section-num {
   font-family: var(--font-mono);
@@ -217,6 +261,8 @@
   transform: translateY(14px);
   transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
     transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Siblings that should arrive one after another set --reveal-delay. */
+  transition-delay: var(--reveal-delay, 0s);
   will-change: opacity, transform;
 }
 .js [data-reveal].is-visible {

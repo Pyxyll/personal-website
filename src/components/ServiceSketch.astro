@@ -1,59 +1,70 @@
 ---
 /**
- * One mark per service.
+ * One schematic per service: a technical line drawing that assembles itself,
+ * then does its job on a loop.
  *
- * These are marks, not diagrams: a single large shape built from a handful of
- * heavy primitives, closer to a logo than to an illustration of the work. The
- * old set drew literal little interfaces, which meant six figures competing on
- * detail at 200px wide and losing. Six silhouettes compete on shape instead —
- * frame, quadrants, ring, slabs, hub, lens — and stay legible at any size.
+ * ── The language ─────────────────────────────────────────────────────────
+ * Drawn the way a network diagram is drawn, not the way an icon is:
  *
- * ── The timeline ─────────────────────────────────────────────────────────
- * Every part runs the same cycle length and differs only in *when inside that
- * cycle* it appears. That is the whole trick, and it is why the lanes are
- * separate keyframe sets rather than one set plus animation-delay.
+ *   - A 1.5px monoline that is 1.5px at every size. Stroke widths are in
+ *     user units, so marks.ts measures each figure and sets --sw to whatever
+ *     user-unit width renders as 1.5px. Labels are sized off the same number
+ *     and so hold at about 13px too. Without the script they fall back to
+ *     the value below, which is right for the services page.
+ *   - A dot grid as the ground. Lines land on it where they can.
+ *   - Depth from structure, never from light: a plate behind a plate, an
+ *     isometric slab, a dashed ring around a solid one. No shadow, no glow.
+ *   - Anything that flows is dashed, and the dashes march.
+ *   - Small mono labels are part of the drawing. They are what turns an icon
+ *     into an infographic, and they show where there is room for them: on
+ *     the services page, with the caption.
+ *   - The accent is a signal, not a paint. One pink thing per mark, and it is
+ *     the thing that moves or the thing that matters.
  *
- * A delay shifts an element's entire build → hold → teardown, so the last part
- * in was still holding while the first was already leaving, and the figure was
- * only fully assembled for about a second in six. Here the entry is staggered
- * and the exit is very nearly not, so the mark spends about three quarters of
- * the cycle standing complete:
+ * ── Two acts ─────────────────────────────────────────────────────────────
+ *   entry   the drawing draws itself: strokes in document order, then the
+ *           flows, labels and dots fade in. About 1.5s, once.
+ *   loop    the service's verb as a flow: a dot travelling a line, a node
+ *           changing state, a value being measured. Then a rest.
  *
- *   lane 1   ▓▓▓░░░░░░░░░░░░░░░░░░░▓▓▓
- *   lane 3     ▓▓▓░░░░░░░░░░░░░░░░░░▓▓▓
- *   lane 5       ▓▓▓░░░░░░░░░░░░░░░░░▓▓▓
- *                └──── assembled ────┘
+ * All of it lives in scripts/marks.ts. This file only draws the finished
+ * schematic and tags the parts the script moves (data-el). Without JavaScript
+ * the finished drawing is simply there, and under reduced motion the script
+ * stays out and the same finished drawing is what you get.
  *
- * Five lanes, .l1 to .l5. Parts that should arrive together share one.
+ * Classes the script relies on:
+ *   .m-ink .m-rule .m-sig   stroked parts, drawn on during the entry
+ *   .f-ink .f-sig           filled parts, faded in
+ *   .flow                   dashed and marching, faded in
+ *   .lead                   a flow that only points at a label; hidden with it
+ *   .lbl                    labels, faded in last
+ *   .fx                     loop-only parts, hidden at rest
  *
- * ── Rules that still apply ───────────────────────────────────────────────
- *   1. transform-box: fill-box on anything transformed, or transform-origin
- *      resolves against the viewBox and parts fly at the top-left corner.
- *   2. Every stroked element needs pathLength="1". The stroke classes set
- *      stroke-dasharray: 1, which with pathLength 1 is a single dash covering
- *      the whole path — solid at rest, and drawable by offsetting it. Miss the
- *      attribute and you get a 1-unit dotted line instead.
- *   3. Hover drives its own elements, invisible the rest of the time, so it
- *      never fights the loop for a property mid-cycle.
- *
- * Only transform, opacity and stroke-dashoffset are animated, so nothing here
- * touches layout. Loops are paused until the section is revealed, and reduced
- * motion stops everything at the finished mark.
- *
- * aria-hidden: where a caption shows it carries the meaning in text, and where
- * it doesn't the pitch beside the mark already does.
+ * aria-hidden: the caption carries the meaning where it shows, and where it
+ * doesn't the pitch beside the drawing already does.
  */
 import { services } from "../lib/services";
 
 interface Props {
   slug: string;
-  /** Show the figure caption. Off in tight spaces like the homepage plate. */
+  /** Show the figure caption. Turns the in-drawing labels on unless overridden. */
   caption?: boolean;
-  /** Run the loop and the hover beat. */
+  /** Show the mono labels inside the drawing. Defaults to follow caption. */
+  labels?: boolean;
+  /** Draw for a light plate: dark ink, light ground. The pink stays pink. */
+  inverted?: boolean;
+  /** Run the entry and the loop. Off gives the finished drawing, still. */
   animate?: boolean;
   class?: string;
 }
-const { slug, caption = false, animate = true, class: className = "" } = Astro.props;
+const {
+  slug,
+  caption = false,
+  labels = caption,
+  inverted = false,
+  animate = true,
+  class: className = "",
+} = Astro.props;
 
 const num = services.find((s) => s.slug === slug)?.num ?? "";
 
@@ -65,117 +76,164 @@ const captions: Record<string, string> = {
   ai: "Forty layouts in, one shape out.",
   audit: "What it costs you now, in order.",
 };
+
+const grid = `dots-${slug}`;
 ---
 
-<figure class:list={["sketch", `is-${slug}`, animate && "is-live", className]}>
+<figure
+  class:list={[
+    "sketch",
+    `is-${slug}`,
+    animate && "is-live",
+    labels && "has-labels",
+    inverted && "is-inverted",
+    className,
+  ]}
+  data-mark={animate ? slug : undefined}
+>
+  {/* The sheet is a window: the hover camera pushes the drawing to twice its
+      size and this box crops it, so it never spills over the copy or the
+      caption. */}
+  <div class="sheet">
   <svg viewBox="0 0 200 120" fill="none" aria-hidden="true" focusable="false">
+    <defs>
+      <pattern id={grid} width="10" height="10" patternUnits="userSpaceOnUse">
+        <circle cx="5" cy="5" r="0.7" class="dot" />
+      </pattern>
+    </defs>
+    {/* Oversized: the grid drifts under the hover parallax and must not show an edge. */}
+    <rect class="grid" x="-10" y="-10" width="220" height="140" fill={`url(#${grid})`} />
+
     {slug === "website" && (
       <>
-        {/* A page, reduced to its frame and the one block worth clicking. */}
-        <rect class="m-line l1" x="52" y="12" width="96" height="96" rx="14" pathLength="1" />
-        <path class="m-line-2 l2" d="M52 42h96" pathLength="1" />
-        <circle class="m-dim l3" cx="66" cy="27" r="4" />
-        <circle class="m-dim l3" cx="80" cy="27" r="4" />
-        <rect class="m-dim l4" x="68" y="56" width="64" height="10" rx="5" />
-        <rect class="m-accent l5" x="68" y="78" width="44" height="18" rx="9" />
-
-        <g class="hov">
-          <circle class="tap" cx="90" cy="87" r="15" />
-        </g>
+        {/* A page: a plate behind a plate, a header, three lines of copy and
+            the one button. The cursor is the pink thing, and at rest it sits
+            on the button. */}
+        <rect class="m-rule" x="56" y="26" width="100" height="76" rx="2" />
+        <rect class="m-ink" data-el="frame" x="50" y="20" width="100" height="76" rx="2" />
+        <path class="m-ink" d="M50 32H150" />
+        <circle class="f-ink" cx="56" cy="26" r="1.3" />
+        <circle class="f-ink" cx="61" cy="26" r="1.3" />
+        <path class="m-rule" d="M62 46H118" />
+        <path class="m-rule" d="M62 54H106" />
+        <path class="m-rule" d="M62 62H112" />
+        <rect class="m-ink" data-el="cta" x="62" y="72" width="36" height="12" rx="1.5" />
+        <path class="flow lead" d="M98 78H170V96" />
+        <text class="lbl" x="50" y="14">index.html</text>
+        <text class="lbl" x="170" y="108" text-anchor="end">one action</text>
+        <circle class="f-sig" data-el="cursor" cx="80" cy="78" r="2" />
       </>
     )}
 
     {slug === "app" && (
       <>
-        {/* Four panels, one of them the thing you opened it for. */}
-        <rect class="m-line l1" x="48" y="10" width="44" height="44" rx="9" pathLength="1" />
-        <rect class="m-line l2" x="108" y="10" width="44" height="44" rx="9" pathLength="1" />
-        <rect class="m-line l3" x="48" y="64" width="44" height="44" rx="9" pathLength="1" />
-        <rect class="m-accent l4" x="108" y="64" width="44" height="44" rx="9" />
-
-        <g class="hov">
-          <rect class="sweep" x="44" y="6" width="5" height="106" rx="2.5" />
-        </g>
+        {/* A sheet on the left, piped into a dashboard on the right. The
+            dashboard's live reading is the pink thing. */}
+        <rect class="m-rule" x="24" y="36" width="50" height="48" />
+        <path class="m-rule" d="M24 48H74M24 60H74M24 72H74M34 36V84M44 36V84M54 36V84M64 36V84" />
+        <rect class="m-rule" x="114" y="36" width="66" height="54" rx="2" />
+        <rect class="m-ink" data-el="panel" x="108" y="30" width="66" height="54" rx="2" />
+        <path class="m-ink" d="M108 44H174M141 44V84" />
+        <path class="m-ink" data-el="bar" d="M116 76V62" />
+        <path class="m-ink" data-el="bar" d="M122 76V56" />
+        <path class="m-ink" data-el="bar" d="M128 76V66" />
+        <path class="m-ink" data-el="bar" d="M134 76V52" />
+        <path class="m-ink" data-el="spark" d="M146 72L152 66L158 69L164 58L170 62" />
+        <path class="flow" d="M74 60H108" />
+        <text class="lbl" x="24" y="30">rows 1,240</text>
+        <text class="lbl" x="174" y="98" text-anchor="end">live</text>
+        <circle class="f-sig" data-el="tip" cx="170" cy="62" r="1.8" />
       </>
     )}
 
     {slug === "automation" && (
       <>
-        {/* A closed loop with a gap and an arrowhead: it comes back round on
-            its own. The square on the ring is the thing being carried. */}
-        <path class="m-line l1" d="M129.7 89.7A42 42 0 1 1 129.7 30.3" pathLength="1" />
-        <path class="m-line l2" d="M113.4 26.8L129.7 30.3L126.2 14" pathLength="1" />
-        <rect class="m-accent l3" x="91" y="93" width="18" height="18" rx="5" />
-        <circle class="m-dim l4" cx="58" cy="60" r="5" />
-        <circle class="m-dim l4" cx="100" cy="18" r="5" />
-
-        <g class="hov">
-          {/* Rotated about the ring's centre rather than its own, so it rides
-              the ring. view-box, because the box being rotated about is the
-              drawing's, not this square's. */}
-          <g class="orbit">
-            <rect x="93" y="11" width="14" height="14" rx="4" />
-          </g>
-        </g>
+        {/* A ring with a gap and a chevron, two stations on it, something in
+            and something out. The job going round is the pink thing. */}
+        <path class="m-ink" data-el="ring" d="M129.7 89.7A42 42 0 1 1 129.7 30.3" />
+        <path class="m-ink" d="M118 27.5L129.7 30.3L127 19" />
+        <circle class="m-ink node" data-el="node" cx="58" cy="60" r="3" />
+        <circle class="m-ink node" data-el="node" cx="100" cy="18" r="3" />
+        <path class="flow" d="M14 60H54" />
+        <path class="flow" d="M100 14V4" />
+        <text class="lbl" x="14" y="55">in</text>
+        <text class="lbl" x="104" y="8">out</text>
+        <text class="lbl" x="100" y="114" text-anchor="middle">every 5 min</text>
+        <circle class="f-sig" data-el="job" cx="129.7" cy="89.7" r="2.6" />
       </>
     )}
 
     {slug === "hosting" && (
       <>
-        {/* Three tiers and three lights, one of which is the one you would
-            ring someone about. */}
-        <rect class="m-line l1" x="44" y="18" width="112" height="24" rx="7" pathLength="1" />
-        <rect class="m-line l2" x="44" y="48" width="112" height="24" rx="7" pathLength="1" />
-        <rect class="m-line l3" x="44" y="78" width="112" height="24" rx="7" pathLength="1" />
-        <circle class="m-dim l4" cx="62" cy="60" r="5" />
-        <circle class="m-dim l4" cx="62" cy="90" r="5" />
-        <circle class="m-accent l5" cx="62" cy="30" r="6" />
-
-        <g class="hov">
-          <circle class="pulse" cx="62" cy="30" r="9" />
-        </g>
+        {/* Three isometric slabs, a light on each. The live light is the pink
+            thing, and its check runs up the dashed leader to the log line. */}
+        <path class="m-ink" d="M48 84L108 54L148 74L88 104Z" />
+        <path class="m-ink" d="M48 84V92L88 112V104M148 74V82L88 112" />
+        <path class="m-ink" d="M48 62L108 32L148 52L88 82Z" />
+        <path class="m-ink" d="M48 62V70L88 90V82M148 52V60L88 90" />
+        <path class="m-ink" d="M48 40L108 10L148 30L88 60Z" />
+        <path class="m-ink" d="M48 40V48L88 68V60M148 30V38L88 68" />
+        <circle class="m-rule node" data-el="light" cx="57" cy="92.5" r="2" />
+        <circle class="m-rule node" data-el="light" cx="57" cy="70.5" r="2" />
+        <path class="flow lead" d="M57 48.5H36V20" />
+        <text class="lbl" x="28" y="14">03:14 <tspan class="lbl-strong">200 ok</tspan></text>
+        <text class="lbl" x="152" y="108">x3</text>
+        <circle class="f-sig" data-el="live" cx="57" cy="48.5" r="2" />
       </>
     )}
 
     {slug === "ai" && (
       <>
-        {/* Three hollow things in on one side, one solid thing out the other,
-            and the part doing the work in the middle. */}
-        <circle class="m-line l1" cx="100" cy="60" r="34" pathLength="1" />
-        <path
-          class="m-line-2 l2"
-          d="M66 60H45M70.6 77L52.4 87.5M70.6 43L52.4 32.5M134 60h21"
-          pathLength="1"
-        />
-        <rect class="m-line-2 l3" x="31" y="53" width="14" height="14" rx="4" pathLength="1" />
-        <rect class="m-line-2 l3" x="39.3" y="84" width="14" height="14" rx="4" pathLength="1" />
-        <rect class="m-line-2 l3" x="39.3" y="22" width="14" height="14" rx="4" pathLength="1" />
-        <rect class="m-ink l4" x="155" y="53" width="14" height="14" rx="4" />
-        <circle class="m-accent l5" cx="100" cy="60" r="13" />
-
-        <g class="hov">
-          <circle class="feed" cx="66" cy="60" r="5" />
-        </g>
+        {/* Three documents of three shapes flow into a layered core, and one
+            finished shape flows out. The core's centre is the pink thing; the
+            travelling dots exist only for the loop. */}
+        <rect class="m-rule" x="22" y="22" width="16" height="20" />
+        <path class="m-rule" d="M26 28H34M26 32H32M26 36H34" />
+        <rect class="m-rule" x="20" y="52" width="20" height="16" />
+        <path class="m-rule" d="M24 58H36M24 62H32" />
+        <rect class="m-rule" x="24" y="78" width="14" height="22" />
+        <path class="m-rule" d="M27 84H35M27 88H33M27 92H35" />
+        <circle class="m-rule dash" cx="100" cy="60" r="20" />
+        <circle class="m-ink" data-el="core" cx="100" cy="60" r="12" />
+        <rect class="m-ink" data-el="result" x="150" y="48" width="18" height="24" />
+        <path class="m-ink" d="M154 55H164M154 60H164M154 65H160" />
+        <path class="flow" data-el="in" d="M38 32H62L82.7 50" />
+        <path class="flow" data-el="in" d="M40 60H80" />
+        <path class="flow" data-el="in" d="M38 89H62L82.7 70" />
+        <path class="flow" data-el="out" d="M120 60H150" />
+        <text class="lbl" x="20" y="14">40 layouts</text>
+        <text class="lbl" x="168" y="86" text-anchor="end">1 schema</text>
+        <circle class="f-sig" data-el="centre" cx="100" cy="60" r="3" />
+        <circle class="f-sig fx" data-el="doc" cx="0" cy="0" r="2" />
+        <circle class="f-sig fx" data-el="doc" cx="0" cy="0" r="2" />
+        <circle class="f-sig fx" data-el="doc" cx="0" cy="0" r="2" />
+        <circle class="f-sig fx" data-el="packet" cx="0" cy="0" r="2" />
       </>
     )}
 
     {slug === "audit" && (
       <>
-        {/* A lens, and under it the findings in the order they cost you. */}
-        <circle class="m-line l1" cx="86" cy="50" r="34" pathLength="1" />
-        <path class="m-line-heavy l2" d="M110 74L148 112" pathLength="1" />
-        {/* Widest at the top, and the widest is the accent: the findings in
-            the order they cost you, which is the whole pitch. */}
-        <rect class="m-accent l3" x="68" y="28" width="42" height="12" rx="6" />
-        <rect class="m-ink l4" x="68" y="46" width="34" height="10" rx="5" />
-        <rect class="m-dim l5" x="68" y="62" width="24" height="10" rx="5" />
-
-        <g class="hov">
-          <circle class="probe" cx="86" cy="50" r="34" />
-        </g>
+        {/* The findings ranked by hours lost, against a scale. The top one is
+            the pink thing. The scan line that measures them is loop-only. */}
+        <rect class="m-sig" data-el="bar" x="56" y="30" width="80" height="10" />
+        <rect class="m-ink" data-el="bar" x="56" y="50" width="52" height="10" />
+        <rect class="m-ink" data-el="bar" x="56" y="70" width="28" height="10" />
+        <path class="m-rule" d="M56 96H156" />
+        <path class="m-rule" d="M56 96v3M76 96v3M96 96v3M116 96v3M136 96v3M156 96v3" />
+        <text class="lbl" x="56" y="16">hours lost / week</text>
+        <text class="lbl" x="40" y="37.5">01</text>
+        <text class="lbl" x="40" y="57.5">02</text>
+        <text class="lbl" x="40" y="77.5">03</text>
+        <text class="lbl lbl-strong" data-el="val" x="140" y="37.5">4.2h</text>
+        <text class="lbl" data-el="val" x="112" y="57.5">1.5h</text>
+        <text class="lbl" data-el="val" x="88" y="77.5">0.5h</text>
+        <text class="lbl" x="56" y="108">0</text>
+        <text class="lbl" x="156" y="108" text-anchor="end">5h</text>
+        <path class="m-sig dash fx" data-el="scan" d="M56 24V88" />
       </>
     )}
   </svg>
+  </div>
 
   {caption && (
     <figcaption class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint mt-4">
@@ -187,374 +245,140 @@ const captions: Record<string, string> = {
 <style>
   .sketch {
     margin: 0;
+    /* User-unit stroke width that renders as 1.5px. The script sets this per
+       figure from its rendered size; this fallback suits the services page. */
+    --sw: 0.6;
+    --cf: cubic-bezier(0.4, 0, 0.2, 1);
+    /* The drawing's own palette, so one figure can sit on a light plate. The
+       script reads --mk-ink and --mk-rule from here too, so the colours it
+       tweens back to are always the figure's own. */
+    --mk-ink: var(--color-ink-dim);
+    --mk-rule: var(--color-rule-strong);
+    --mk-faint: var(--color-ink-faint);
+    --mk-strong: var(--color-ink-dim);
+    --mk-node: var(--color-paper-2);
+    --mk-dot: #262626;
+    --mk-hover: var(--color-ink);
+    --mk-hover-lbl: var(--color-ink-dim);
+  }
+  /* On a light plate: the brief's #262626 ink and its greys, mirrored. */
+  .sketch.is-inverted {
+    --mk-ink: #525252;
+    --mk-rule: #a3a3a3;
+    --mk-faint: #737373;
+    --mk-strong: #525252;
+    --mk-node: #fafafa;
+    --mk-dot: #d4d4d4;
+    --mk-hover: #262626;
+    --mk-hover-lbl: #525252;
+  }
+  .sketch .sheet {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 5 / 3;
+  }
+  /* The 3D build (scripts/marks3d.ts) draws into a canvas that covers the
+     whole card, behind its copy, with the object framed where this sheet
+     sits at rest. Its labels are HTML pinned to the card, so they stay 13px
+     at any distance. Once it is up the SVG is hidden; it remains the
+     fallback. The canvas and label rules live in global.css because they
+     are appended to the card, outside this component's scope. */
+  .sketch.is-3d svg {
+    visibility: hidden;
   }
   .sketch svg {
     display: block;
     width: 100%;
     height: auto;
-    /* The hover beats leave the box: the orbit rides the ring's outside and
-       the taps expand past their shape. */
     overflow: visible;
   }
+  /* The grid is drawn larger than the viewBox for the parallax; clip it back
+     to the sheet so it does not spill into the card. */
+  .sketch .grid {
+    clip-path: inset(10px 10px 10px 10px);
+  }
 
-  /* ── Palette ─────────────────────────────────────────────────────────────
-     Strokes scale with the figure rather than holding a pixel width. These are
-     marks: at the size they run on the services page a hairline would read as
-     a diagram again, which is the thing we moved away from. */
-  .sketch .m-line,
-  .sketch .m-line-2,
-  .sketch .m-line-heavy {
-    stroke: var(--color-rule-strong);
+  /* ── Monoline ────────────────────────────────────────────────────────── */
+  .sketch .m-ink,
+  .sketch .m-rule,
+  .sketch .m-sig {
     fill: none;
+    stroke-width: var(--sw);
     stroke-linecap: round;
     stroke-linejoin: round;
-    /* Rule 2. One dash covering the whole path, so at rest the shape is solid
-       and the build is a matter of offsetting it. */
-    stroke-dasharray: 1;
+    transition: stroke 0.3s var(--cf);
   }
-  .sketch .m-line {
-    stroke-width: 5;
-  }
-  .sketch .m-line-2 {
-    stroke-width: 4;
-  }
-  .sketch .m-line-heavy {
-    stroke-width: 7;
-  }
-  .sketch .m-dim {
-    fill: #2b2b2b;
-  }
-  .sketch .m-ink {
-    fill: var(--color-ink-faint);
-  }
-  .sketch .m-accent {
-    fill: var(--color-accent);
-  }
+  .sketch .m-ink { stroke: var(--mk-ink); }
+  .sketch .m-rule { stroke: var(--mk-rule); }
+  .sketch .m-sig { stroke: var(--color-accent); }
+  .sketch .node { fill: var(--mk-node); }
+  .sketch .f-ink { fill: var(--mk-ink); }
+  .sketch .f-sig { fill: var(--color-accent); }
+  .sketch .dot { fill: var(--mk-dot); }
 
-  /* Rule 1, and every part scales about its own middle. */
-  .sketch .l1,
-  .sketch .l2,
-  .sketch .l3,
-  .sketch .l4,
-  .sketch .l5,
-  .sketch .hov > * {
-    transform-box: fill-box;
-    transform-origin: 50% 50%;
+  /* Dashed lines: the dash is sized off the stroke so it reads the same at
+     any size, and the flows march at a fixed pace. */
+  .sketch .dash,
+  .sketch .flow {
+    stroke-dasharray: calc(var(--sw) * 2.5) calc(var(--sw) * 2.5);
   }
-
-  /* ── The five lanes ──────────────────────────────────────────────────────
-     Identical shape, shifted entry, near-shared exit:
-
-       lane   in     complete   out    gone
-       1       1%       8.5%     91%    95%
-       2       3%      10.5%     92%    96%
-       3       5%      12.5%     93%    97%
-       4       7%      14.5%     94%    98%
-       5       9%      16.5%     95%    99%
-
-     Which leaves every mark standing complete from 16.5% to 91% of its cycle:
-     on an 11 second loop, about a second building, eight standing, half a
-     second leaving.
-
-     The windows are deliberately a small slice of a long cycle rather than a
-     big slice of a short one. Six of these run on the homepage at once, and
-     the difference between them being alive and being a nuisance is almost
-     entirely how much of the time anything is moving.
-
-     Timing sits inside the keyframes rather than on the shorthand: an arrival,
-     an impact and a departure all want different curves, and one curve across
-     all three is most of what makes a build read as mechanical. Each part
-     comes in under its own size, punches past it, and settles back. */
-  @keyframes mark-1 {
-    0%,
-    1% {
-      opacity: 0;
-      transform: scale(0.4);
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    2% {
-      opacity: 1;
-    }
-    5.5% {
-      opacity: 1;
-      transform: scale(1.13);
-      stroke-dashoffset: 0.18;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    7% {
-      transform: scale(0.955);
-      stroke-dashoffset: 0;
-    }
-    8.5%,
-    91% {
-      opacity: 1;
-      transform: scale(1);
-      stroke-dashoffset: 0;
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    95%,
-    100% {
-      opacity: 0;
-      transform: scale(0.5);
-      stroke-dashoffset: 1;
-    }
-  }
-  @keyframes mark-2 {
-    0%,
-    3% {
-      opacity: 0;
-      transform: scale(0.4);
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    4% {
-      opacity: 1;
-    }
-    7.5% {
-      opacity: 1;
-      transform: scale(1.13);
-      stroke-dashoffset: 0.18;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    9% {
-      transform: scale(0.955);
-      stroke-dashoffset: 0;
-    }
-    10.5%,
-    92% {
-      opacity: 1;
-      transform: scale(1);
-      stroke-dashoffset: 0;
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    96%,
-    100% {
-      opacity: 0;
-      transform: scale(0.5);
-      stroke-dashoffset: 1;
-    }
-  }
-  @keyframes mark-3 {
-    0%,
-    5% {
-      opacity: 0;
-      transform: scale(0.4);
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    6% {
-      opacity: 1;
-    }
-    9.5% {
-      opacity: 1;
-      transform: scale(1.13);
-      stroke-dashoffset: 0.18;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    11% {
-      transform: scale(0.955);
-      stroke-dashoffset: 0;
-    }
-    12.5%,
-    93% {
-      opacity: 1;
-      transform: scale(1);
-      stroke-dashoffset: 0;
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    97%,
-    100% {
-      opacity: 0;
-      transform: scale(0.5);
-      stroke-dashoffset: 1;
-    }
-  }
-  @keyframes mark-4 {
-    0%,
-    7% {
-      opacity: 0;
-      transform: scale(0.4);
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    8% {
-      opacity: 1;
-    }
-    11.5% {
-      opacity: 1;
-      transform: scale(1.13);
-      stroke-dashoffset: 0.18;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    13% {
-      transform: scale(0.955);
-      stroke-dashoffset: 0;
-    }
-    14.5%,
-    94% {
-      opacity: 1;
-      transform: scale(1);
-      stroke-dashoffset: 0;
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    98%,
-    100% {
-      opacity: 0;
-      transform: scale(0.5);
-      stroke-dashoffset: 1;
-    }
-  }
-  @keyframes mark-5 {
-    0%,
-    9% {
-      opacity: 0;
-      transform: scale(0.4);
-      stroke-dashoffset: 1;
-      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-    10% {
-      opacity: 1;
-    }
-    13.5% {
-      opacity: 1;
-      transform: scale(1.13);
-      stroke-dashoffset: 0.18;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1);
-    }
-    15% {
-      transform: scale(0.955);
-      stroke-dashoffset: 0;
-    }
-    16.5%,
-    95% {
-      opacity: 1;
-      transform: scale(1);
-      stroke-dashoffset: 0;
-      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.2);
-    }
-    99%,
-    100% {
-      opacity: 0;
-      transform: scale(0.5);
-      stroke-dashoffset: 1;
-    }
-  }
-
-  .sketch.is-live .l1 { animation: mark-1 var(--dur) linear infinite both; }
-  .sketch.is-live .l2 { animation: mark-2 var(--dur) linear infinite both; }
-  .sketch.is-live .l3 { animation: mark-3 var(--dur) linear infinite both; }
-  .sketch.is-live .l4 { animation: mark-4 var(--dur) linear infinite both; }
-  .sketch.is-live .l5 { animation: mark-5 var(--dur) linear infinite both; }
-
-  /* Six loops on one page. Prime-ish durations so they drift apart rather than
-     falling into step and turning the plate into one big pulse. */
-  .sketch.is-website { --dur: 11s; }
-  .sketch.is-app { --dur: 10.6s; }
-  .sketch.is-automation { --dur: 12s; }
-  .sketch.is-hosting { --dur: 11.4s; }
-  .sketch.is-ai { --dur: 12.6s; }
-  .sketch.is-audit { --dur: 11.8s; }
-
-  /* ── Hover ───────────────────────────────────────────────────────────────
-     Rule 3: dedicated elements, invisible otherwise, so the loop underneath is
-     never interrupted and there is nothing to jump back from.
-
-     Two triggers: the homepage plate, where the card is one big link, and the
-     services page, where the mark sits in a static panel. */
-  .sketch .hov > * {
-    opacity: 0;
-  }
-  .sketch .tap,
-  .sketch .pulse,
-  .sketch .probe {
-    stroke: var(--color-accent);
-    stroke-width: 3;
+  .sketch .flow {
     fill: none;
+    stroke: var(--mk-rule);
+    stroke-width: calc(var(--sw) * 0.8);
+    stroke-linecap: butt;
   }
-  .sketch .sweep,
-  .sketch .feed,
-  .sketch .orbit rect {
-    fill: var(--color-accent);
+  @keyframes march {
+    to { stroke-dashoffset: calc(var(--sw) * -5); }
   }
-  .sketch .orbit {
-    /* The centre it turns about is the ring's, not its own, so this one reads
-       against the drawing rather than against its own little box. */
-    transform-box: view-box;
-    transform-origin: 100px 60px;
+  .sketch.is-live .flow {
+    animation: march 1.1s linear infinite;
   }
 
-  @keyframes hv-tap {
-    0% { opacity: 0; transform: scale(0.35); }
-    45% { opacity: 0.9; transform: scale(1.1); }
-    100% { opacity: 0; transform: scale(1.75); }
+  /* ── Labels ──────────────────────────────────────────────────────────── */
+  .sketch .lbl {
+    font-family: var(--font-mono);
+    /* px in SVG is user units, and calc needs a unit to produce a length. */
+    font-size: calc(var(--sw) * 8.5px);
+    fill: var(--mk-faint);
+    letter-spacing: 0.02em;
+    transition: fill 0.3s var(--cf);
   }
-  @keyframes hv-sweep {
-    0% { opacity: 0; transform: translateX(0); }
-    12% { opacity: 0.85; }
-    82% { opacity: 0.85; }
-    100% { opacity: 0; transform: translateX(104px); }
-  }
-  @keyframes hv-orbit {
-    0% { opacity: 0; transform: rotate(0deg); }
-    15% { opacity: 1; }
-    85% { opacity: 1; }
-    100% { opacity: 0; transform: rotate(360deg); }
-  }
-  @keyframes hv-pulse {
-    0% { opacity: 0; transform: scale(0.5); }
-    40% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(2.1); }
-  }
-  @keyframes hv-feed {
-    0% { opacity: 0; transform: translateX(-22px) scale(0.6); }
-    18% { opacity: 1; transform: translateX(-14px) scale(1); }
-    76% { opacity: 1; transform: translateX(20px) scale(1); }
-    100% { opacity: 0; transform: translateX(26px) scale(0.4); }
-  }
-  @keyframes hv-probe {
-    0% { opacity: 0; transform: scale(1.16); }
-    35% { opacity: 0.95; transform: scale(1.04); }
-    100% { opacity: 0; transform: scale(0.94); }
+  .sketch .lbl-strong { fill: var(--mk-strong); }
+  .sketch:not(.has-labels) .lbl,
+  /* Leaders exist to point at a label, so they go with it. */
+  .sketch:not(.has-labels) .lead { display: none; }
+
+  /* Loop-only parts. Hidden at rest so the finished drawing is the same with
+     or without the script. */
+  .sketch .fx { opacity: 0; }
+
+  /* ── Hover: colour, never position ─────────────────────────────────── */
+  .sketch:hover .m-ink,
+  :global(.group:hover) .sketch .m-ink { stroke: var(--mk-hover); }
+  .sketch:hover .lbl,
+  :global(.group:hover) .sketch .lbl { fill: var(--mk-hover-lbl); }
+  .sketch:hover .lbl-strong,
+  :global(.group:hover) .sketch .lbl-strong { fill: var(--mk-hover); }
+
+  /* Nothing shows until the script has put every part at its starting state,
+     or the finished drawing flashes for a frame before it draws itself.
+     Gated on .js so a blocked bundle leaves the drawing visible; the script
+     adds .is-ready even under reduced motion, where it does nothing else. */
+  :global(html.js) .sketch.is-live:not(.is-ready) svg {
+    visibility: hidden;
   }
 
-  .sketch.is-live.is-website:hover .tap,
-  :global(.group:hover) .sketch.is-live.is-website .tap {
-    animation: hv-tap 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-app:hover .sweep,
-  :global(.group:hover) .sketch.is-live.is-app .sweep {
-    animation: hv-sweep 1s cubic-bezier(0.4, 0, 0.35, 1) forwards;
-  }
-  .sketch.is-live.is-automation:hover .orbit,
-  :global(.group:hover) .sketch.is-live.is-automation .orbit {
-    animation: hv-orbit 1.4s cubic-bezier(0.45, 0, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-hosting:hover .pulse,
-  :global(.group:hover) .sketch.is-live.is-hosting .pulse {
-    animation: hv-pulse 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-ai:hover .feed,
-  :global(.group:hover) .sketch.is-live.is-ai .feed {
-    animation: hv-feed 0.95s cubic-bezier(0.35, 0, 0.3, 1) forwards;
-  }
-  .sketch.is-live.is-audit:hover .probe,
-  :global(.group:hover) .sketch.is-live.is-audit .probe {
-    animation: hv-probe 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
-  }
-
-  /* Nothing runs until the section holding it has been revealed, so six marks
-     below the fold are not looping at people who never scroll. Gated on .js:
-     without it .is-visible never arrives and they would freeze mid-build. */
-  :global(html.js [data-reveal]:not(.is-visible)) .sketch * {
-    animation-play-state: paused !important;
-  }
-
-  /* The finished mark is the resting state — solid strokes, no transform — so
-     stopping the animations is the whole of what this needs to do. */
   @media (prefers-reduced-motion: reduce) {
-    .sketch * {
-      animation: none !important;
+    :global(html.js) .sketch.is-live:not(.is-ready) svg {
+      visibility: visible;
+    }
+    .sketch .flow {
+      animation: none;
     }
   }
 </style>
+
+<script>
+  import "../scripts/marks.ts";
+</script>
