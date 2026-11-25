@@ -2,13 +2,12 @@
 /**
  * A sequence, drawn as a track rather than stacked as a list.
  *
- * Numbering earns its place here: these steps happen in this order, and the
- * order is the information. The spine runs horizontally on wide screens so the
- * whole process is one object you can take in at a glance, and folds to a
- * vertical timeline on narrow ones.
+ * These steps happen in this order, and the order is the information. The
+ * spine carries it: one line, a node per step, read left to right. It runs
+ * horizontally on wide screens so the whole process is one object you can
+ * take in at a glance, and folds to a vertical timeline on narrow ones.
  */
 interface Step {
-  step: string;
   title: string;
   body: string;
 }
@@ -23,7 +22,6 @@ const { steps, class: className = "" } = Astro.props;
   {steps.map((s) => (
     <li class="track-step">
       <span class="track-node" aria-hidden="true"></span>
-      <span class="track-num">{s.step}</span>
       <h3 class="track-title">{s.title}</h3>
       <p class="track-body">{s.body}</p>
     </li>
@@ -57,15 +55,6 @@ const { steps, class: className = "" } = Astro.props;
     height: 7px;
     background: var(--color-paper);
     border: 1px solid var(--color-accent);
-  }
-
-  .track-num {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    color: var(--color-accent-text);
-    margin-bottom: 0.5rem;
   }
 
   .track-title {

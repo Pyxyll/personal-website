@@ -1,6 +1,6 @@
 ---
 /**
- * One schematic per service: a technical line drawing that assembles itself,
+ * One schematic per skill: a technical line drawing that assembles itself,
  * then does its job on a loop.
  *
  * ── The language ─────────────────────────────────────────────────────────
@@ -10,21 +10,22 @@
  *     user units, so marks.ts measures each figure and sets --sw to whatever
  *     user-unit width renders as 1.5px. Labels are sized off the same number
  *     and so hold at about 13px too. Without the script they fall back to
- *     the value below, which is right for the services page.
+ *     the value below, which is right for the skills page.
  *   - A dot grid as the ground. Lines land on it where they can.
  *   - Depth from structure, never from light: a plate behind a plate, an
  *     isometric slab, a dashed ring around a solid one. No shadow, no glow.
  *   - Anything that flows is dashed, and the dashes march.
- *   - Small mono labels are part of the drawing. They are what turns an icon
- *     into an infographic, and they show where there is room for them: on
- *     the services page, with the caption.
+ *   - Small mono labels can sit in the drawing ("rows 1,240", "live"). They
+ *     are off unless a figure asks for them with `labels`: the drawings read
+ *     without the words, and the words made them busier than they needed
+ *     to be.
  *   - The accent is a signal, not a paint. One pink thing per mark, and it is
  *     the thing that moves or the thing that matters.
  *
  * ── Two acts ─────────────────────────────────────────────────────────────
  *   entry   the drawing draws itself: strokes in document order, then the
  *           flows, labels and dots fade in. About 1.5s, once.
- *   loop    the service's verb as a flow: a dot travelling a line, a node
+ *   loop    the skill's verb as a flow: a dot travelling a line, a node
  *           changing state, a value being measured. Then a rest.
  *
  * All of it lives in scripts/marks.ts. This file only draws the finished
@@ -43,13 +44,11 @@
  * aria-hidden: the caption carries the meaning where it shows, and where it
  * doesn't the pitch beside the drawing already does.
  */
-import { services } from "../lib/services";
-
 interface Props {
   slug: string;
-  /** Show the figure caption. Turns the in-drawing labels on unless overridden. */
+  /** Show the line under the figure. */
   caption?: boolean;
-  /** Show the mono labels inside the drawing. Defaults to follow caption. */
+  /** Show the mono labels inside the drawing. Off by default. */
   labels?: boolean;
   /** Draw for a light plate: dark ink, light ground. The pink stays pink. */
   inverted?: boolean;
@@ -60,13 +59,11 @@ interface Props {
 const {
   slug,
   caption = false,
-  labels = caption,
+  labels = false,
   inverted = false,
   animate = true,
   class: className = "",
 } = Astro.props;
-
-const num = services.find((s) => s.slug === slug)?.num ?? "";
 
 const captions: Record<string, string> = {
   website: "One page, one thing worth clicking.",
@@ -236,9 +233,7 @@ const grid = `dots-${slug}`;
   </div>
 
   {caption && (
-    <figcaption class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint mt-4">
-      Fig. {num} <span class="text-ink-dim ml-1">{captions[slug]}</span>
-    </figcaption>
+    <figcaption class="font-mono text-[13px] text-ink-faint mt-4">{captions[slug]}</figcaption>
   )}
 </figure>
 
@@ -246,7 +241,7 @@ const grid = `dots-${slug}`;
   .sketch {
     margin: 0;
     /* User-unit stroke width that renders as 1.5px. The script sets this per
-       figure from its rendered size; this fallback suits the services page. */
+       figure from its rendered size; this fallback suits the skills page. */
     --sw: 0.6;
     --cf: cubic-bezier(0.4, 0, 0.2, 1);
     /* The drawing's own palette, so one figure can sit on a light plate. The

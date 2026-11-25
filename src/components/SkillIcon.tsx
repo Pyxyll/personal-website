@@ -1,5 +1,5 @@
 /**
- * Maps a service to its icon.
+ * Maps a skill to its icon.
  *
  * The icons themselves are from ItsHover (itshover.com/icons), pulled in via
  * their shadcn registry and living unmodified in ./icons so they can be
@@ -28,7 +28,7 @@ const BY_SLUG = {
   audit: MagnifierIcon,
 } as const;
 
-export type ServiceIconSlug = keyof typeof BY_SLUG;
+export type SkillIconSlug = keyof typeof BY_SLUG;
 
 interface Props extends AnimatedIconProps {
   slug: string;
@@ -39,7 +39,7 @@ const wantsStillness = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const ServiceIcon = forwardRef<AnimatedIconHandle, Props>(
+const SkillIcon = forwardRef<AnimatedIconHandle, Props>(
   ({ slug, size = 20, strokeWidth = 1.75, ...rest }, ref) => {
     const inner = useRef<AnimatedIconHandle>(null);
 
@@ -58,11 +58,11 @@ const ServiceIcon = forwardRef<AnimatedIconHandle, Props>(
       },
     }), []);
 
-    const Icon = BY_SLUG[slug as ServiceIconSlug];
+    const Icon = BY_SLUG[slug as SkillIconSlug];
     if (!Icon) return null;
     return <Icon ref={inner} size={size} strokeWidth={strokeWidth} {...rest} />;
   },
 );
 
-ServiceIcon.displayName = "ServiceIcon";
-export default ServiceIcon;
+SkillIcon.displayName = "SkillIcon";
+export default SkillIcon;

@@ -27,6 +27,9 @@ const work = defineCollection({
     repo: z.url().optional(),
     /** Up to three 16:10 screenshots, shown as a stack on the homepage. */
     images: z.array(image()).max(3).optional(),
+    /** Position among the four on the homepage: 1 leads. Entries without one
+        fill the remaining places, newest first. */
+    featured: z.number().int().positive().optional(),
   }),
 });
 

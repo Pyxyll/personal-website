@@ -34,9 +34,8 @@ const pageUrl = new URL("/now/", site.url).toString();
     ]}
   />
   <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-16 lg:mb-24">
-      <div class="hidden lg:block lg:col-span-2 section-num lift">004 / Now</div>
-      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+    <header class="flex flex-col gap-6 mb-16 lg:mb-24">
+      <div class="flex flex-col gap-5">
         <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
           Now<span class="text-accent">.</span>
         </h1>
@@ -45,15 +44,15 @@ const pageUrl = new URL("/now/", site.url).toString();
           what I'm focused on right now, and what I'm not. The honest version,
           not what I want you to think I'm working on.
         </p>
-        <div class="font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
-          Last updated · <time datetime={isoUpdated}>{updated}</time>
-        </div>
+        <p class="font-mono text-[13px] text-ink-faint m-0 lift lift-3">
+          Last updated <time datetime={isoUpdated}>{updated}</time>
+        </p>
       </div>
     </header>
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
-      <div class="col-span-12 lg:col-span-2 section-num">Work</div>
-      <div class="col-span-12 lg:col-span-10 prose">
+    <div class="flex flex-col gap-6" data-reveal>
+      <h2 class="section-heading">Work</h2>
+      <div class="prose">
         <p>
           Software developer at <strong>The B!G Idea</strong>, keeping our
           WordPress platform running while building its replacement.
@@ -68,9 +67,9 @@ const pageUrl = new URL("/now/", site.url).toString();
 
     <div class="rule my-12 lg:my-16"></div>
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
-      <div class="col-span-12 lg:col-span-2 section-num">Projects</div>
-      <div class="col-span-12 lg:col-span-10 prose">
+    <div class="flex flex-col gap-6" data-reveal>
+      <h2 class="section-heading">Projects</h2>
+      <div class="prose">
         <ul style="list-style:none;padding-left:0">
           <li><strong>VoxesDen</strong>: voice actors build voice cards to send to casting directors, played right in the browser. In progress.</li>
           <li><strong>Rust applets for COSMIC</strong>: small pieces for System76's desktop environment.</li>
@@ -82,9 +81,9 @@ const pageUrl = new URL("/now/", site.url).toString();
 
     <div class="rule my-12 lg:my-16"></div>
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
-      <div class="col-span-12 lg:col-span-2 section-num">Lately</div>
-      <div class="col-span-12 lg:col-span-10 prose">
+    <div class="flex flex-col gap-6" data-reveal>
+      <h2 class="section-heading">Lately</h2>
+      <div class="prose">
         <p>
           Booked two weeks in Japan for February 2027, so I'm learning some
           basic Japanese. I can't stand showing up in a country unable to say
@@ -99,9 +98,9 @@ const pageUrl = new URL("/now/", site.url).toString();
 
     <div class="rule my-12 lg:my-16"></div>
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10" data-reveal>
-      <div class="col-span-12 lg:col-span-2 section-num">Off</div>
-      <div class="col-span-12 lg:col-span-10 prose">
+    <div class="flex flex-col gap-6" data-reveal>
+      <h2 class="section-heading">Off</h2>
+      <div class="prose">
         <p>
           Coffee, cats, gaming, 3D printing, and a pile of other hobbies I
           don't get to nearly enough.

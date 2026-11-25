@@ -1,5 +1,5 @@
 /**
- * The service schematics as objects.
+ * The skill schematics as objects.
  *
  * Each mark is real geometry drawn as 1.5px lines over a floor of dots, so
  * the rack is three boxes and the ring is a ring. At rest the camera is a
@@ -12,7 +12,7 @@
  *
  * Loaded only when it can be used: a fine pointer that hovers, no reduced
  * motion, and WebGL available. Everything else gets the SVG schematic from
- * ServiceSketch.astro and the GSAP motion in marks.ts, which is also what
+ * SkillSketch.astro and the GSAP motion in marks.ts, which is also what
  * this file falls back to if it fails to load.
  *
  * ── Conventions ──────────────────────────────────────────────────────────

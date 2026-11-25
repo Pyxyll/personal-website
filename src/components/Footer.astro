@@ -4,10 +4,9 @@
  *
  * The panel mirrors the hero — same shell measure, same rounded box, same
  * dashed rules above and below, same shader behind it — so the page opens and
- * closes on the same object. Content in it is a placeholder for now.
+ * closes on the same object.
  *
- * Below that, the full-width strip that was already here: credits, trading
- * details, secondary links.
+ * Below that, the full-width strip: credits, feed, profiles, secondary links.
  *
  * Last, the wordmark: the name set huge in outline across the content
  * measure, cropped by the bottom of the page so it reads as rising out of
@@ -15,7 +14,7 @@
  */
 import HeroShader from "./HeroShader";
 import FloatingIcons from "./FloatingIcons.astro";
-import { site } from "../lib/site";
+import OpenToWork from "./OpenToWork.astro";
 
 const year = new Date().getFullYear();
 ---
@@ -47,14 +46,15 @@ const year = new Date().getFullYear();
           <div class="flex justify-center">
             <div class="flex flex-col items-center gap-6 text-center">
               <p class="display text-[clamp(2.5rem,7vw,5rem)] m-0">
-                Let's build<span class="text-accent">.</span>
+                Let's talk<span class="text-accent">.</span>
               </p>
               <p class="text-base sm:text-lg text-ink-dim max-w-md">
-                Websites, internal tools and automation for small businesses in
-                Ireland.
+                Software engineer in Ireland. Platforms, the servers under
+                them, and the AI tooling around both.
               </p>
+              <OpenToWork />
               <div class="flex flex-wrap items-center justify-center gap-4">
-                <a href="/start/" class="nav-cta fcta">Hire me</a>
+                <a href="/cv/" class="nav-cta fcta">View CV</a>
                 <a
                   href="/contact/"
                   class="link inline-flex items-baseline gap-2 font-mono text-xs uppercase tracking-widest text-ink-dim"
@@ -88,15 +88,15 @@ const year = new Date().getFullYear();
       </ul>
     </div>
 
-    {/* Trading details. Someone selling services under a domain name should
-        say who is behind it, and under what. */}
+    {/* The pages the bar does not carry. */}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-rule pt-8">
       <p class="font-mono text-[11px] uppercase tracking-widest text-ink-faint">
-        {site.business.legalName} trading as {site.business.tradingName} · {site.business.structure}
+        Built by hand in Ireland
       </p>
       <ul class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest">
-        <li><a href="/services/" class="link text-ink-dim">Services</a></li>
-        <li><a href="/start/" class="link text-ink-dim">Start a project</a></li>
+        <li><a href="/cv/" class="link text-ink-dim">CV</a></li>
+        <li><a href="/writing/" class="link text-ink-dim">Writing</a></li>
+        <li><a href="/now/" class="link text-ink-dim">Now</a></li>
         <li><a href="/privacy/" class="link text-ink-dim">Privacy</a></li>
       </ul>
     </div>

@@ -1,25 +1,22 @@
 ---
 /**
- * An empty collection, said plainly: a dashed hairline plate with a mono
- * label, a short line, and an optional action. Used wherever a collection has
- * no entries yet so the section reads as intentionally empty, not broken.
+ * An empty collection, said plainly: a dashed hairline plate with a short
+ * line and an optional action. Used wherever a collection has no entries yet
+ * so the section reads as intentionally empty, not broken.
  *
- * Mono at 13px, sentence case, no tracking: the same metadata register as the
- * rest of the site, and the action is the site's accent text with its arrow.
+ * The action is the site's accent text with its arrow.
  */
 import ArrowIcon from "./ArrowIcon.astro";
 
 interface Props {
-  label?: string;
   message: string;
   ctaHref?: string;
   ctaLabel?: string;
 }
-const { label = "Coming soon", message, ctaHref, ctaLabel } = Astro.props;
+const { message, ctaHref, ctaLabel } = Astro.props;
 ---
 
 <div class="rounded-[6px] border border-dashed border-rule-strong px-6 py-10 sm:px-10 sm:py-12 flex flex-col gap-4">
-  <span class="font-mono text-[13px] text-accent-text">{label}</span>
   <p class="text-ink-dim text-base sm:text-lg max-w-xl m-0">{message}</p>
   {ctaHref && ctaLabel && (
     <a

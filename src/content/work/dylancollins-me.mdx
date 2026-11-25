@@ -1,10 +1,10 @@
 ---
 title: "dylancollins.me"
-summary: "This site. Astro, a single shader, a Cloudflare Worker for the contact form, and all the content in MDX."
+summary: "This site. Astro, a dithered shader, six schematics drawn in three.js, a Cloudflare Worker for the contact form, and all the content in MDX."
 category: "Sites"
 role: "Designer & engineer"
 publishedAt: 2026-01-07
-stack: ["Astro", "TypeScript", "Tailwind", "Cloudflare Workers"]
+stack: ["Astro", "three.js", "TypeScript", "GSAP", "Tailwind", "Cloudflare Workers"]
 url: "https://dylancollins.me"
 repo: "https://github.com/Pyxyll/personal-website"
 ---
@@ -18,10 +18,23 @@ of weeks. This time the rule was: stop overbuilding.
 ## What it is
 
 One static Astro site. Posts and projects live as MDX files, so publishing is
-a commit and a push. A single dithered shader sits behind the home wordmark;
-everything else is type and hairlines. The contact form posts to a tiny
+a commit and a push. A dithered shader sits behind the home wordmark, and
+apart from the schematics below everything else is type and hairlines. The
+contact form posts to a tiny
 Cloudflare Worker that calls Resend server-side, which keeps the site fully
 static with no backend to babysit. It deploys to my own VPS through Coolify.
+
+## The schematics
+
+Each of the six things on the [skills page](/skills/) has a drawing: 1.5px
+lines over a dot grid, which draws itself and then does its job on a loop. On a
+phone it is an SVG moved by GSAP. On a desktop the same drawing is real
+geometry in three.js, framed through a long lens so it reads as flat until you
+hover, when the camera moves in and the perspective appears.
+
+The SVG is the default and the 3D is the enhancement, loaded only where there
+is a pointer to hover with, WebGL to draw with, and no request for reduced
+motion. Nothing on the page depends on it arriving.
 
 ## What I kept
 

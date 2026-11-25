@@ -7,26 +7,37 @@ import CornerNodes from "../components/CornerNodes.astro";
 import RotatingWord from "../components/RotatingWord";
 import EmptyState from "../components/EmptyState.astro";
 import Schema from "../components/Schema.astro";
-import ServiceCard from "../components/ServiceCard.astro";
-import ServicePair from "../components/ServicePair.astro";
+import SkillCard from "../components/SkillCard.astro";
+import SkillPair from "../components/SkillPair.astro";
+import AiLoop from "../components/AiLoop.astro";
+import ExperiencePlate from "../components/ExperiencePlate.astro";
+import OpenToWork from "../components/OpenToWork.astro";
 import WorkStack from "../components/WorkStack.astro";
 import ArrowIcon from "../components/ArrowIcon.astro";
 import { getCollection } from "astro:content";
 import { personSchema, websiteSchema } from "../lib/schema";
-import { services } from "../lib/services";
+import { skills } from "../lib/skills";
 
-const bySlug = (slug: string) => services.find((s) => s.slug === slug)!;
+const bySlug = (slug: string) => skills.find((s) => s.slug === slug)!;
 
 const writingEntries = (await getCollection("writing", ({ data }) => !data.draft))
   .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt)
   .slice(0, 3);
 
-const workEntries = (await getCollection("work"))
-  .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt)
-  .slice(0, 4);
+/* Entries with a `featured` position lead, in that order; the newest of the
+   rest fill whatever is left of the four. */
+const allWork = await getCollection("work");
+const workEntries = [
+  ...allWork
+    .filter((e) => e.data.featured !== undefined)
+    .sort((a, b) => a.data.featured! - b.data.featured!),
+  ...allWork
+    .filter((e) => e.data.featured === undefined)
+    .sort((a, b) => +b.data.publishedAt - +a.data.publishedAt),
+].slice(0, 4);
 /* The bento's wide cells are the first and the last. A wide card with no
    screenshots is mostly empty, so if the last entry has none and the one
-   before it does, they swap. Date order otherwise. */
+   before it does, they swap. Otherwise the order above stands. */
 if (workEntries.length === 4 && !workEntries[3].data.images?.length && workEntries[2].data.images?.length) {
   [workEntries[2], workEntries[3]] = [workEntries[3], workEntries[2]];
 }
@@ -46,7 +57,10 @@ const readingTime = (body: string | undefined) =>
 ---
 
 <Base>
-  <Schema slot="head" data={[personSchema(), websiteSchema()]} />
+  <Schema
+    slot="head"
+    data={[personSchema({ knowsAbout: skills.map((s) => s.title) }), websiteSchema()]}
+  />
   {/* ── HERO ───────────────────────────────────────────────────────── */}
   {/* The section runs the full width so the rules above and below can cross
       the whole browser; the panel inside stays on the shell measure, level
@@ -87,17 +101,17 @@ const readingTime = (body: string | undefined) =>
                   Engineer, builder, curious.
                 </p>
                 <p class="text-base sm:text-lg text-ink-dim">
-                  I build websites, internal tools and automation for small
-                  businesses in Ireland.
+                  I build web platforms end to end, run the servers they live
+                  on, and work with AI tooling every day.
                 </p>
               </div>
 
               <div class="flex flex-wrap items-baseline gap-x-8 gap-y-3 lift lift-3">
                 <a
-                  href="/services/"
+                  href="/cv/"
                   class="link group inline-flex items-baseline gap-2 text-base sm:text-lg text-ink"
                 >
-                  Work with me
+                  View CV
                   <span aria-hidden="true" class="text-accent transition-transform group-hover:translate-x-1">→</span>
                 </a>
                 <a
@@ -108,6 +122,8 @@ const readingTime = (body: string | undefined) =>
                   <span aria-hidden="true">→</span>
                 </a>
               </div>
+
+              <OpenToWork detail class="lift lift-4" />
             </div>
           </div>
         </div>
@@ -127,45 +143,60 @@ const readingTime = (body: string | undefined) =>
   <FramedSection class="mt-3 sm:mt-4" minHeight="0">
     <div class="flex flex-col gap-24 sm:gap-32 py-20 sm:py-28">
 
-      {/* ── Services ─────────────────────────────────────────────────── */}
+      {/* ── What I do ────────────────────────────────────────────────── */}
       <div data-reveal>
-        <SectionHeader eyebrow="Services">
-          What I can <RotatingWord client:visible words={["build", "fix", "deploy", "automate", "host"]} /> for you<span class="text-accent">.</span>
+        <SectionHeader>
+          I can <RotatingWord client:visible words={["build", "fix", "ship", "automate", "run"]} /> that<span class="text-accent">.</span>
         </SectionHeader>
 
-        {/* A plate of six services in five cells, four kinds: the lead offer
-            sideways across two thirds, the cheapest way in as an inverted
-            plate beside it, two standard cards, and a paired cell holding the
-            two tiers of hand-it-to-a-machine. The wide cell sits left on the
-            first row and right on the second. Cells draw their own bottom and
-            right edge; the container supplies the top and left, so the box
-            closes at any column count. */}
+        {/* A plate of six skills in five cells, four kinds: the main one
+            sideways across two thirds, the one to notice as an inverted plate
+            beside it, two standard cards, and a paired cell holding the two
+            that happen after launch. The wide cell sits left on the first row
+            and right on the second. Cells draw their own bottom and right
+            edge; the container supplies the top and left, so the box closes
+            at any column count. */}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 border-t border-l border-rule">
-          <ServiceCard service={bySlug("website")} variant="lead" />
-          <ServiceCard service={bySlug("audit")} variant="start" />
-          <ServiceCard service={bySlug("app")} />
-          <ServiceCard service={bySlug("hosting")} />
-          <ServicePair
-            services={[bySlug("automation"), bySlug("ai")]}
-            label="Two ways to hand work to a machine"
-          />
+          <SkillCard skill={bySlug("app")} variant="lead" />
+          <SkillCard skill={bySlug("ai")} variant="highlight" />
+          <SkillCard skill={bySlug("website")} />
+          <SkillCard skill={bySlug("audit")} />
+          <SkillPair skills={[bySlug("automation"), bySlug("hosting")]} />
+        </div>
+        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+          <a href="/skills/" class="link text-ink-dim">All six, in detail <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+      {/* ── Working with AI ──────────────────────────────────────────────
+          Its own block, not just a card in the plate: it is the question
+          every hiring conversation gets to now, so it gets a straight answer
+          and a method, drawn in the order the method runs. */}
+      <div data-reveal>
+        <SectionHeader>
+          The agent types. I read every line<span class="text-accent">.</span>
+        </SectionHeader>
+
+        <AiLoop />
+
+        <div class="mt-6 font-mono text-xs uppercase tracking-widest">
+          <a href="/skills/#ai" class="link text-ink-dim">How I use it, in detail <span aria-hidden="true">→</span></a>
         </div>
       </div>
 
       {/* ── Selected work ────────────────────────────────────────────── */}
       <div data-reveal>
-        <SectionHeader eyebrow="Selected work" title="Things I've built." />
+        <SectionHeader title="Things I've built." />
 
         {workEntries.length === 0 ? (
           <EmptyState
-            label="In progress"
             message="Case studies are being written up. In the meantime, reach out and I'll send recent samples."
             ctaHref="/contact/"
             ctaLabel="Get in touch"
           />
         ) : (
           <>
-            {/* Bento on the same three columns as the services plate: two
+            {/* Bento on the same three columns as the skills plate: two
                 thirds then one third, and the next row the other way round.
                 Unlike the plate these are separate cards with air between
                 them, each carrying its own border — so the joints belong to
@@ -208,14 +239,6 @@ const readingTime = (body: string | undefined) =>
                       ]}
                     >
                     <div class="flex flex-col gap-2">
-                      <span
-                        class:list={[
-                          "font-mono text-[10px] uppercase tracking-[0.18em]",
-                          filled ? "text-white" : "text-ink-faint",
-                        ]}
-                      >
-                        {entry.data.category}
-                      </span>
                       <h3
                         class:list={[
                           "font-semibold tracking-tight leading-snug m-0",
@@ -274,13 +297,18 @@ const readingTime = (body: string | undefined) =>
         )}
       </div>
 
+      {/* ── Experience ───────────────────────────────────────────────── */}
+      <div data-reveal>
+        <SectionHeader title="Where I've done it." />
+        <ExperiencePlate />
+      </div>
+
       {/* ── Writing ──────────────────────────────────────────────────── */}
       <div data-reveal>
-        <SectionHeader eyebrow="Recent writing" title="Notes from the keyboard." />
+        <SectionHeader title="Notes from the keyboard." />
 
         {writingEntries.length === 0 ? (
           <EmptyState
-            label="Coming soon"
             message="First posts are in the drafts folder. Notes on web, infra, and the things I build will land here."
             ctaHref="/writing/"
             ctaLabel="The writing page"
@@ -343,7 +371,6 @@ const readingTime = (body: string | undefined) =>
                     ))}
                     {rest.length < 2 && (
                       <div data-reveal style="--reveal-delay:0.24s" class="flex flex-1 flex-col justify-end gap-2 p-6">
-                        <span class="font-mono text-[13px] text-ink-faint">Next up</span>
                         <p class="text-sm text-ink-dim leading-relaxed m-0">
                           More notes are in the drafts folder. The feed will have them first.
                         </p>
@@ -366,7 +393,6 @@ const readingTime = (body: string | undefined) =>
 
       {/* ── Now ──────────────────────────────────────────────────────── */}
       <div data-reveal>
-        <div class="eyebrow mb-3">Now</div>
         <p class="text-[clamp(1.5rem,3.5vw,1.875rem)] font-medium tracking-tight leading-snug max-w-3xl">
           A day job, a few side projects, and a long list I never quite get to.
         </p>
@@ -382,16 +408,18 @@ const readingTime = (body: string | undefined) =>
             Say hi<span class="text-accent">.</span>
           </h2>
           <p class="text-ink-dim max-w-md">
-            Got a project? <a href="/start/" class="ilink">Send a brief</a> and
-            you'll have an answer on cost and timing. Anything else, the
-            <a href="/contact/" class="ilink">contact form</a> is two fields and a message.
+            Hiring, or building something you want a hand with?{" "}
+            <a href="/cv/" class="ilink">The CV</a> is the short version of me,
+            and the <a href="/contact/" class="ilink">contact form</a> is two
+            fields and a message.
           </p>
+          <OpenToWork class="mt-2" />
         </div>
         <a
-          href="/start/"
+          href="/contact/"
           class="inline-flex items-center gap-3 self-start sm:self-end shrink-0 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
         >
-          Start a project
+          Get in touch
           <span aria-hidden="true">→</span>
         </a>
       </div>

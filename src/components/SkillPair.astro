@@ -1,50 +1,46 @@
 ---
 /**
- * Two services that are one family in two tiers, in one cell of the homepage
- * plate.
+ * Two skills that belong to one stage of the work, in one cell of the
+ * homepage plate.
  *
- * Automation and AI are the same promise at two depths: the first handles the
- * steps you can write down, the second the ones you cannot. Putting them in
+ * Automation and infrastructure are both what happens after something ships:
+ * one keeps the data moving, the other keeps the lights on. Putting them in
  * one cell says that, and it gives the plate a third kind of cell: two
- * sideways rows under a grouping line, each its own link, with a hairline
- * between them. The footers are inline here rather than plates, the index
- * register rather than the card register, which is the variance the row
- * needs against the two standard cards beside it.
+ * sideways rows, each its own link, with a hairline between them. The footers
+ * are inline here rather than plates, the index register rather than the card
+ * register, which is the variance the row needs against the two standard
+ * cards beside it.
  */
 import CornerNodes from "./CornerNodes.astro";
-import ServiceSketch from "./ServiceSketch.astro";
-import { priceFormat, type Service } from "../lib/services";
+import SkillSketch from "./SkillSketch.astro";
+import type { Skill } from "../lib/skills";
 
 interface Props {
-  services: [Service, Service];
-  /** Why these two share a cell, in a short line. */
-  label: string;
+  skills: [Skill, Skill];
 }
-const { services, label } = Astro.props;
+const { skills } = Astro.props;
 ---
 
 <div class="relative flex flex-col border-b border-r border-rule md:col-span-2 lg:col-span-6">
   <CornerNodes />
-  <p class="font-mono text-[13px] text-ink-faint m-0 px-6 pt-5">{label}</p>
-
-  {services.map((service, i) => (
+  {skills.map((skill, i) => (
     <a
-      href={`/services/#${service.slug}`}
+      href={`/skills/#${skill.slug}`}
       class:list={[
         "group grid flex-1 gap-5 p-6 sm:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] sm:items-center transition-colors duration-300 hover:bg-paper-2",
         i > 0 && "border-t border-rule",
       ]}
     >
-      <ServiceSketch slug={service.slug} class="opacity-90 transition-opacity group-hover:opacity-100" />
+      <SkillSketch slug={skill.slug} class="opacity-90 transition-opacity group-hover:opacity-100" />
       <div data-copy class="flex flex-col gap-1.5">
-        <h3 class="text-lg font-semibold tracking-tight leading-snug m-0">{service.title}</h3>
-        <p class="text-sm text-ink-dim leading-relaxed m-0">{service.tagline}</p>
+        <h3 class="text-lg font-semibold tracking-tight leading-snug m-0">{skill.title}</h3>
+        <p class="text-sm text-ink-dim leading-relaxed m-0">{skill.tagline}</p>
         <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
           <span class="font-mono text-xs leading-none text-ink-dim whitespace-nowrap">
-            From {priceFormat.format(service.from)}{service.fromUnit}
+            {skill.tools.slice(0, 3).join(" · ")}
           </span>
           <span class="inline-flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap text-accent-text transition-colors duration-300 group-hover:text-ink">
-            What's included
+            In detail
             <svg
               width="16"
               height="16"

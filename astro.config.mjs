@@ -8,6 +8,12 @@ export default defineConfig({
   site: "https://dylancollins.me",
   output: "static",
   trailingSlash: "always",
+  // The freelance pages are gone. Anyone arriving on an old link lands on the
+  // page that replaced it instead of a 404.
+  redirects: {
+    "/services": "/skills/",
+    "/start": "/contact/",
+  },
   prefetch: {
     // Hover-prefetch internal links; subsequent navs feel instant without
     // the bandwidth cost of prefetching everything.
@@ -30,9 +36,9 @@ export default defineConfig({
       filter: (page) =>
         !page.includes("/og/") && !page.includes("/og.png") && !page.includes("/demos/"),
       serialize: (item) => {
-        // Bump home + the commercial pages; lower /contact, /now, /privacy.
+        // Bump home + the pages a hiring manager reads; lower /contact, /now, /privacy.
         if (item.url === "https://dylancollins.me/") item.priority = 1.0;
-        else if (item.url.endsWith("/services/") || item.url.endsWith("/start/")) item.priority = 0.9;
+        else if (item.url.endsWith("/cv/") || item.url.endsWith("/skills/")) item.priority = 0.9;
         else if (item.url.endsWith("/writing/") || item.url.endsWith("/work/")) item.priority = 0.9;
         else if (item.url.includes("/writing/")) item.priority = 0.8;
         else if (item.url.includes("/work/")) item.priority = 0.8;

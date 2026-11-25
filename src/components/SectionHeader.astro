@@ -1,24 +1,22 @@
 ---
 /**
- * Section heading: eyebrow over title.
+ * Section heading.
  *
- * Flush left rather than indented. The old version reserved a two-column
- * gutter for a marginalia number; now that the section rails define where
- * content starts, the copy begins on that line and nothing sits outside it.
+ * Just the heading. It used to carry a small tracked-out label above it, and
+ * the label only ever said what the heading was about to say.
+ *
+ * Flush left rather than indented: the section rails define where content
+ * starts, so the copy begins on that line and nothing sits outside it.
  */
 interface Props {
-  num?: string;
-  eyebrow?: string;
   /** Plain-text title. Omit and use the default slot for markup. */
   title?: string;
   class?: string;
 }
-const { num, eyebrow, title, class: className = "" } = Astro.props;
+const { title, class: className = "" } = Astro.props;
 ---
 
-<header class:list={["flex flex-col gap-3 mb-10", className]}>
-  {num && <div class="section-num">{num}</div>}
-  {eyebrow && <div class="eyebrow">{eyebrow}</div>}
+<header class:list={["mb-10", className]}>
   <h2 class="text-[clamp(1.75rem,5vw,3rem)] font-bold tracking-tight leading-[0.95] m-0">
     <slot>{title}</slot>
   </h2>

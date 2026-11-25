@@ -1,0 +1,256 @@
+---
+/**
+ * The CV, as a page.
+ *
+ * Everything on it comes from lib/cv.ts. The same page is the PDF: the print
+ * rules in global.css turn it into black on white with the site chrome
+ * removed, and `npm run cv:pdf` prints it to public/dylan-collins-cv.pdf with
+ * a headless browser. The download button only renders when that file is
+ * there, so a build never links to a PDF that does not exist.
+ *
+ * Two headers on purpose. On screen the page opens like every other page on
+ * the site, with its name. On paper nobody needs to be told it is a CV: the
+ * sheet opens with the person and how to reach them instead.
+ */
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Schema from "../../components/Schema.astro";
+import OpenToWork from "../../components/OpenToWork.astro";
+import { profilePageSchema, breadcrumbSchema } from "../../lib/schema";
+import { site } from "../../lib/site";
+import { cv } from "../../lib/cv";
+
+const hasPdf = existsSync(join(process.cwd(), "public", cv.pdf));
+
+const updatedDate = new Date(cv.updated);
+const updated = new Intl.DateTimeFormat("en-IE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}).format(updatedDate);
+
+/* The projects worth a line on a CV are the ones already chosen for the
+   homepage, in the same order. */
+const projects = (await getCollection("work"))
+  .filter((e) => e.data.featured !== undefined)
+  .sort((a, b) => a.data.featured! - b.data.featured!);
+
+/* "Present" reads better lower case mid-sentence; a month keeps its capital. */
+const span = (start: string, end: string) => `${start} to ${end === "Present" ? "present" : end}`;
+
+const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+const pageUrl = new URL("/cv/", site.url).toString();
+const pageTitle = "CV · Dylan Collins";
+const pageDesc =
+  "Software engineer in Ireland: experience, education and skills, on one page. Laravel, React, TypeScript, PostgreSQL, Linux, and AI tooling.";
+
+const button =
+  "inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors";
+---
+
+<Base title={pageTitle} description={pageDesc} ogType="profile">
+  <Schema
+    slot="head"
+    data={[
+      profilePageSchema({ url: pageUrl, name: pageTitle, description: pageDesc, modified: updatedDate }),
+      breadcrumbSchema([
+        { name: "Home", url: site.url + "/" },
+        { name: "CV", url: pageUrl },
+      ]),
+    ]}
+  />
+
+  <section class="cv mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24 print:p-0">
+    {/* ── ON PAPER ─────────────────────────────────────────────────── */}
+    <header class="hidden print:block mb-6">
+      <p class="text-[2.25rem] font-black tracking-tight leading-none m-0">{site.author.name}</p>
+      <p class="text-base mt-2 mb-0">{site.author.role} · {site.author.country}</p>
+      <p class="font-mono text-[11px] mt-2 mb-0">
+        {site.author.email} · {bare(site.url)} · {bare(site.social.github)} · {bare(site.social.linkedin)}
+      </p>
+    </header>
+
+    {/* ── ON SCREEN ────────────────────────────────────────────────── */}
+    <header class="flex flex-col gap-6 mb-16 lg:mb-24 print:hidden">
+      <div class="flex flex-col gap-5">
+        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
+          CV<span class="text-accent">.</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-ink max-w-2xl lift lift-2">
+          {site.author.name}. {site.author.role}, {site.author.country}.
+        </p>
+        <ul class="flex flex-wrap gap-x-8 gap-y-2 list-none m-0 p-0 text-base lift lift-3">
+          <li><a href={`mailto:${site.author.email}`} class="ilink" rel="author">{site.author.email}</a></li>
+          <li><a href={site.social.github} target="_blank" rel="me noopener" class="ilink">GitHub</a></li>
+          <li><a href={site.social.linkedin} target="_blank" rel="me noopener" class="ilink">LinkedIn</a></li>
+        </ul>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-4 lift lift-3">
+          {hasPdf && (
+            <a href={cv.pdf} download class={button}>
+              Download PDF
+              <span aria-hidden="true">↓</span>
+            </a>
+          )}
+          {/* Hidden until the script is there to make it do something. */}
+          <button type="button" id="cv-print" hidden class={hasPdf ? "text-[13px] font-medium text-ink-dim transition-colors duration-300 hover:text-ink" : button}>
+            Print this page
+          </button>
+          <OpenToWork detail />
+        </div>
+        <p class="font-mono text-[13px] text-ink-faint m-0 lift lift-4">
+          Last updated <time datetime={cv.updated}>{updated}</time>
+        </p>
+      </div>
+    </header>
+
+    {/* ── PROFILE ──────────────────────────────────────────────────── */}
+    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
+      <h2 class="section-heading">Profile</h2>
+      <div class="flex flex-col gap-4 max-w-3xl print:max-w-none print:gap-2">
+        {cv.summary.map((p, i) => (
+          <p class:list={["m-0 leading-relaxed", i === 0 ? "text-lg text-ink print:text-[13px]" : "text-base text-ink-dim print:text-[13px]"]}>{p}</p>
+        ))}
+      </div>
+    </div>
+
+    <div class="rule my-12 lg:my-16 print:my-5"></div>
+
+    {/* ── EXPERIENCE ───────────────────────────────────────────────── */}
+    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
+      <h2 class="section-heading">Experience</h2>
+      <ol class="list-none m-0 p-0 flex flex-col gap-12 print:gap-5">
+        {cv.experience.map((role) => (
+          <li class="flex flex-col gap-3 break-inside-avoid print:gap-1.5">
+            <div class="flex flex-col gap-1 print:flex-row print:flex-wrap print:items-baseline print:justify-between print:gap-x-6">
+              <h3 class="text-[clamp(1.25rem,3vw,1.625rem)] font-semibold tracking-tight leading-snug m-0 print:text-[15px]">
+                {role.title}
+                <span class="font-normal text-ink-dim">
+                  {" · "}
+                  {role.orgUrl ? (
+                    <a href={role.orgUrl} target="_blank" rel="noopener" class="hover:text-accent-text transition-colors">{role.org}</a>
+                  ) : (
+                    role.org
+                  )}
+                </span>
+              </h3>
+              <span class="font-mono text-[13px] text-ink-faint print:text-[11px]">
+                {span(role.start, role.end)} · {role.location}
+              </span>
+            </div>
+
+            {role.summary && (
+              <p class="text-base text-ink-dim leading-relaxed max-w-3xl m-0 print:max-w-none print:text-[12px]">{role.summary}</p>
+            )}
+
+            <ul class="list-none m-0 p-0 flex flex-col gap-2 max-w-3xl print:max-w-none print:gap-1">
+              {role.points.map((point) => (
+                <li class="flex gap-3 text-base leading-relaxed print:text-[12px] print:leading-snug">
+                  {/* One line tall and centred, so the mark sits on the first
+                      line's middle at any size or leading, screen or paper. */}
+                  <span class="flex h-[1lh] shrink-0 items-center" aria-hidden="true">
+                    <span class="h-1 w-1 bg-accent"></span>
+                  </span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p class="font-mono text-xs text-ink-faint m-0 mt-1 print:text-[10px] print:mt-0">{role.stack.join(" · ")}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="rule my-12 lg:my-16 print:my-5"></div>
+
+    {/* ── EDUCATION ────────────────────────────────────────────────── */}
+    <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
+      <h2 class="section-heading">Education</h2>
+      <ul class="list-none m-0 p-0 flex flex-col gap-8">
+        {cv.education.map((study) => (
+          <li class="flex flex-col gap-2 print:gap-1">
+            <div class="flex flex-col gap-1 print:flex-row print:flex-wrap print:items-baseline print:justify-between print:gap-x-6">
+              <h3 class="text-[clamp(1.25rem,3vw,1.625rem)] font-semibold tracking-tight leading-snug m-0 print:text-[15px]">
+                {study.award}
+                <span class="font-normal text-ink-dim"> · {study.school}</span>
+              </h3>
+              <span class="font-mono text-[13px] text-ink-faint print:text-[11px]">
+                {span(study.start, study.end)}
+              </span>
+            </div>
+            {study.detail && (
+              <p class="text-base text-ink-dim leading-relaxed max-w-3xl m-0 print:max-w-none print:text-[12px]">{study.detail}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="rule my-12 lg:my-16 print:my-5"></div>
+
+    {/* ── SKILLS ───────────────────────────────────────────────────── */}
+    <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
+      <h2 class="section-heading">Skills</h2>
+      <div class="flex flex-col gap-6">
+        <dl class="m-0 grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-x-6 gap-y-3 max-w-3xl print:max-w-none print:gap-y-1.5">
+          {cv.skills.map((set) => (
+            <>
+              <dt class="text-base font-semibold tracking-tight text-ink-dim print:text-[12px]">{set.group}</dt>
+              <dd class="m-0 text-base leading-relaxed print:text-[12px]">{set.items.join(" · ")}</dd>
+            </>
+          ))}
+        </dl>
+        <p class="font-mono text-xs uppercase tracking-widest m-0 print:hidden">
+          <a href="/skills/" class="link text-ink-dim">What these look like in practice <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+    </div>
+
+    {projects.length > 0 && (
+      <>
+        <div class="rule my-12 lg:my-16 print:my-5"></div>
+
+        {/* ── PROJECTS ─────────────────────────────────────────────── */}
+        <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
+          <h2 class="section-heading">Projects</h2>
+          <ul class="list-none m-0 p-0 flex flex-col gap-5 max-w-3xl print:max-w-none print:gap-2">
+            {projects.map((entry) => (
+              <li class="flex flex-col gap-1">
+                <h3 class="text-lg font-semibold tracking-tight m-0 print:text-[13px]">
+                  <a href={`/work/${entry.id}/`} class="hover:text-accent-text transition-colors">{entry.data.title}</a>
+                  <span class="hidden print:inline font-mono font-normal text-[10px] text-ink-faint">
+                    {" "}{bare(site.url)}/work/{entry.id}
+                  </span>
+                </h3>
+                <p class="text-base text-ink-dim leading-relaxed m-0 print:text-[12px]">{entry.data.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>
+    )}
+
+    <div class="rule my-12 lg:my-16 print:my-5"></div>
+
+    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
+      <h2 class="section-heading">References</h2>
+      <p class="text-base text-ink-dim m-0 print:text-[12px]">
+        Available on request.{" "}
+        <span class="print:hidden">
+          The quickest way to ask is <a href="/contact/" class="ilink">the contact page</a>.
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <script>
+    const print = document.getElementById("cv-print");
+    if (print) {
+      print.hidden = false;
+      print.addEventListener("click", () => window.print());
+    }
+  </script>
+</Base>

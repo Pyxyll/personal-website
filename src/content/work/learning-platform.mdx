@@ -1,16 +1,42 @@
 ---
 title: "Learning platform"
-summary: "A learning platform I build and maintain at my day job: keeping the current one running while a replacement takes shape. Details under wraps."
+summary: "The platform behind my day job, rebuilt from scratch: students, teachers, mentors, partner companies and staff, all served by one Laravel and React application."
 category: "Web apps"
 role: "Software developer"
 publishedAt: 2026-03-01
-stack: ["WordPress", "PHP"]
+featured: 2
+stack: ["Laravel", "React", "TypeScript", "PostgreSQL"]
 ---
+
+## What it is
+
+The platform behind The B!G Idea, an education programme run in secondary
+schools across Ireland. Students work in teams on a project, teachers run the
+class, and mentors from industry give feedback along the way. The platform is
+where all of that happens.
+
+I inherited it as a WordPress site that had been extended well past what
+WordPress is for. I kept that running and built its replacement alongside it:
+one application with five kinds of user, each with their own dashboard,
+navigation and permissions.
+
+## The parts I would point at
+
+**Students do not have accounts.** A team shares a link. The platform holds far
+less personal data about under-18s than a conventional login would need, and
+that one decision reshaped nearly every permission check in the product.
+
+**One design system, five audiences.** Every role gets its own colour, and every
+screen still comes from the same component library. A fix to one dialog is a
+fix to all of them.
+
+**Email as a system.** Typed triggers, batching, and sends anchored to dates in
+the programme calendar, with an admin view that answers "what fires when this
+date moves?"
+
+**I run it too.** Deploys, CI, staging, backups, and the box it lives on.
 
 ## What I can say
 
-This is the platform behind my day job at The B!G Idea. I keep the existing
-build running while we work on its replacement.
-
-The specifics stay off the public web for now, so this entry is deliberately
-light on detail.
+It belongs to my employer, so this entry stays at the level of a CV. I am happy
+to go deeper in conversation.

@@ -1,0 +1,70 @@
+---
+title: "Shot In The Dark"
+summary: "Renames screenshots by asking a local vision model what is in them. It runs on my own GPU through Ollama, so nothing leaves the machine."
+category: "AI"
+role: "Solo"
+publishedAt: 2026-08-15
+stack: ["Ollama", "Bash", "Local vision models"]
+repo: "https://github.com/Pyxyll/shot-in-the-dark"
+---
+
+## Why it exists
+
+Screenshots named by timestamp are useless a week later. This watches the
+screenshot directory, asks a local model what the image contains, and renames
+the file to something you can search for.
+
+```
+Screenshot from 2026-08-15 13-45-02.png
+  ->  2026-08-15 13-45 zen - youtube-underrated-movies.png
+      2026-08-15 14-02 kitty - rust-borrow-checker-error.png
+      2026-08-15 15-30 steam - cyberpunk-settings-menu.png
+```
+
+The descriptions are not always right. That is fine, and it is the point of
+the name. A vague hint about what is in the file beats a timestamp.
+
+## How it works
+
+1. `inotifywait` watches the screenshot directory for new files.
+2. The focused window is read from the compositor, which gives an app name and
+   a window title.
+3. The image is resized to 1024px and sent to a vision model running in Ollama,
+   with the window title passed along as a hint.
+4. The file is renamed to the date, the app and a short description.
+
+If a game is focused, the model pass is skipped. The file is named from the
+window title straight away and queued for a second pass later, because loading
+a model into VRAM in the middle of a game is how you find out what your frame
+rate used to be. If anything fails, the file still gets a window-title name. It
+is never left with the one it started with.
+
+## Picking the model
+
+I compared two models over 100 real screenshots before settling on a default.
+
+`gemma3:4b` answers in about six tokens with no reasoning pass. It is fast,
+cheap, never fails, and gets the gist right while often getting the specifics
+wrong. It called a NieR:Automata wallpaper "2077 protagonist" and a Linux
+desktop "macOS".
+
+`qwen3-vl:4b` is noticeably more accurate, GUI-heavy screenshots included, but
+it always reasons first and there was no switching that off. Give it too small
+a token budget and the whole budget goes on thinking, and the answer comes back
+empty. So the script escalates the budget and retries, and because that model is
+not deterministic on dense screenshots, the retries double as second attempts.
+
+The 8B version was worse on both counts: slower, and more likely to return
+nothing, because more reasoning means more chances to run out of budget.
+
+The default is the small, fast, slightly wrong one. This was built for a machine
+where being light mattered more than being right, and the better model is one
+environment variable away.
+
+## Why it is on this page
+
+It is a small tool, written as shell that calls `jq` and `curl`, and there are
+certainly more refined versions of the idea around. I include it because it is
+the honest shape of most useful AI work: one narrow job, a model small enough
+to run where the data already is, a measured choice between options, and a
+fallback for every way it can fail.

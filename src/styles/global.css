@@ -107,7 +107,7 @@
   }
 }
 
-/* ── Service marks in 3D (scripts/marks3d.ts) ───────────────────────────
+/* ── Skill marks in 3D (scripts/marks3d.ts) ───────────────────────────
    The canvas covers the card behind its content: the card isolates its own
    stacking context (set by the script) so a negative z-index sits above the
    card's background and below everything in it. Labels are pinned by
@@ -151,21 +151,17 @@
   background-color: color-mix(in srgb, var(--scrim, var(--color-paper-2)) 82%, transparent);
 }
 
-/* Brutalist-lite display number, used as the marginalia "001 / 002 / 003" */
-.section-num {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  color: var(--color-ink-faint);
-  text-transform: uppercase;
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
-  color: var(--color-ink-dim);
-  text-transform: uppercase;
+/* A section's heading on the inner pages. One step under the page title and
+   one over anything inside the section, set above its content and flush with
+   it. These pages used to name their sections with a small tracked-out label
+   in a left-hand gutter, which read as decoration rather than as a heading. */
+.section-heading {
+  font-family: var(--font-sans);
+  font-size: clamp(1.625rem, 3.4vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-ink);
 }
 
 /* Animated underline for inline links (writing entries, nav) */
@@ -395,4 +391,53 @@
   border: 0;
   border-top: 1px solid var(--color-rule);
   margin: 2.5em 0;
+}
+
+/* ── Print ────────────────────────────────────────────────────────────────
+   The CV is the page people print, and the PDF is that page printed by a
+   headless browser, so paper is a real target and not an afterthought. The
+   tokens flip to ink on white, the site's chrome goes, and anything that
+   waits for a scroll or an animation to show itself is simply shown. */
+@media print {
+  :root {
+    /* The pages declare a dark colour scheme, and a browser paints the sheet's
+       margins in that scheme's canvas colour: without this the CV prints as a
+       white column inside a black frame. */
+    color-scheme: only light;
+    --color-paper: #ffffff;
+    --color-paper-2: #ffffff;
+    --color-ink: #111111;
+    --color-ink-dim: #333333;
+    --color-ink-faint: #595959;
+    --color-rule: #d4d4d4;
+    --color-rule-strong: #8a8a8a;
+    /* The brand pink is too light for small type on white; the deep one holds. */
+    --color-accent: #b31d4f;
+    --color-accent-text: #b31d4f;
+  }
+  @page {
+    margin: 13mm 14mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  #site-nav,
+  body > footer,
+  body > a[href="#main"] {
+    display: none !important;
+  }
+  .lift {
+    animation: none !important;
+  }
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  /* On paper a section heading only has to be larger than what is under it. */
+  .section-heading {
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
 }

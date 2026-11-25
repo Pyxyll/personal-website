@@ -48,8 +48,7 @@ const year = entry.data.publishedAt.getFullYear();
   />
   <article class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
     <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-12 lg:mb-20">
-      <div class="hidden lg:block lg:col-span-2 section-num lift">Work / {year}</div>
-      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
+      <div class="col-span-12 lg:col-span-10 lg:col-start-3 flex flex-col gap-5">
         <h1 class="display text-[clamp(2.25rem,6vw,3.75rem)] lift lift-1">{entry.data.title}</h1>
         <p class="text-lg sm:text-xl text-ink-dim max-w-2xl lift lift-2">{entry.data.summary}</p>
         <div class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">

@@ -1,5 +1,5 @@
 /**
- * The motion behind the service schematics (components/ServiceSketch.astro).
+ * The motion behind the skill schematics (components/SkillSketch.astro).
  *
  * Motion here is editorial pacing, not spectacle. One easing curve throughout
  * (0.4, 0, 0.2, 1), durations of a few hundred milliseconds, nothing that
@@ -9,7 +9,7 @@
  *
  *   entry   the drawing draws itself. Stroked parts draw on in document
  *           order, then the flows, fills and labels fade in. About 1.5s.
- *   loop    the service's verb, as a flow: a dot along a line, a node
+ *   loop    the skill's verb, as a flow: a dot along a line, a node
  *           changing colour, a value measured out. Then a rest of a few
  *           seconds, because six of these share the homepage and the
  *           difference between alive and busy is mostly how often anything
@@ -21,7 +21,7 @@
  *
  * The script also keeps the monoline honest: a ResizeObserver sets --sw on
  * each figure to the user-unit stroke width that renders as 1.5px, so the
- * line weight is the same on the homepage plate and the services page.
+ * line weight is the same on the homepage plate and the skills page.
  *
  * ── Conventions ──────────────────────────────────────────────────────────
  *   - Parts the loops touch carry data-el. The entry works from the palette

@@ -1,0 +1,97 @@
+---
+/**
+ * How I work with an agent, drawn as the pipeline it is.
+ *
+ * A plate on the same hairlines and corner joints as the skills plate above
+ * it. Three cells are a sequence and are drawn as one: a rail runs across the
+ * top of them, a node per step, dashed between because dashed is what this
+ * site draws anything that flows in. The last node is the pink one. It is the
+ * review, and the review is the part that matters.
+ *
+ * The fourth cell is not a step, so the rail stops short of it. It is the
+ * other half of the subject, a model as the feature rather than the typist,
+ * and it is a link because it has something to show.
+ *
+ * Nothing here moves. The six marks above already do, and a second thing
+ * looping beside them would make the page busy rather than alive.
+ */
+import CornerNodes from "./CornerNodes.astro";
+import ArrowIcon from "./ArrowIcon.astro";
+import { aiLoop, aiBuild } from "../lib/skills";
+
+const last = aiLoop.length - 1;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-l border-rule">
+  {aiLoop.map((step, i) => (
+    <div class="relative flex flex-col gap-2 border-b border-r border-rule p-6">
+      <CornerNodes />
+
+      {/* The rail. Pulled out through the cell's padding so the line meets
+          the next cell's line at the border and reads as one run. Only where
+          the three sit side by side; stacked, the order is the order. */}
+      <div class="rail hidden lg:flex" aria-hidden="true">
+        <span class:list={["lead", i > 0 && "dash"]}></span>
+        <span class:list={["node", i === last && "is-gate"]}></span>
+        {i < last && <span class="run dash"></span>}
+      </div>
+
+      <h3 class="text-lg font-semibold tracking-tight leading-snug m-0">{step.title}</h3>
+      <p class="text-sm text-ink-dim leading-relaxed m-0">{step.body}</p>
+    </div>
+  ))}
+
+  <a
+    href={aiBuild.proof.href}
+    class="group relative flex flex-col gap-2 border-b border-r border-rule p-6 transition-colors duration-300 hover:bg-paper-2 md:col-span-1"
+  >
+    <CornerNodes />
+    {/* Holds the rail's height so the four titles share a line. */}
+    <div class="rail hidden lg:flex" aria-hidden="true"></div>
+
+    <h3 class="text-lg font-semibold tracking-tight leading-snug m-0">{aiBuild.title}</h3>
+    <p class="text-sm text-ink-dim leading-relaxed m-0">{aiBuild.body}</p>
+
+    <span class="mt-auto pt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text transition-colors duration-300 group-hover:text-ink">
+      {aiBuild.proof.label}
+      <ArrowIcon />
+    </span>
+  </a>
+</div>
+
+<style>
+  .rail {
+    align-items: center;
+    height: 9px;
+    margin: 0 -1.5rem 1.25rem; /* out through the cell's p-6 */
+  }
+  /* From the cell's left border to the node. Empty on the first cell, where
+     nothing arrives. */
+  .lead {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5px;
+  }
+  .run {
+    flex: 1;
+    height: 1.5px;
+  }
+  /* The marks' own flow: a 1.5px line broken 4 on, 4 off. */
+  .dash {
+    background-image: linear-gradient(to right, var(--color-rule-strong) 4px, transparent 4px);
+    background-size: 8px 1.5px;
+    background-repeat: repeat-x;
+  }
+  .node {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-ink-dim);
+    background: var(--color-paper);
+  }
+  .node.is-gate {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+  }
+</style>

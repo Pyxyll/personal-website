@@ -1,0 +1,122 @@
+---
+/**
+ * One cell of the homepage skills plate.
+ *
+ * Three variants, and each one says something true about the skill it holds
+ * rather than decorating it:
+ *
+ *   lead       the main thing I do. Spans the width of two peers and turns
+ *              sideways: the drawing on the left, the copy on the right.
+ *   highlight  the one to notice. An inversion plate: light on a dark page.
+ *              The drawing flips its ink to match and the pink stays pink.
+ *   peer       the rest of the range. The standard card.
+ *
+ * Every variant ends in the same footer plate: a hairline plate with a 10px
+ * radius holding the tools in inline mono and the action in accent text with
+ * a 1.5px arrow. Hover shifts colour only: the plate's hairline deepens and
+ * the action lifts to ink. Nothing moves.
+ */
+import CornerNodes from "./CornerNodes.astro";
+import SkillSketch from "./SkillSketch.astro";
+import type { Skill } from "../lib/skills";
+
+interface Props {
+  skill: Skill;
+  variant?: "lead" | "highlight" | "peer";
+}
+const { skill, variant = "peer" } = Astro.props;
+const inverted = variant === "highlight";
+
+const span = {
+  lead: "md:col-span-2 lg:col-span-8",
+  highlight: "md:col-span-2 lg:col-span-4",
+  peer: "lg:col-span-3",
+}[variant];
+
+/* How the drawing and the copy sit. The lead is sideways from small screens
+   up. The highlight is sideways only at tablet width, where it spans the
+   plate, and stacks again beside the lead on large screens. Peers stack. */
+const layout = {
+  lead: "sm:grid-cols-2 sm:items-center",
+  highlight: "md:grid-cols-2 md:items-center lg:grid-cols-1 lg:items-start",
+  peer: "",
+}[variant];
+
+/* The light plate uses the brief's own ink and greys. They are literal here
+   rather than tokens because nothing else on the site is light. */
+const tone = inverted
+  ? {
+      card: "bg-[#fafafa] text-[#262626] hover:bg-white [--scrim:#ffffff]",
+      dim: "text-[#595959]",
+      plate: "border-[#dcdcdc] group-hover:border-[#262626]",
+      tools: "text-[#595959]",
+      action: "text-accent group-hover:text-[#262626]",
+    }
+  : {
+      card: "hover:bg-paper-2",
+      dim: "text-ink-dim",
+      plate: "border-rule group-hover:border-rule-strong",
+      tools: "text-ink-dim",
+      action: "text-accent-text group-hover:text-ink",
+    };
+---
+
+<a
+  href={`/skills/#${skill.slug}`}
+  class:list={[
+    "group @container relative flex flex-col gap-5 border-b border-r border-rule p-6 transition-colors duration-300",
+    span,
+    tone.card,
+  ]}
+>
+  <CornerNodes />
+
+  <div class:list={["grid flex-1 gap-6", layout]}>
+    <SkillSketch
+      slug={skill.slug}
+      inverted={inverted}
+      class="opacity-90 transition-opacity group-hover:opacity-100"
+    />
+    <div data-copy class:list={["flex flex-col", variant === "lead" ? "gap-3" : "gap-1.5"]}>
+      <h3 class:list={["font-semibold tracking-tight leading-snug m-0", variant === "lead" ? "text-xl" : "text-lg"]}>
+        {skill.title}
+      </h3>
+      <p class:list={["text-sm leading-relaxed m-0", tone.dim]}>{skill.tagline}</p>
+      {variant === "lead" && (
+        <p class:list={["hidden lg:block text-sm leading-relaxed m-0 max-w-[36ch]", tone.dim]}>{skill.body}</p>
+      )}
+    </div>
+  </div>
+
+  <div
+    class:list={[
+      /* Stacked by default; a row once the card's content box is 16.5rem.
+         Container queries measure the content box, so that is the card width
+         less its 48px of padding. Narrow cards name two tools and the wide
+         ones three; the line truncates rather than wraps if it still runs
+         out of room, so the plate is the same height on every card. */
+      "relative mt-auto flex flex-col items-start gap-2 @[16.5rem]:flex-row @[16.5rem]:items-center @[16.5rem]:justify-between @[16.5rem]:gap-3 border rounded-[10px] px-3 py-3 transition-colors duration-300",
+      tone.plate,
+    ]}
+  >
+    <span class:list={["min-w-0 max-w-full truncate font-mono text-xs leading-none", tone.tools]}>
+      {skill.tools.slice(0, variant === "peer" ? 2 : 3).join(" · ")}
+    </span>
+    <span class:list={["inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-300", tone.action]}>
+      In detail
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 8h10M9 4l4 4-4 4" />
+      </svg>
+    </span>
+  </div>
+</a>
