@@ -3,21 +3,31 @@
  * The CV, as a page.
  *
  * Everything on it comes from lib/cv.ts. The same page is the PDF: the print
- * rules in global.css turn it into black on white with the site chrome
- * removed, and `npm run cv:pdf` prints it to public/dylan-collins-cv.pdf with
- * a headless browser. The download button only renders when that file is
- * there, so a build never links to a PDF that does not exist.
+ * rules below and in global.css turn it into black on white with the site's
+ * chrome gone (the hero, the rails, the plates' boxes, the timeline), and
+ * `npm run cv:pdf` prints it to public/dylan-collins-cv.pdf with a headless
+ * browser. The download button only renders when that file is there, so a
+ * build never links to a PDF that does not exist.
  *
- * Two headers on purpose. On screen the page opens like every other page on
- * the site, with its name. On paper nobody needs to be told it is a CV: the
- * sheet opens with the person and how to reach them instead.
+ * On screen it is built like the homepage: the page hero, then sections with
+ * their headings over hairline plates, the experience opening on the same
+ * timeline (runner and all). On paper nobody needs to be told it is a CV:
+ * the sheet opens with the person and how to reach them instead.
  */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import ExperiencePlate from "../../components/ExperiencePlate.astro";
 import OpenToWork from "../../components/OpenToWork.astro";
+import SocialIcon from "../../components/SocialIcon.astro";
+import TechIcon from "../../components/TechIcon.astro";
+import AwardIcon from "../../components/AwardIcon.astro";
+import ArrowIcon from "../../components/ArrowIcon.astro";
 import { profilePageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 import { cv } from "../../lib/cv";
@@ -25,30 +35,24 @@ import { cv } from "../../lib/cv";
 const hasPdf = existsSync(join(process.cwd(), "public", cv.pdf));
 
 const updatedDate = new Date(cv.updated);
-const updated = new Intl.DateTimeFormat("en-IE", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-}).format(updatedDate);
+const updated = new Intl.DateTimeFormat("en-IE", { year: "numeric", month: "long", day: "numeric" }).format(updatedDate);
 
-/* The projects worth a line on a CV are the ones already chosen for the
-   homepage, in the same order. */
+/* The projects worth a line on a CV are the ones chosen for the homepage, in
+   the same order. */
 const projects = (await getCollection("work"))
   .filter((e) => e.data.featured !== undefined)
   .sort((a, b) => a.data.featured! - b.data.featured!);
 
 /* "Present" reads better lower case mid-sentence; a month keeps its capital. */
 const span = (start: string, end: string) => `${start} to ${end === "Present" ? "present" : end}`;
-
+/* On paper, the range every CV parser expects. */
+const range = (start: string, end: string) => `${start} – ${end}`;
 const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 const pageUrl = new URL("/cv/", site.url).toString();
 const pageTitle = "CV · Dylan Collins";
 const pageDesc =
   "Full-stack developer in Ireland: experience, education and skills, on one page. Laravel, React, TypeScript, PostgreSQL, Linux, and AI tooling.";
-
-const button =
-  "inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors";
 ---
 
 <Base title={pageTitle} description={pageDesc} ogType="profile">
@@ -63,188 +67,236 @@ const button =
     ]}
   />
 
-  <section class="cv mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24 print:p-0">
-    {/* ── ON PAPER ─────────────────────────────────────────────────── */}
-    <header class="hidden print:block mb-6">
-      <p class="text-[2.25rem] font-black tracking-tight leading-none m-0">{site.author.name}</p>
-      <p class="text-base mt-2 mb-0">{site.author.role} · {site.author.country}</p>
-      <p class="font-mono text-[11px] mt-2 mb-0">
-        {site.author.email} · {bare(site.url)} · {bare(site.social.github)} · {bare(site.social.linkedin)}
-      </p>
-    </header>
+  <PageHero title="CV">
+    <p class="m-0 text-ink">{site.author.name}. {site.author.role}, {site.author.country}.</p>
+    <ul class="m-0 p-0 list-none flex flex-wrap gap-x-6 gap-y-2 text-base">
+      <li><a href={`mailto:${site.author.email}`} class="ilink" rel="author">{site.author.email}</a></li>
+      <li>
+        <a href={site.social.github} target="_blank" rel="me noopener" class="inline-flex items-center gap-2 text-ink-dim hover:text-ink transition-colors">
+          <SocialIcon name="github" class="h-4 w-4" />GitHub
+        </a>
+      </li>
+      <li>
+        <a href={site.social.linkedin} target="_blank" rel="me noopener" class="inline-flex items-center gap-2 text-ink-dim hover:text-ink transition-colors">
+          <SocialIcon name="linkedin" class="h-4 w-4" />LinkedIn
+        </a>
+      </li>
+    </ul>
+    <Fragment slot="actions">
+      {hasPdf && (
+        <a href={cv.pdf} download class="btn btn-primary">
+          Download PDF
+          <svg class="icon-down" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2.75v7.5M4.75 7 8 10.25 11.25 7M3 13.25h10" />
+          </svg>
+        </a>
+      )}
+      {/* Hidden until the script is there to make it do something. */}
+      <button type="button" id="cv-print" hidden class:list={["btn", hasPdf ? "btn-secondary" : "btn-primary"]}>
+        Print
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4.5 6V2.5h7V6M4.5 11.5H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1h-1.5M4.5 9.5h7v4h-7z" />
+        </svg>
+      </button>
+    </Fragment>
+    {site.hiring.open && <OpenToWork detail slot="after" />}
+  </PageHero>
 
-    {/* ── ON SCREEN ────────────────────────────────────────────────── */}
-    <header class="flex flex-col gap-6 mb-16 lg:mb-24 print:hidden">
-      <div class="flex flex-col gap-5">
-        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
-          CV<span class="text-accent">.</span>
-        </h1>
-        <p class="text-lg sm:text-xl text-ink max-w-2xl lift lift-2">
-          {site.author.name}. {site.author.role}, {site.author.country}.
-        </p>
-        <ul class="flex flex-wrap gap-x-8 gap-y-2 list-none m-0 p-0 text-base lift lift-3">
-          <li><a href={`mailto:${site.author.email}`} class="ilink" rel="author">{site.author.email}</a></li>
-          <li><a href={site.social.github} target="_blank" rel="me noopener" class="ilink">GitHub</a></li>
-          <li><a href={site.social.linkedin} target="_blank" rel="me noopener" class="ilink">LinkedIn</a></li>
-        </ul>
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-4 lift lift-3">
-          {hasPdf && (
-            <a href={cv.pdf} download class={button}>
-              Download PDF
-              <span aria-hidden="true">↓</span>
-            </a>
-          )}
-          {/* Hidden until the script is there to make it do something. */}
-          <button type="button" id="cv-print" hidden class={hasPdf ? "text-[13px] font-medium text-ink-dim transition-colors duration-300 hover:text-ink" : button}>
-            Print this page
-          </button>
-          <OpenToWork detail />
-        </div>
-        <p class="font-mono text-[13px] text-ink-faint m-0 lift lift-4">
-          Last updated <time datetime={cv.updated}>{updated}</time>
-        </p>
-      </div>
-    </header>
+  {/* ── ON PAPER ─────────────────────────────────────────────────────── */}
+  {/* For applicant tracking systems as much as people: the name as plain
+      text, a headline that names the stack, and every contact in full. The
+      empty #cv-phone is filled only when a private copy is printed for
+      sending to employers; the public PDF has no number. */}
+  <header class="cv-paper hidden print:block mb-5">
+    <p class="text-[2rem] font-black tracking-tight leading-none m-0">{site.author.name}</p>
+    <p class="text-[13px] mt-2 mb-0">{site.author.role} · Laravel, React, TypeScript, PostgreSQL · {site.author.country}</p>
+    <p class="text-[11px] mt-1.5 mb-0">
+      <a href={`mailto:${site.author.email}`}>{site.author.email}</a><span id="cv-phone"></span> · <a href={site.url}>{bare(site.url)}</a> · <a href={site.social.linkedin}>{bare(site.social.linkedin)}</a> · <a href={site.social.github}>{bare(site.social.github)}</a>
+    </p>
+  </header>
 
-    {/* ── PROFILE ──────────────────────────────────────────────────── */}
-    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
-      <h2 class="section-heading">Profile</h2>
-      <div class="flex flex-col gap-4 max-w-3xl print:max-w-none print:gap-2">
-        {cv.summary.map((p, i) => (
-          <p class:list={["m-0 leading-relaxed", i === 0 ? "text-lg text-ink print:text-[13px]" : "text-base text-ink-dim print:text-[13px]"]}>{p}</p>
-        ))}
-      </div>
-    </div>
+  <FramedSection class="cv mt-3 sm:mt-4" minHeight="0">
+    <div class="flex flex-col gap-24 sm:gap-32 py-20 sm:py-28 print:gap-5 print:py-0">
 
-    <div class="rule my-12 lg:my-16 print:my-5"></div>
-
-    {/* ── EXPERIENCE ───────────────────────────────────────────────── */}
-    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
-      <h2 class="section-heading">Experience</h2>
-      <ol class="list-none m-0 p-0 flex flex-col gap-12 print:gap-5">
-        {cv.experience.map((role) => (
-          <li class="flex flex-col gap-3 break-inside-avoid print:gap-1.5">
-            <div class="flex flex-col gap-1 print:flex-row print:flex-wrap print:items-baseline print:justify-between print:gap-x-6">
-              <h3 class="text-[clamp(1.25rem,3vw,1.625rem)] font-semibold tracking-tight leading-snug m-0 print:text-[15px]">
-                {role.title}
-                <span class="font-normal text-ink-dim">
-                  {" · "}
-                  {role.orgUrl ? (
-                    <a href={role.orgUrl} target="_blank" rel="noopener" class="hover:text-accent-text transition-colors">{role.org}</a>
-                  ) : (
-                    role.org
-                  )}
-                </span>
-              </h3>
-              <span class="font-mono text-[13px] text-ink-faint print:text-[11px]">
-                {span(role.start, role.end)} · {role.location}
-              </span>
-            </div>
-
-            {role.summary && (
-              <p class="text-base text-ink-dim leading-relaxed max-w-3xl m-0 print:max-w-none print:text-[12px]">{role.summary}</p>
-            )}
-
-            <ul class="list-none m-0 p-0 flex flex-col gap-2 max-w-3xl print:max-w-none print:gap-1">
-              {role.points.map((point) => (
-                <li class="flex gap-3 text-base leading-relaxed print:text-[12px] print:leading-snug">
-                  {/* One line tall and centred, so the mark sits on the first
-                      line's middle at any size or leading, screen or paper. */}
-                  <span class="flex h-[1lh] shrink-0 items-center" aria-hidden="true">
-                    <span class="h-1 w-1 bg-accent"></span>
-                  </span>
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-
-            <p class="font-mono text-xs text-ink-faint m-0 mt-1 print:text-[10px] print:mt-0">{role.stack.join(" · ")}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-
-    <div class="rule my-12 lg:my-16 print:my-5"></div>
-
-    {/* ── EDUCATION ────────────────────────────────────────────────── */}
-    <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
-      <h2 class="section-heading">Education</h2>
-      <ul class="list-none m-0 p-0 flex flex-col gap-8">
-        {cv.education.map((study) => (
-          <li class="flex flex-col gap-2 print:gap-1">
-            <div class="flex flex-col gap-1 print:flex-row print:flex-wrap print:items-baseline print:justify-between print:gap-x-6">
-              <h3 class="text-[clamp(1.25rem,3vw,1.625rem)] font-semibold tracking-tight leading-snug m-0 print:text-[15px]">
-                {study.award}
-                <span class="font-normal text-ink-dim"> · {study.school}</span>
-              </h3>
-              <span class="font-mono text-[13px] text-ink-faint print:text-[11px]">
-                {span(study.start, study.end)}
-              </span>
-            </div>
-            {study.detail && (
-              <p class="text-base text-ink-dim leading-relaxed max-w-3xl m-0 print:max-w-none print:text-[12px]">{study.detail}</p>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div class="rule my-12 lg:my-16 print:my-5"></div>
-
-    {/* ── SKILLS ───────────────────────────────────────────────────── */}
-    <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
-      <h2 class="section-heading">Skills</h2>
-      <div class="flex flex-col gap-6">
-        <dl class="m-0 grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-x-6 gap-y-3 max-w-3xl print:max-w-none print:gap-y-1.5">
-          {cv.skills.map((set) => (
-            <>
-              <dt class="text-base font-semibold tracking-tight text-ink-dim print:text-[12px]">{set.group}</dt>
-              <dd class="m-0 text-base leading-relaxed print:text-[12px]">{set.items.join(" · ")}</dd>
-            </>
+      {/* ── PROFILE ──────────────────────────────────────────────────── */}
+      <section data-reveal>
+        <SectionHeader title="Profile." />
+        <div class="plate rounded-[6px] border border-rule p-6 sm:p-8 lg:p-10 flex flex-col gap-4">
+          {cv.summary.map((p, i) => (
+            <p class:list={["m-0 leading-relaxed max-w-4xl", i === 0 ? "text-lg sm:text-xl text-ink" : "text-base text-ink-dim"]}>{p}</p>
           ))}
-        </dl>
-        <p class="font-mono text-xs uppercase tracking-widest m-0 print:hidden">
-          <a href="/skills/" class="link text-ink-dim">What these look like in practice <span aria-hidden="true">→</span></a>
-        </p>
-      </div>
-    </div>
+        </div>
+      </section>
 
-    {projects.length > 0 && (
-      <>
-        <div class="rule my-12 lg:my-16 print:my-5"></div>
-
-        {/* ── PROJECTS ─────────────────────────────────────────────── */}
-        <div class="flex flex-col gap-6 print:gap-2 break-inside-avoid" data-reveal>
-          <h2 class="section-heading">Projects</h2>
-          <ul class="list-none m-0 p-0 flex flex-col gap-5 max-w-3xl print:max-w-none print:gap-2">
-            {projects.map((entry) => (
-              <li class="flex flex-col gap-1">
-                <h3 class="text-lg font-semibold tracking-tight m-0 print:text-[13px]">
-                  <a href={`/work/${entry.id}/`} class="hover:text-accent-text transition-colors">{entry.data.title}</a>
-                  <span class="hidden print:inline font-mono font-normal text-[10px] text-ink-faint">
-                    {" "}{bare(site.url)}/work/{entry.id}
+      {/* ── EXPERIENCE ───────────────────────────────────────────────── */}
+      <section data-reveal>
+        <SectionHeader title="Experience." />
+        {/* From tablet up, where it has room for the chart; on a phone it
+            would only list the roles the plates below already list. */}
+        <div class="mb-3 hidden md:block print:hidden">
+          <ExperiencePlate actions={false} />
+        </div>
+        <ol class="list-none m-0 p-0 flex flex-col gap-3 print:gap-4">
+          {cv.experience.map((role) => (
+            <li class="plate rounded-[6px] border border-rule p-6 sm:p-8 flex flex-col gap-4 break-inside-avoid">
+              <div class="flex flex-col gap-1.5 md:flex-row md:items-baseline md:justify-between md:gap-6 print:flex-row print:items-baseline print:justify-between print:gap-6">
+                <h3 class="role-title m-0 text-[clamp(1.25rem,2.4vw,1.5rem)] font-semibold tracking-tight leading-snug">
+                  {role.title}
+                  <span class="font-normal text-ink-dim">
+                    {" · "}
+                    {role.orgUrl ? (
+                      <a href={role.orgUrl} target="_blank" rel="noopener" class="hover:text-ink transition-colors">{role.org}</a>
+                    ) : (
+                      role.org
+                    )}
                   </span>
                 </h3>
-                <p class="text-base text-ink-dim leading-relaxed m-0 print:text-[12px]">{entry.data.summary}</p>
+                <span class="role-when shrink-0 font-mono text-xs text-ink-faint">
+                  <span class="print:hidden">{span(role.start, role.end)}</span><span class="hidden print:inline">{range(role.start, role.end)}</span> · {role.location}
+                </span>
+              </div>
+
+              {role.summary && <p class="m-0 text-base leading-relaxed text-ink-dim max-w-4xl">{role.summary}</p>}
+
+              <ul class="points m-0 p-0 list-none flex flex-col gap-2 max-w-4xl">
+                {role.points.map((point) => (
+                  <li class="flex gap-3 text-base leading-relaxed">
+                    {/* One line tall and centred, so the mark sits on the
+                        first line's middle at any size, screen or paper. */}
+                    <span class="flex h-[1lh] shrink-0 items-center" aria-hidden="true"><span class="h-[5px] w-[5px] bg-accent"></span></span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <ul class="chips flex flex-wrap gap-1.5 m-0 p-0 list-none" aria-label="Stack">
+                {role.stack.map((tech) => <li class="chip"><TechIcon name={tech} />{tech}</li>)}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ── AWARDS ───────────────────────────────────────────────────── */}
+      {cv.awards.length > 0 && (
+        <section class="break-inside-avoid" data-reveal>
+          <SectionHeader title="Awards." />
+          <ul class="plate list-none m-0 p-0 rounded-[6px] border border-rule">
+            {cv.awards.map((award, i) => (
+              <li class:list={["plate-row flex flex-col gap-2 px-6 sm:px-8 py-6", i > 0 && "border-t border-rule"]}>
+                <div class="flex flex-col gap-1.5 md:flex-row md:items-baseline md:justify-between md:gap-6 print:flex-row print:items-baseline print:justify-between print:gap-6">
+                  <h3 class="role-title m-0 flex items-center gap-3 text-[clamp(1.125rem,2vw,1.25rem)] font-semibold tracking-tight leading-snug">
+                    <AwardIcon class="h-5 w-5 shrink-0 text-accent-text print:hidden" />
+                    <span>{award.name}<span class="font-normal text-ink-dim"> · {award.event}</span></span>
+                  </h3>
+                  <span class="role-when shrink-0 font-mono text-xs text-ink-faint">{award.year}</span>
+                </div>
+                <p class="m-0 text-base leading-relaxed text-ink-dim">
+                  {award.detail}
+                  {award.href && (
+                    <span class="print:hidden"> <a href={award.href} class="ilink">The case study</a>.</span>
+                  )}
+                </p>
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {/* ── EDUCATION ────────────────────────────────────────────────── */}
+      <section class="break-inside-avoid" data-reveal>
+        <SectionHeader title="Education." />
+        <ul class="plate list-none m-0 p-0 rounded-[6px] border border-rule">
+          {cv.education.map((study, i) => (
+            <li class:list={["plate-row flex flex-col gap-2 px-6 sm:px-8 py-6", i > 0 && "border-t border-rule"]}>
+              <div class="flex flex-col gap-1.5 md:flex-row md:items-baseline md:justify-between md:gap-6 print:flex-row print:items-baseline print:justify-between print:gap-6">
+                <h3 class="role-title m-0 text-[clamp(1.125rem,2vw,1.25rem)] font-semibold tracking-tight leading-snug">
+                  {study.award}<span class="font-normal text-ink-dim"> · {study.school}</span>
+                </h3>
+                <span class="role-when shrink-0 font-mono text-xs text-ink-faint"><span class="print:hidden">{span(study.start, study.end)}</span><span class="hidden print:inline">{range(study.start, study.end)}</span></span>
+              </div>
+              {study.detail && <p class="m-0 text-base leading-relaxed text-ink-dim max-w-4xl">{study.detail}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── SKILLS ───────────────────────────────────────────────────── */}
+      <section class="break-inside-avoid" data-reveal>
+        <SectionHeader title="Skills." />
+        <div class="plate rounded-[6px] border border-rule">
+          <dl class="m-0">
+            {cv.skills.map((set, i) => (
+              <div class:list={["plate-row skills-row grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-2.5 px-6 sm:px-8 py-5", i > 0 && "border-t border-rule"]}>
+                <dt class="md:col-span-3 lg:col-span-2 text-[13px] text-ink-faint md:pt-1">{set.group}</dt>
+                <dd class="md:col-span-9 lg:col-span-10 m-0">
+                  <ul class="chips flex flex-wrap gap-1.5 m-0 p-0 list-none">
+                    {set.items.map((item) => <li class="chip"><TechIcon name={item} />{item}</li>)}
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div class="flex justify-end border-t border-rule px-6 sm:px-8 py-5 print:hidden">
+            <a href="/skills/" class="btn btn-secondary btn-sm">What these look like in practice<ArrowIcon /></a>
+          </div>
         </div>
-      </>
-    )}
+      </section>
 
-    <div class="rule my-12 lg:my-16 print:my-5"></div>
+      {/* ── PROJECTS ─────────────────────────────────────────────────── */}
+      {projects.length > 0 && (
+        <section class="break-inside-avoid" data-reveal>
+          <SectionHeader title="Projects." />
+          <ul class="plate list-none m-0 p-0 rounded-[6px] border border-rule">
+            {projects.map((entry, i) => (
+              <li class:list={["plate-row", i > 0 && "border-t border-rule"]}>
+                <a href={new URL(`/work/${entry.id}/`, site.url).toString()} class="project-row group grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-1.5 px-6 sm:px-8 py-5 transition-colors hover:bg-paper-2">
+                  <h3 class="role-title md:col-span-4 lg:col-span-3 m-0 text-lg font-semibold tracking-tight leading-snug">{entry.data.title}</h3>
+                  <p class="md:col-span-7 lg:col-span-8 m-0 text-base leading-relaxed text-ink-dim print:hidden">{entry.data.summary}</p>
+                  <p class="hidden print:block m-0">{entry.data.tagline ?? entry.data.summary}</p>
+                  <span aria-hidden="true" class="hidden md:flex md:col-span-1 justify-end pt-1 text-accent transition-transform group-hover:translate-x-1 print:hidden">
+                    <ArrowIcon />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-    <div class="flex flex-col gap-6 print:gap-2" data-reveal>
-      <h2 class="section-heading">References</h2>
-      <p class="text-base text-ink-dim m-0 print:text-[12px]">
-        Available on request.{" "}
-        <span class="print:hidden">
-          The quickest way to ask is <a href="/contact/" class="ilink">the contact page</a>.
-        </span>
-      </p>
+      {/* ── INTERESTS ────────────────────────────────────────────────── */}
+      {cv.interests && (
+        <section class="break-inside-avoid" data-reveal>
+          <SectionHeader title="Interests." />
+          <div class="plate rounded-[6px] border border-rule">
+            <p class="plate-row m-0 px-6 sm:px-8 py-6 text-base text-ink-dim">{cv.interests}</p>
+          </div>
+        </section>
+      )}
+
+      {/* ── REFERENCES ───────────────────────────────────────────────── */}
+      <section class="break-inside-avoid" data-reveal>
+        <SectionHeader title="References." />
+        <div class="plate rounded-[6px] border border-rule">
+          <p class="plate-row m-0 px-6 sm:px-8 py-6 text-base text-ink-dim">
+            Available on request.
+            <span class="print:hidden"> The quickest way to ask is <a href="/contact/" class="ilink">the contact page</a>.</span>
+          </p>
+          <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule px-6 sm:px-8 py-5 print:hidden">
+            <span class="font-mono text-xs text-ink-faint">Updated <time datetime={cv.updated}>{updated}</time></span>
+            {hasPdf && (
+              <a href={cv.pdf} download class="btn btn-secondary btn-sm">
+                Download PDF
+                <svg class="icon-down" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 2.75v7.5M4.75 7 8 10.25 11.25 7M3 13.25h10" />
+                </svg>
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
-  </section>
+  </FramedSection>
 
   <script>
     const print = document.getElementById("cv-print");
@@ -254,3 +306,123 @@ const button =
     }
   </script>
 </Base>
+
+<style>
+  /* On paper the plates lose their boxes and the sections close up: the
+     sheet is type on white, the way a CV should be. Chips become a plain
+     run of names. */
+  @media print {
+    :global(.cv) :global(.framed-rail) {
+      display: none;
+    }
+    /* Flush with the paper header: no gutters inside the section. */
+    :global(.cv) > :global(div:last-child) {
+      max-width: none;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    :global(.cv) :global(header) {
+      margin-bottom: 0.35rem;
+    }
+    :global(.cv) :global(header h2) {
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+    /* Plain headings on paper ("Experience", not "Experience."), so a parser
+       matches them to the section it knows. */
+    :global(.cv) :global(header h2 .text-accent) {
+      display: none;
+    }
+    /* Skills as "Group: items", one line each, as a CV reads. */
+    :global(.cv) .skills-row {
+      display: grid;
+      grid-template-columns: 7rem minmax(0, 1fr);
+      align-items: baseline;
+      gap: 0 0.75rem;
+      padding: 0.05rem 0;
+    }
+    :global(.cv) .skills-row dt {
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    /* The screen layout's column spans would otherwise come along, and which
+       of them apply depends on the size of the window printed from: from a
+       wide one the label spans the row and pushes its list underneath. On
+       paper it is always label, then list. */
+    :global(.cv) .skills-row > dt,
+    :global(.cv) .skills-row > dd {
+      grid-column: auto;
+    }
+    :global(.cv) .plate {
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      gap: 0.35rem;
+    }
+    :global(.cv) .plate-row {
+      border: 0;
+      padding: 0.2rem 0;
+    }
+    :global(.cv) .plate-row > a {
+      padding: 0;
+    }
+    :global(.cv) li.plate {
+      gap: 0.3rem;
+    }
+    :global(.cv) .role-title {
+      font-size: 14px;
+    }
+    :global(.cv) .role-when {
+      font-size: 10px;
+    }
+    :global(.cv) p,
+    :global(.cv) li,
+    :global(.cv) dd {
+      font-size: 12px;
+    }
+    :global(.cv) .points {
+      gap: 0.1rem;
+    }
+    :global(.cv) .points li {
+      line-height: 1.4;
+    }
+    :global(.cv) dt {
+      padding-top: 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    :global(.cv) .chips {
+      gap: 0;
+    }
+    :global(.cv) .chips :global(.chip) {
+      height: auto;
+      padding: 0;
+      gap: 0;
+      background: none;
+      box-shadow: none;
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--color-ink-faint);
+    }
+    /* A comma list, which is what a parser splits on. The comma goes after
+       a word, so a line that wraps does not start with one. */
+    :global(.cv) .chips :global(.chip:not(:last-child))::after {
+      content: ",";
+      margin-right: 0.3rem;
+    }
+    /* A project to a line: its name, then its one-line description. */
+    :global(.cv) .project-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 0.5rem;
+      align-items: baseline;
+    }
+    :global(.cv) .project-row h3::after {
+      content: " ·";
+      font-weight: 400;
+    }
+    :global(.cv) .chips :global(.chip-icon) {
+      display: none;
+    }
+  }
+</style>

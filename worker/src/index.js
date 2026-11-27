@@ -1,4 +1,6 @@
-// Contact-form mailer. A single edge handler: validates the submission, then
+// Contact-form mailer, and (at /mcp) an MCP server: see mcp.js.
+//
+// The form: a single edge handler that validates the submission, then
 // calls Resend's REST API twice: a notification to the site owner (with the
 // sender's address as Reply-To, so replying in your inbox goes straight back
 // to them) and a confirmation to the sender. No framework, no SDK, no deps.
@@ -15,18 +17,14 @@
 //   FROM_CONFIRM    (var)     "Name <addr@send.dylancollins.me>" for the confirmation
 //   RATE_LIMITER    (binding, optional) Cloudflare Rate Limiting binding
 
+import { ACCENT, MONO, SANS, escapeHtml, headerSafe, sendEmail } from "./shared.js";
+import { handleMcp } from "./mcp.js";
+
 const ALLOWED_ORIGINS = [
   "https://dylancollins.me",
   "https://www.dylancollins.me",
   "http://localhost:4321",
 ];
-
-const RESEND_ENDPOINT = "https://api.resend.com/emails";
-
-// Email-safe font stacks (web fonts don't load in mail clients).
-const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-const MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
-const ACCENT = "#da2862";
 
 const cors = (origin) => {
   const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -44,24 +42,6 @@ const json = (body, status, headers) =>
     status,
     headers: { "Content-Type": "application/json", ...headers },
   });
-
-const escapeHtml = (s) =>
-  String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-
-// Anything interpolated into a mail header has to lose its control characters,
-// or a newline in a name turns one header into two. Resend takes JSON rather
-// than raw SMTP, so this is belt-and-braces, but the cost is a regex.
-const headerSafe = (s) =>
-  String(s)
-    // C0 controls and DEL only. Punctuation is left alone, because names
-    // have hyphens and apostrophes in them.
-    .replace(/[\u0000-\u001F\u007F]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 
 // Qualifying fields from the /start/ brief, in the order they read best in the
 // email. Anything not in this list is ignored, so a new form field can't smuggle
@@ -103,20 +83,11 @@ const briefHtml = (rows) =>
       </table>`
     : "";
 
-async function sendEmail(env, payload) {
-  const res = await fetch(RESEND_ENDPOINT, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  return res;
-}
-
 export default {
   async fetch(request, env, ctx) {
+    // /mcp is the MCP server; everything else is the contact form, as before.
+    if (new URL(request.url).pathname.replace(/\/+$/, "") === "/mcp") return handleMcp(request, env, ctx);
+
     const origin = request.headers.get("Origin") ?? "";
     const headers = cors(origin);
 

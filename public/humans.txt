@@ -1,7 +1,7 @@
 /* TEAM */
   Built and maintained by: Dylan Collins
   Site: https://dylancollins.me
-  Email: hello@dylancollins.me
+  Email: dylan@dylancollins.me
   GitHub: pyxyll
   From: Ireland
 

@@ -151,19 +151,6 @@
   background-color: color-mix(in srgb, var(--scrim, var(--color-paper-2)) 82%, transparent);
 }
 
-/* A section's heading on the inner pages. One step under the page title and
-   one over anything inside the section, set above its content and flush with
-   it. These pages used to name their sections with a small tracked-out label
-   in a left-hand gutter, which read as decoration rather than as a heading. */
-.section-heading {
-  font-family: var(--font-sans);
-  font-size: clamp(1.625rem, 3.4vw, 2.125rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--color-ink);
-}
-
 /* Animated underline for standalone links (footer, nav) */
 .link {
   position: relative;
@@ -261,6 +248,15 @@
 .btn:hover svg.icon-up {
   transform: translateY(-2px);
 }
+/* An icon leading the label (GitHub, LinkedIn) sits a touch out to the left
+   instead, and stays put on hover: only trailing arrows travel. */
+.btn > .icon-lead {
+  margin-right: 0;
+  margin-left: -0.25rem;
+}
+.btn:hover > .icon-lead {
+  transform: none;
+}
 
 /* A section's way onward ("All work"): plain sans in sentence case with the
    site's arrow, the voice of the rest of the copy rather than a mono label. */
@@ -331,12 +327,15 @@
   box-shadow: none;
   color: #0a0a0a;
 }
-.chip-dot {
-  width: 0.375rem;
-  height: 0.375rem;
+/* The award's rosette in a badge (components/AwardIcon.astro): chip-sized,
+   in the brand pink, a hair heavier than the text so it reads at 14px. */
+.chip-award-icon {
+  width: 0.875rem;
+  height: 0.875rem;
   flex-shrink: 0;
-  border-radius: 9999px;
-  background: var(--color-accent);
+  margin-left: -0.125rem;
+  color: var(--color-accent);
+  stroke-width: 2.25;
 }
 
 /* The other work cards: quieter relatives of the lead. A faint lift at the
@@ -617,6 +616,44 @@
   color: var(--color-ink);
   font-weight: 600;
 }
+/* Lists in prose take the CV's mark: a small pink square on the first
+   line's middle, not a browser bullet. */
+.prose ul {
+  list-style: none;
+  padding-left: 0;
+}
+.prose ul > li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+.prose ul > li + li {
+  margin-top: 0.4em;
+}
+.prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.125rem;
+  top: calc(0.85em - 2px);
+  width: 5px;
+  height: 5px;
+  background: var(--color-accent);
+}
+/* Long-form pages (case studies, privacy): headings in the homepage's
+   section voice, a size down, closing on the brand full stop. */
+.prose-case h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin-top: 2.25em;
+}
+.prose-case h2:first-child {
+  margin-top: 0;
+}
+.prose-case h2::after {
+  content: ".";
+  color: var(--color-accent);
+}
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.9em;
@@ -679,7 +716,10 @@
     --color-accent: #b31d4f;
     --color-accent-text: #b31d4f;
   }
+  /* A4: the paper size an employer in Ireland or the UK prints on, and the
+     one a CV is expected in. */
   @page {
+    size: A4;
     margin: 13mm 14mm;
   }
   html,
@@ -698,10 +738,5 @@
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
-  }
-  /* On paper a section heading only has to be larger than what is under it. */
-  .section-heading {
-    font-size: 17px;
-    letter-spacing: -0.01em;
   }
 }

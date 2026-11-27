@@ -1,0 +1,53 @@
+---
+/**
+ * The way to all the work, as the last card of a grid of work cards.
+ *
+ * Dashed and without the cards' lifted surface (.work-all in global.css), so
+ * it never reads as one more project; it names a few of the ones you have
+ * not seen, so it says what is behind it. The homepage's work grid ends on
+ * it, and so does the "more work" at the foot of a case study.
+ */
+import ArrowIcon from "./ArrowIcon.astro";
+import CategoryIcon from "./CategoryIcon.astro";
+
+interface Props {
+  /** How many pieces of work there are in all. */
+  total: number;
+  /** Titles of some you have not seen; the first three are named. */
+  titles: string[];
+  index?: number;
+  class?: string;
+}
+const { total, titles, index = 0, class: className = "" } = Astro.props;
+---
+
+<a
+  href="/work/"
+  data-reveal
+  style={`--reveal-delay:${index * 0.12}s`}
+  class:list={[
+    "work-card work-all group flex flex-col gap-8 md:min-h-[18rem] rounded-[6px] border p-7 sm:p-8 transition-colors hover:bg-paper-2",
+    className,
+  ]}
+>
+  <div class="flex flex-col items-start gap-3">
+    <div class="self-stretch flex items-center justify-between gap-4 mb-3 text-[13px] text-ink-faint">
+      <span class="flex items-center gap-2">
+        <CategoryIcon category="Archive" class="work-card-mark" />
+        Archive
+      </span>
+      <span class="font-mono text-xs">{total} in all</span>
+    </div>
+    <h3 class="font-semibold tracking-tight leading-snug m-0 text-[clamp(1.25rem,2.2vw,1.5rem)]">All projects</h3>
+    <ul class="m-0 p-0 list-none text-sm leading-relaxed text-ink-dim">
+      {titles.slice(0, 3).map((t) => <li>{t}</li>)}
+      {titles.length > 3 && <li class="text-ink-faint">and {titles.length - 3} more</li>}
+    </ul>
+  </div>
+  <div class="mt-auto flex items-end justify-between gap-4">
+    <span class="text-sm font-medium text-ink">Browse all {total}</span>
+    <span aria-hidden="true" class="flex items-center shrink-0 h-[1.625rem] text-accent transition-transform group-hover:translate-x-1">
+      <ArrowIcon />
+    </span>
+  </div>
+</a>

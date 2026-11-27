@@ -1,0 +1,178 @@
+---
+/**
+ * A piece of work as a card: the homepage's work grid, /work/, and the "more
+ * work" at the foot of a case study all draw their cards with this.
+ *
+ * Two kinds. The lead is the brand pink, with the award badge where there is
+ * one, its figures beside the copy, and the dot field behind it that a
+ * pointer turns into a plane of dots and then terrain (scripts/workDots.ts).
+ * Every other card is a quiet surface: what kind of thing and when, the
+ * title, a line, the stack as chips, and a halftone in two layers that
+ * slides against itself under the pointer. Both end in the site's arrow.
+ *
+ * Text on the lead is solid white throughout: on the brand pink only pure
+ * white clears 4.5:1, so the hierarchy inside it comes from size and weight
+ * rather than tone. Entries with screenshots carry a stack that fans on
+ * hover: beside the copy on a wide card, above it on a narrow one.
+ */
+import type { CollectionEntry } from "astro:content";
+import ArrowIcon from "./ArrowIcon.astro";
+import CategoryIcon from "./CategoryIcon.astro";
+import AwardIcon from "./AwardIcon.astro";
+import TechIcon from "./TechIcon.astro";
+import WorkStack from "./WorkStack.astro";
+import { cv } from "../lib/cv";
+
+interface Props {
+  entry: CollectionEntry<"work">;
+  /** The pink lead card. */
+  lead?: boolean;
+  /** Its place in the grid, for the reveal's stagger. */
+  index?: number;
+  class?: string;
+}
+const { entry, lead = false, index = 0, class: className = "" } = Astro.props;
+
+/** The award a piece of work won, if any: matched on the award's link, so
+    lib/cv.ts stays the one place the award is written down. */
+const award = cv.awards.find((a) => a.href === `/work/${entry.id}/`);
+const images = entry.data.images ?? [];
+const stacked = images.length > 0;
+const highlights = lead && !stacked ? (entry.data.highlights ?? []) : [];
+const side = lead && (stacked || highlights.length > 0);
+const stack = entry.data.stack.slice(0, lead ? 5 : 3);
+---
+
+<a
+  href={`/work/${entry.id}/`}
+  data-reveal
+  style={`--reveal-delay:${index * 0.12}s`}
+  class:list={[
+    "group flex flex-col gap-8 md:min-h-[18rem] rounded-[6px] border p-7 sm:p-8 transition-colors",
+    lead
+      ? "work-lead bg-accent border-accent text-white hover:bg-accent-deep"
+      : "work-card border-rule hover:bg-paper-2",
+    className,
+  ]}
+>
+  {lead && <span class="work-dots" aria-hidden="true"><span class="work-dots-plane"></span></span>}
+  {stacked && !lead && <WorkStack images={images} alt={`${entry.data.title}, three views`} onAccent={lead} />}
+  <div
+    class:list={[
+      "flex flex-col gap-8",
+      side && "lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-14",
+      side && stacked && "lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-10",
+    ]}
+  >
+    <div class="flex flex-col items-start gap-3">
+      {!lead && (
+        <div class="self-stretch flex items-center justify-between gap-4 mb-3 text-[13px] text-ink-faint">
+          <span class="flex items-center gap-2">
+            <CategoryIcon category={entry.data.category} class="work-card-mark" />
+            {entry.data.category}
+          </span>
+          <time class="font-mono text-xs" datetime={entry.data.publishedAt.toISOString().split("T")[0]}>
+            {entry.data.publishedAt.getFullYear()}
+          </time>
+        </div>
+      )}
+      {award && (
+        <span class:list={["chip mb-2", lead ? "chip-award" : "text-ink"]}>
+          <AwardIcon class="chip-award-icon" />
+          {award.name}, {award.year}
+        </span>
+      )}
+      <h3
+        class:list={[
+          "font-semibold tracking-tight leading-snug m-0",
+          lead ? "text-[clamp(1.5rem,3vw,2.125rem)]" : "text-[clamp(1.25rem,2.2vw,1.5rem)]",
+        ]}
+      >
+        {entry.data.title}
+      </h3>
+      <p class:list={["leading-relaxed m-0", lead ? "text-white text-base max-w-xl" : "text-ink-dim text-sm"]}>
+        {entry.data.summary}
+      </p>
+    </div>
+    {stacked && lead && <WorkStack images={images} alt={`${entry.data.title}, three views`} onAccent={lead} />}
+    {highlights.length > 0 && (
+      <dl
+        class:list={[
+          "grid gap-x-8 gap-y-6 m-0",
+          highlights.length === 3 ? "grid-cols-3 lg:grid-cols-1 lg:pr-4" : "grid-cols-2 gap-x-10",
+        ]}
+      >
+        {highlights.map((h) => (
+          <div class="flex flex-col gap-1">
+            <dt class="order-2 text-sm">{h.label}</dt>
+            <dd class="order-1 m-0 font-semibold tracking-tight leading-none text-[clamp(2.25rem,4vw,3rem)] tabular-nums">
+              {h.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+
+  <div class="mt-auto flex items-end justify-between gap-4">
+    <ul class="flex flex-wrap gap-1.5 m-0 p-0 list-none" aria-label="Stack">
+      {stack.map((tech) => (
+        <li class:list={["chip", lead && "chip-on-accent"]}><TechIcon name={tech} />{tech}</li>
+      ))}
+    </ul>
+    <span
+      aria-hidden="true"
+      class:list={[
+        "flex items-center shrink-0 h-[1.625rem] transition-transform group-hover:translate-x-1",
+        lead ? "text-white" : "text-accent",
+      ]}
+    >
+      <ArrowIcon />
+    </span>
+  </div>
+</a>
+
+<script>
+  // The lead card's dot field in three.js (scripts/workDots.ts), loaded only
+  // where it can be used: a fine pointer that hovers, without reduced motion.
+  // Everything else keeps the CSS dots, and the other cards' halftone still.
+  const able =
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dots = document.querySelector<HTMLElement>(".work-dots");
+  if (dots && able) {
+    import("../scripts/workDots").then(({ mount }) => mount(dots)).catch(() => {});
+  }
+
+  // The other cards' halftone parallax (.work-card in global.css): the
+  // pointer's place on the card, from -0.5 to 0.5 each way, one write a frame.
+  // Back to centre on leave, as the dots fade out. Includes the homepage's
+  // archive card, which shares the class.
+  if (able) {
+    document.querySelectorAll<HTMLElement>(".work-card").forEach((card) => {
+      let frame = 0;
+      let x = 0;
+      let y = 0;
+      const write = () => {
+        frame = 0;
+        card.style.setProperty("--px", x.toFixed(3));
+        card.style.setProperty("--py", y.toFixed(3));
+      };
+      card.addEventListener(
+        "pointermove",
+        (e) => {
+          const r = card.getBoundingClientRect();
+          x = (e.clientX - r.left) / r.width - 0.5;
+          y = (e.clientY - r.top) / r.height - 0.5;
+          if (!frame) frame = requestAnimationFrame(write);
+        },
+        { passive: true },
+      );
+      card.addEventListener("pointerleave", () => {
+        x = 0;
+        y = 0;
+        if (!frame) frame = requestAnimationFrame(write);
+      });
+    });
+  }
+</script>

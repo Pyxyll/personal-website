@@ -7,6 +7,8 @@ compatibility_date = "2026-05-01"
 TO_EMAIL = "hello@dylancollins.me"
 FROM_NOTIFY = "dylancollins.me <contact@send.dylancollins.me>"
 FROM_CONFIRM = "Dylan Collins <hello@send.dylancollins.me>"
+# Where the MCP server (/mcp) reads its facts: the site's /ai.json.
+SITE_ORIGIN = "https://dylancollins.me"
 
 # Per-IP rate limit: 5 submissions per 60s. The Worker degrades gracefully if
 # this binding is removed. If `wrangler deploy` complains about the syntax on

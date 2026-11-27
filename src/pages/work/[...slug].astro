@@ -1,9 +1,29 @@
 ---
+/**
+ * A case study.
+ *
+ * Opens with the page hero: the name, the summary, and the ways out (the
+ * live site, the code). Then the write-up in a reading column, with the
+ * facts beside it in a plate that stays in view as you read: what my part
+ * was, when, what kind of thing, the award if there is one, the stack, the
+ * links. On a phone the facts come first. It ends on more work: the next
+ * two pieces in the homepage's order, and the archive card.
+ */
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
+import CornerNodes from "../../components/CornerNodes.astro";
+import WorkCard from "../../components/WorkCard.astro";
+import ArchiveCard from "../../components/ArchiveCard.astro";
+import CategoryIcon from "../../components/CategoryIcon.astro";
+import AwardIcon from "../../components/AwardIcon.astro";
+import TechIcon from "../../components/TechIcon.astro";
 import { getCollection, render } from "astro:content";
 import { creativeWorkSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
+import { cv } from "../../lib/cv";
 
 export async function getStaticPaths() {
   const entries = await getCollection("work");
@@ -16,9 +36,21 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
+/* The homepage's order, for what comes next. */
+const all = await getCollection("work");
+const ordered = [
+  ...all.filter((e) => e.data.featured !== undefined).sort((a, b) => a.data.featured! - b.data.featured!),
+  ...all.filter((e) => e.data.featured === undefined).sort((a, b) => +b.data.publishedAt - +a.data.publishedAt),
+];
+const at = ordered.findIndex((e) => e.id === entry.id);
+const next = [1, 2].map((k) => ordered[(at + k) % ordered.length]).filter((e) => e.id !== entry.id);
+const unseen = ordered.filter((e) => e.id !== entry.id && !next.includes(e)).map((e) => e.data.title);
+
+const award = cv.awards.find((a) => a.href === `/work/${entry.id}/`);
 const pageUrl = new URL(`/work/${entry.id}/`, site.url).toString();
 const ogImage = `/og/work/${entry.id}.png`;
 const year = entry.data.publishedAt.getFullYear();
+const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 ---
 
 <Base
@@ -46,37 +78,83 @@ const year = entry.data.publishedAt.getFullYear();
       ]),
     ]}
   />
-  <article class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-12 lg:mb-20">
-      <div class="col-span-12 lg:col-span-10 lg:col-start-3 flex flex-col gap-5">
-        <h1 class="display text-[clamp(2.25rem,6vw,3.75rem)] lift lift-1">{entry.data.title}</h1>
-        <p class="text-lg sm:text-xl text-ink-dim max-w-2xl lift lift-2">{entry.data.summary}</p>
-        <div class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-ink-faint lift lift-3">
-          {entry.data.role && <span>{entry.data.role}</span>}
-          {entry.data.stack.length > 0 && <span>{entry.data.stack.join(" · ")}</span>}
-          {entry.data.url && (
-            <a href={entry.data.url} target="_blank" rel="noopener" class="link text-ink-dim">Visit <span aria-hidden="true">↗</span></a>
-          )}
-          {entry.data.repo && (
-            <a href={entry.data.repo} target="_blank" rel="noopener" class="link text-ink-dim">Code <span aria-hidden="true">↗</span></a>
-          )}
-        </div>
-      </div>
-    </header>
 
-    <div class="rule mb-12 lg:mb-16 lift lift-3" />
+  <PageHero title={entry.data.title} size="long">
+    <p class="m-0">{entry.data.summary}</p>
+    {(entry.data.url || entry.data.repo) && (
+      <Fragment slot="actions">
+        {entry.data.url && (
+          <a href={entry.data.url} target="_blank" rel="noopener" class="btn btn-primary">
+            Visit {bare(entry.data.url)}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5" /></svg>
+          </a>
+        )}
+        {entry.data.repo && (
+          <a href={entry.data.repo} target="_blank" rel="noopener" class:list={["btn", entry.data.url ? "btn-secondary" : "btn-primary"]}>
+            View the code
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5" /></svg>
+          </a>
+        )}
+      </Fragment>
+    )}
+  </PageHero>
 
-    <div class="grid grid-cols-12 gap-6 lg:gap-10 lift lift-4">
-      <aside class="hidden lg:block lg:col-span-2">
-        <div class="sticky top-10 font-mono text-xs uppercase tracking-widest text-ink-faint">
-          <a href="/work/" class="link">← All work</a>
-        </div>
-      </aside>
-      <div class="col-span-12 lg:col-span-9">
-        <div class="prose">
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="flex flex-col gap-24 sm:gap-32 py-20 sm:py-28">
+      <article class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10" data-reveal>
+        {/* The facts. First on a phone, beside the reading on a desktop,
+            where it stays in view. */}
+        <aside class="lg:col-span-4 lg:col-start-9 lg:row-start-1">
+          <dl class="lg:sticky lg:top-28 m-0 rounded-[6px] border border-rule">
+            {entry.data.role && (
+              <div class="flex flex-col gap-1.5 px-6 py-4">
+                <dt class="text-[13px] text-ink-faint">My part</dt>
+                <dd class="m-0 text-ink">{entry.data.role}</dd>
+              </div>
+            )}
+            <div class="flex flex-col gap-1.5 px-6 py-4 border-t border-rule first:border-t-0">
+              <dt class="text-[13px] text-ink-faint">Kind</dt>
+              <dd class="m-0 flex items-center gap-2 text-ink">
+                <CategoryIcon category={entry.data.category} class="text-ink-dim" />
+                {entry.data.category}, {year}
+              </dd>
+            </div>
+            {award && (
+              <div class="flex flex-col gap-1.5 px-6 py-4 border-t border-rule">
+                <dt class="text-[13px] text-ink-faint">Award</dt>
+                <dd class="m-0 flex items-start gap-2.5 text-ink">
+                  <AwardIcon class="mt-0.5 h-4 w-4 shrink-0 text-accent-text" />
+                  <span>{award.name}, {award.event}, {award.year}</span>
+                </dd>
+              </div>
+            )}
+            {entry.data.stack.length > 0 && (
+              <div class="flex flex-col gap-2.5 px-6 py-4 border-t border-rule">
+                <dt class="text-[13px] text-ink-faint">Stack</dt>
+                <dd class="m-0">
+                  <ul class="flex flex-wrap gap-1.5 m-0 p-0 list-none">
+                    {entry.data.stack.map((tech) => <li class="chip"><TechIcon name={tech} />{tech}</li>)}
+                  </ul>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </aside>
+
+        <div class="lg:col-span-8 lg:row-start-1 prose prose-case">
           <Content />
+        </div>
+      </article>
+
+      {/* ── More work ────────────────────────────────────────────────── */}
+      <div data-reveal>
+        <SectionHeader title="More work." />
+        <div class="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CornerNodes />
+          {next.map((e, i) => <WorkCard entry={e} index={i} />)}
+          <ArchiveCard total={all.length} titles={unseen} index={next.length} class="md:col-span-2 lg:col-span-1" />
         </div>
       </div>
     </div>
-  </article>
+  </FramedSection>
 </Base>

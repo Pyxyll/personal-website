@@ -1,30 +1,35 @@
 ---
+/**
+ * All the work, as the homepage shows it: the same cards, all of them.
+ *
+ * The lead is the homepage's lead, across the top in the brand pink; the
+ * rest follow two to a row, so every row is full whatever the count. Order
+ * is the homepage's: entries with a `featured` place first, then the newest.
+ * Each card says what kind of thing it is, so there are no category headings
+ * between them.
+ */
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
-import EmptyState from "../../components/EmptyState.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
+import CornerNodes from "../../components/CornerNodes.astro";
+import WorkCard from "../../components/WorkCard.astro";
+import ArrowIcon from "../../components/ArrowIcon.astro";
 import { getCollection } from "astro:content";
 import { collectionPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 
-const entries = (await getCollection("work")).sort(
-  (a, b) => +b.data.publishedAt - +a.data.publishedAt
-);
-
-// Group by category, preserving the date sort within each. Known categories
-// render in this order; anything new falls in after, alphabetically.
-const CATEGORY_ORDER = ["Web apps", "AI", "Sites", "COSMIC", "Homelab"];
-const groups = entries.reduce<Record<string, typeof entries>>((acc, e) => {
-  (acc[e.data.category] ??= []).push(e);
-  return acc;
-}, {});
-const cats = [
-  ...CATEGORY_ORDER.filter((c) => groups[c]),
-  ...Object.keys(groups).filter((c) => !CATEGORY_ORDER.includes(c)).sort(),
+const all = await getCollection("work");
+const entries = [
+  ...all.filter((e) => e.data.featured !== undefined).sort((a, b) => a.data.featured! - b.data.featured!),
+  ...all.filter((e) => e.data.featured === undefined).sort((a, b) => +b.data.publishedAt - +a.data.publishedAt),
 ];
+const [lead, ...rest] = entries;
 
 const pageUrl = new URL("/work/", site.url).toString();
 const pageTitle = "Work · Dylan Collins";
-const pageDesc = "Things I've built: web platforms, a local AI tool, COSMIC applets, and a few self-hosted experiments.";
+const pageDesc =
+  "Things I've built: an award-winning education platform, native desktop apps in Rust, a local AI tool, and the servers they run on.";
 ---
 
 <Base title={pageTitle} description={pageDesc}>
@@ -38,68 +43,25 @@ const pageDesc = "Things I've built: web platforms, a local AI tool, COSMIC appl
       ]),
     ]}
   />
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    <header class="mb-16 lg:mb-24">
-      <div class="flex flex-col gap-5">
-        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
-          Work<span class="text-accent">.</span>
-        </h1>
-        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          A short list of things I've built, for work, for fun, and for people
-          who needed a hand. If something here overlaps with what you're making,{" "}
-          <a href="/contact/" class="link">say hi</a>.
-        </p>
 
-      </div>
-    </header>
+  <PageHero title="Work">
+    <p class="m-0">
+      Things I've built, at work and for myself: an award-winning platform for
+      schools, native desktop apps in Rust, a local AI tool, and the servers
+      they all run on.
+    </p>
+    <Fragment slot="actions">
+      <a href="/cv/" class="btn btn-primary">View CV<ArrowIcon /></a>
+    </Fragment>
+  </PageHero>
 
-    {entries.length === 0 ? (
-      <div data-reveal>
-        <EmptyState
-          message="Case studies are being written up. In the meantime, reach out and I'll send recent samples."
-          ctaHref="/contact/"
-          ctaLabel="Get in touch"
-        />
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="py-20 sm:py-28">
+      <div class="relative grid grid-cols-1 md:grid-cols-2 gap-3">
+        <CornerNodes />
+        {lead && <WorkCard entry={lead} lead index={0} class="md:col-span-2" />}
+        {rest.map((entry, i) => <WorkCard entry={entry} index={(i % 2) + 1} />)}
       </div>
-    ) : (
-      cats.map((cat) => (
-        <section class="mb-16 lg:mb-20" data-reveal>
-          <h2 class="section-heading mb-5">{cat}</h2>
-          <ul class="list-none m-0 p-0 border-t border-rule divide-y divide-rule">
-            {groups[cat].map((entry) => {
-              const year = entry.data.publishedAt.getFullYear();
-              const iso = entry.data.publishedAt.toISOString().split("T")[0];
-              return (
-              <li class="group py-6 px-2 -mx-2 transition-colors hover:bg-paper-2">
-                <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <h3 class="text-[clamp(1.375rem,3.5vw,1.875rem)] font-semibold tracking-tight m-0">
-                    <a href={`/work/${entry.id}/`} class="hover:text-accent-text transition-colors">
-                      {entry.data.title}
-                      <span aria-hidden="true" class="ml-3 text-accent inline-block group-hover:translate-x-1 transition-transform">→</span>
-                    </a>
-                  </h3>
-                  <span class="font-mono text-xs text-ink-faint tracking-widest uppercase shrink-0">
-                    {entry.data.role ?? ""} {entry.data.role && "·"} <time datetime={iso}>{year}</time>
-                  </span>
-                </div>
-                <p class="text-ink-dim text-sm sm:text-base max-w-2xl mt-2">{entry.data.summary}</p>
-                {(entry.data.stack.length > 0 || entry.data.repo || entry.data.url) && (
-                  <div class="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-ink-faint mt-3">
-                    {entry.data.stack.length > 0 && <span>{entry.data.stack.join(" · ")}</span>}
-                    {entry.data.repo && (
-                      <a href={entry.data.repo} target="_blank" rel="noopener" class="link text-ink-dim hover:text-ink">GitHub <span aria-hidden="true">↗</span></a>
-                    )}
-                    {entry.data.url && (
-                      <a href={entry.data.url} target="_blank" rel="noopener" class="link text-ink-dim hover:text-ink">Visit <span aria-hidden="true">↗</span></a>
-                    )}
-                  </div>
-                )}
-              </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))
-    )}
-  </section>
+    </div>
+  </FramedSection>
 </Base>

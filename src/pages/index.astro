@@ -10,10 +10,9 @@ import Schema from "../components/Schema.astro";
 import SkillCard from "../components/SkillCard.astro";
 import ExperiencePlate from "../components/ExperiencePlate.astro";
 import OpenToWork from "../components/OpenToWork.astro";
-import WorkStack from "../components/WorkStack.astro";
 import ArrowIcon from "../components/ArrowIcon.astro";
-import TechIcon from "../components/TechIcon.astro";
-import CategoryIcon from "../components/CategoryIcon.astro";
+import WorkCard from "../components/WorkCard.astro";
+import ArchiveCard from "../components/ArchiveCard.astro";
 import Endorsement from "../components/Endorsement.astro";
 import NowPlate from "../components/NowPlate.astro";
 import { getCollection } from "astro:content";
@@ -40,9 +39,6 @@ const orderedWork = [
 ];
 const workEntries = orderedWork.slice(0, 4);
 const moreWork = orderedWork.slice(4);
-/** The award a piece of work won, if any: matched on the award's link, so
-    lib/cv.ts stays the one place the award is written down. */
-const awardFor = (id: string) => cv.awards.find((a) => a.href === `/work/${id}/`);
 
 ---
 
@@ -160,165 +156,13 @@ const awardFor = (id: string) => cv.awards.find((a) => a.href === `/work/${id}/`
                 a grid cell. */}
             <div class="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <CornerNodes />
-              {workEntries.map((entry, i) => {
-                const wide = i === 0;
-                /* The lead piece carries the accent fill. Text on it is solid
-                   white throughout: on the brand pink only pure white clears
-                   4.5:1, 90% white is 4.0:1, so the hierarchy inside this one
-                   comes from size and weight rather than tone. */
-                const filled = i === 0;
-                const award = awardFor(entry.id);
-                /* Entries with screenshots carry a stack that fans on hover.
-                   Wide cards set it beside the copy on large screens; narrow
-                   ones put it above. A wide card with no screenshots (the
-                   platform, which belongs to my employer) sets its figures
-                   there instead. */
-                const images = entry.data.images ?? [];
-                const stacked = images.length > 0;
-                const highlights = wide && !stacked ? (entry.data.highlights ?? []) : [];
-                const side = wide && (stacked || highlights.length > 0);
-                const stack = entry.data.stack.slice(0, wide ? 5 : 3);
-                return (
-                  <a
-                    href={`/work/${entry.id}/`}
-                    data-reveal
-                    style={`--reveal-delay:${i * 0.12}s`}
-                    class:list={[
-                      "group flex flex-col gap-8 md:min-h-[18rem] rounded-[6px] border p-7 sm:p-8 transition-colors",
-                      filled
-                        ? "work-lead bg-accent border-accent text-white hover:bg-accent-deep"
-                        : "work-card border-rule hover:bg-paper-2",
-                      wide && "md:col-span-2",
-                    ]}
-                  >
-                    {filled && (
-                      <span class="work-dots" aria-hidden="true"><span class="work-dots-plane"></span></span>
-                    )}
-                    {stacked && !wide && (
-                      <WorkStack images={images} alt={`${entry.data.title}, three views`} onAccent={filled} />
-                    )}
-                    <div
-                      class:list={[
-                        "flex flex-col gap-8",
-                        side && "lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-14",
-                        side && stacked && "lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-10",
-                      ]}
-                    >
-                      <div class="flex flex-col items-start gap-3">
-                        {!filled && (
-                          <div class="self-stretch flex items-center justify-between gap-4 mb-3 text-[13px] text-ink-faint">
-                            <span class="flex items-center gap-2">
-                              <CategoryIcon category={entry.data.category} class="work-card-mark" />
-                              {entry.data.category}
-                            </span>
-                            <time class="font-mono text-xs" datetime={entry.data.publishedAt.toISOString().split("T")[0]}>
-                              {entry.data.publishedAt.getFullYear()}
-                            </time>
-                          </div>
-                        )}
-                        {award && (
-                          <span class:list={["chip mb-2", filled ? "chip-award" : "text-ink"]}>
-                            <span class="chip-dot" aria-hidden="true"></span>
-                            {award.name}, {award.year}
-                          </span>
-                        )}
-                        <h3
-                          class:list={[
-                            "font-semibold tracking-tight leading-snug m-0",
-                            wide
-                              ? "text-[clamp(1.5rem,3vw,2.125rem)]"
-                              : "text-[clamp(1.25rem,2.2vw,1.5rem)]",
-                          ]}
-                        >
-                          {entry.data.title}
-                        </h3>
-                        <p
-                          class:list={[
-                            "leading-relaxed m-0",
-                            filled ? "text-white" : "text-ink-dim",
-                            wide ? "text-base max-w-xl" : "text-sm",
-                          ]}
-                        >
-                          {entry.data.summary}
-                        </p>
-                      </div>
-                      {stacked && wide && (
-                        <WorkStack images={images} alt={`${entry.data.title}, three views`} onAccent={filled} />
-                      )}
-                      {highlights.length > 0 && (
-                        <dl
-                          class:list={[
-                            "grid gap-x-8 gap-y-6 m-0",
-                            highlights.length === 3 ? "grid-cols-3 lg:grid-cols-1 lg:pr-4" : "grid-cols-2 gap-x-10",
-                          ]}
-                        >
-                          {highlights.map((h) => (
-                            <div class="flex flex-col gap-1">
-                              <dt class="order-2 text-sm">{h.label}</dt>
-                              <dd class="order-1 m-0 font-semibold tracking-tight leading-none text-[clamp(2.25rem,4vw,3rem)] tabular-nums">
-                                {h.value}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      )}
-                    </div>
-
-                    <div class="mt-auto flex items-end justify-between gap-4">
-                      <ul class="flex flex-wrap gap-1.5 m-0 p-0 list-none" aria-label="Stack">
-                        {stack.map((tech) => (
-                          <li class:list={["chip", filled && "chip-on-accent"]}><TechIcon name={tech} />{tech}</li>
-                        ))}
-                      </ul>
-                      <span
-                        aria-hidden="true"
-                        class:list={[
-                          "flex items-center shrink-0 h-[1.625rem] transition-transform group-hover:translate-x-1",
-                          filled ? "text-white" : "text-accent",
-                        ]}
-                      >
-                        <ArrowIcon />
-                      </span>
-                    </div>
-                  </a>
-                );
-              })}
+              {workEntries.map((entry, i) => (
+                <WorkCard entry={entry} lead={i === 0} index={i} class={i === 0 ? "md:col-span-2" : ""} />
+              ))}
               {/* The archive: the grid's last cell, so the section closes on
-                  a card rather than a loose link under it. Dashed and without
-                  the cards' lifted surface, so it never reads as a project. */}
+                  a card rather than a loose link under it. */}
               {moreWork.length > 0 && (
-                <a
-                  href="/work/"
-                  data-reveal
-                  style={`--reveal-delay:${workEntries.length * 0.12}s`}
-                  class="work-card work-all group flex flex-col gap-8 md:min-h-[18rem] rounded-[6px] border p-7 sm:p-8 transition-colors hover:bg-paper-2"
-                >
-                  <div class="flex flex-col items-start gap-3">
-                    <div class="self-stretch flex items-center justify-between gap-4 mb-3 text-[13px] text-ink-faint">
-                      <span class="flex items-center gap-2">
-                        <CategoryIcon category="Archive" class="work-card-mark" />
-                        Archive
-                      </span>
-                      <span class="font-mono text-xs">{allWork.length} in all</span>
-                    </div>
-                    <h3 class="font-semibold tracking-tight leading-snug m-0 text-[clamp(1.25rem,2.2vw,1.5rem)]">
-                      All projects
-                    </h3>
-                    <ul class="m-0 p-0 list-none text-sm leading-relaxed text-ink-dim">
-                      {moreWork.slice(0, 3).map((e) => <li>{e.data.title}</li>)}
-                      {moreWork.length > 3 && <li class="text-ink-faint">and {moreWork.length - 3} more</li>}
-                    </ul>
-                  </div>
-                  <div class="mt-auto flex items-end justify-between gap-4">
-                    <span class="text-sm font-medium text-ink">Browse all {allWork.length}</span>
-                    <span
-                      aria-hidden="true"
-                      class="flex items-center shrink-0 h-[1.625rem] text-accent transition-transform group-hover:translate-x-1"
-                    >
-                      <ArrowIcon />
-                    </span>
-                  </div>
-                </a>
+                <ArchiveCard total={allWork.length} titles={moreWork.map((e) => e.data.title)} index={workEntries.length} />
               )}
             </div>
           </>
@@ -371,47 +215,3 @@ const awardFor = (id: string) => cv.awards.find((a) => a.href === `/work/${id}/`
   </FramedSection>
 
 </Base>
-
-<script>
-  // The lead work card's dot field in three.js (scripts/workDots.ts), loaded
-  // only where it can be used: a fine pointer that hovers, without reduced
-  // motion. Everything else keeps the CSS dots, and the other cards' still.
-  const dots = document.querySelector<HTMLElement>(".work-dots");
-  const able =
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (dots && able) {
-    import("../scripts/workDots").then(({ mount }) => mount(dots)).catch(() => {});
-  }
-
-  // The other work cards' halftone parallax (.work-card in global.css): the
-  // pointer's place on the card, from -0.5 to 0.5 each way, one write a frame.
-  // Back to centre on leave, as the dots fade out.
-  if (able) {
-    document.querySelectorAll<HTMLElement>(".work-card").forEach((card) => {
-      let frame = 0;
-      let x = 0;
-      let y = 0;
-      const write = () => {
-        frame = 0;
-        card.style.setProperty("--px", x.toFixed(3));
-        card.style.setProperty("--py", y.toFixed(3));
-      };
-      card.addEventListener(
-        "pointermove",
-        (e) => {
-          const r = card.getBoundingClientRect();
-          x = (e.clientX - r.left) / r.width - 0.5;
-          y = (e.clientY - r.top) / r.height - 0.5;
-          if (!frame) frame = requestAnimationFrame(write);
-        },
-        { passive: true },
-      );
-      card.addEventListener("pointerleave", () => {
-        x = 0;
-        y = 0;
-        if (!frame) frame = requestAnimationFrame(write);
-      });
-    });
-  }
-</script>

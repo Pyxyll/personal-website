@@ -27,3 +27,6 @@ dist/
 
 # Drafts
 drafts/
+
+# Wrangler's local dev state
+.wrangler/

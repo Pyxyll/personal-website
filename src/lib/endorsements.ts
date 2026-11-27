@@ -20,9 +20,11 @@ export const endorsements: Endorsement[] = [
     // From Niamh's comment on the award post, Nov 2026.
     quote:
       "Your technical ability is incredible, but it's your curiosity, your problem-solving and your ability to see the bigger picture that really set you apart.",
-    // TODO: full name and her title at The B!G Idea, as she'd like them shown.
-    name: "Niamh",
-    role: "Former colleague, The B!G Idea",
+    // Approved by Niamh for this site, Nov 2026. "Manager" rather than her
+    // job title: it says what her view is worth, and stays true after she
+    // moves on.
+    name: "Niamh Cooney",
+    role: "Manager, The B!G Idea",
     approved: true,
   },
 ];
