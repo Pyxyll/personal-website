@@ -2,25 +2,27 @@
 import { getCollection } from "astro:content";
 import NavMenu from "./NavMenu";
 import type { MenuPanel } from "./NavMenu";
+import SocialIcon from "./SocialIcon.astro";
+import ArrowIcon from "./ArrowIcon.astro";
 import { skills } from "../lib/skills";
+import { site } from "../lib/site";
 
 const { pathname } = Astro.url;
 
-// The CV is not in this list because it is the pill on the right: the one
-// thing the bar asks you to do, and the one thing left when it collapses.
-const items = [
-  { href: "/skills/", label: "Skills" },
-  { href: "/work/", label: "Work" },
-  { href: "/contact/", label: "Contact" },
-];
-const isActive = (item: (typeof items)[number]) => pathname.startsWith(item.href);
+// GitHub and LinkedIn sit in the bar because they are the first two things a
+// recruiter checks after the CV.
+const socials = [
+  { name: "github", label: "GitHub", href: site.social.github },
+  { name: "linkedin", label: "LinkedIn", href: site.social.linkedin },
+] as const;
+
 
 // Panel data, resolved at build time and handed to the island as plain props.
 // Both panels are the same shape, so the menu draws them with one template.
 const skillsPanel: MenuPanel = {
   heading: "Skills",
-  blurb: "Six things I do, and where on this site you can see each one.",
-  all: { href: "/skills/", label: "All six, in detail" },
+  blurb: "Five things I do, and where on this site you can see each one.",
+  all: { href: "/skills/", label: "All five, in detail" },
   items: skills.map((s) => ({
     href: `/skills/#${s.slug}`,
     title: s.title,
@@ -41,14 +43,24 @@ const menuWork = [
 ].slice(0, 6);
 const workPanel: MenuPanel = {
   heading: "Work",
-  blurb: "Things I've built: for the day job, for clients, and because I wanted them to exist.",
+  blurb: "Things I've built: at work, and because I wanted them to exist.",
   all: { href: "/work/", label: "All work" },
   items: menuWork.map((e) => ({
     href: `/work/${e.id}/`,
     title: e.data.title,
-    description: e.data.summary,
+    description: e.data.tagline ?? e.data.summary,
   })),
 };
+
+// The phone menu: the same three items, with Skills and Work opening in place
+// to the same six entries as the desktop panels. The section for the current
+// page starts open.
+const sections = [
+  { key: "skills", label: "Skills", href: "/skills/", panel: skillsPanel },
+  { key: "work", label: "Work", href: "/work/", panel: workPanel },
+  { key: "contact", label: "Contact", href: "/contact/", panel: null },
+] as const;
+const openSection = sections.find((sec) => sec.panel && pathname.startsWith(sec.href))?.key;
 ---
 
 {/* Sticky, because the scrolled state is the point: past the fold this
@@ -61,9 +73,14 @@ const workPanel: MenuPanel = {
     of type, and centring boxes of different sizes leaves the smaller text
     riding high: measured, the links sat 3.5px above the wordmark. The row is
     then centred in the bar as a whole. */}
-<nav id="site-nav" data-scrolled="false" aria-label="Primary">
-  <div class="mx-auto max-w-shell px-6 lg:px-10">
-    <div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_1fr] items-baseline content-center gap-4 h-20">
+<nav id="site-nav" data-scrolled="false" data-menu="closed" aria-label="Primary">
+  {/* Behind the phone menu: dims the page, and a tap on it closes the menu.
+      Outside .nav-bar because it is fixed to the viewport, and the bar's
+      backdrop-filter would make the bar its containing block. */}
+  <div class="nav-scrim sm:hidden" aria-hidden="true"></div>
+
+  <div class="nav-bar">
+    <div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_1fr] items-baseline content-center gap-4 nav-row">
       {/* The wordmark: first name light, surname bold, run together with no
           space, and closed with the hero's pink full stop. The two weights do
           the job the space would have. Read aloud that would come out as one
@@ -85,108 +102,222 @@ const workPanel: MenuPanel = {
         />
       </div>
 
-      <div class="flex items-center gap-3 sm:gap-4 justify-self-end">
+      <div class="nav-end flex items-baseline gap-3 sm:gap-4 justify-self-end">
+        {/* Phones get these in the menu instead: the bar has no room. */}
+        <div class="nav-socials hidden sm:flex items-center gap-1 self-center">
+          {socials.map((s) => (
+            <a href={s.href} class="nav-social" aria-label={`${s.label} (opens in a new tab)`} target="_blank" rel="noopener me">
+              <SocialIcon name={s.name} />
+            </a>
+          ))}
+        </div>
         <a href="/cv/" class="nav-cta" aria-current={pathname.startsWith("/cv/") ? "page" : undefined}>View CV</a>
 
-        {/* Mobile trigger */}
+        {/* Phone menu button: two bars that cross into an X as the menu opens.
+            The same 36px circle as the icons beside the CV button on desktop. */}
         <button
           id="nav-toggle"
           type="button"
-          class="sm:hidden text-sm font-medium text-ink-dim hover:text-ink transition-colors px-2 py-2 -mr-2"
+          class="nav-toggle sm:hidden self-center"
           aria-expanded="false"
-          aria-controls="nav-overlay"
+          aria-controls="nav-sheet"
           aria-label="Open menu"
         >
-          Menu
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
         </button>
       </div>
     </div>
-  </div>
 
-  {/* Mobile overlay */}
-  <div
-    id="nav-overlay"
-    class="fixed inset-0 z-50 bg-paper text-ink sm:hidden flex flex-col"
-    aria-hidden="true"
-    data-open="false"
-    style="visibility: hidden; opacity: 0; transition: opacity 0.25s ease, visibility 0s linear 0.25s;"
-  >
-    <div class="flex items-center justify-between px-6 h-20 border-b border-rule">
-      <a href="/" class="nav-mark" data-nav-link aria-label="Dylan Collins, home">
-        <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
-      </a>
-      <button
-        id="nav-close"
-        type="button"
-        class="text-sm font-medium text-ink-dim hover:text-ink transition-colors px-2 py-2 -mr-2"
-        aria-label="Close menu"
-      >
-        Close
-      </button>
+    {/* The phone menu. It hangs below the bar the way the desktop panels do,
+        on the same surface, and lines up with the pill (or, at the top of the
+        page, with the hero panel's edges). Skills and Work open in place;
+        one at a time, so the sheet stays short. */}
+    <div id="nav-sheet" class="nav-sheet sm:hidden" inert>
+      <div class="nav-sheet-scroll">
+        <ul class="nav-sheet-list">
+          {sections.map((sec) => {
+            const current = pathname.startsWith(sec.href);
+            if (!sec.panel) {
+              return (
+                <li>
+                  <a
+                    href={sec.href}
+                    data-nav-link
+                    class:list={["nav-sheet-row", current && "is-active"]}
+                    aria-current={current ? "page" : undefined}
+                  >
+                    {sec.label}
+                  </a>
+                </li>
+              );
+            }
+            const open = openSection === sec.key;
+            return (
+              <li>
+                <button
+                  type="button"
+                  class:list={["nav-sheet-row", current && "is-active"]}
+                  data-nav-section
+                  aria-expanded={open ? "true" : "false"}
+                  aria-controls={`nav-sheet-${sec.key}`}
+                >
+                  {sec.label}
+                  <svg class="nav-chevron" viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M5.8335 12.5002L10.0002 16.6668L14.1668 12.5002M5.8335 7.50016L10.0002 3.3335L14.1668 7.50016" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </button>
+                <div
+                  id={`nav-sheet-${sec.key}`}
+                  class="nav-sheet-sub"
+                  data-open={open ? "true" : "false"}
+                  inert={!open}
+                >
+                  <div class="nav-sheet-sub-inner">
+                    <ul>
+                      {sec.panel.items.map((item) => (
+                        <li>
+                          <a
+                            href={item.href}
+                            data-nav-link
+                            class:list={["nav-sheet-item", pathname === item.href && "is-active"]}
+                            aria-current={pathname === item.href ? "page" : undefined}
+                          >
+                            <span class="nav-sheet-item-title">{item.title}</span>
+                            <span class="nav-sheet-item-desc">{item.description}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    <a href={sec.panel.all.href} data-nav-link class="nav-sheet-all">
+                      {sec.panel.all.label}
+                      <ArrowIcon />
+                    </a>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        <footer class="nav-sheet-foot">
+          <a href={`mailto:${site.author.email}`} data-nav-link>Email</a>
+          <span class="flex items-center gap-5">
+            {socials.map((sc) => (
+              <a href={sc.href} data-nav-link target="_blank" rel="noopener me" class="inline-flex items-center gap-2">
+                <SocialIcon name={sc.name} class="h-4 w-4" />
+                {sc.label}
+              </a>
+            ))}
+          </span>
+        </footer>
+      </div>
     </div>
-
-    <ul class="flex-1 flex flex-col justify-center gap-2 px-6 py-12">
-      {items.map((item) => (
-        <li>
-          <a
-            href={item.href}
-            data-nav-link
-            class:list={[
-              "group flex items-baseline gap-4 py-4 border-b border-rule",
-              isActive(item) ? "text-ink" : "text-ink-dim",
-            ]}
-          >
-            <span class="text-3xl tracking-tight font-medium">
-              {item.label}
-            </span>
-            {isActive(item) && (
-              <span class="ml-auto h-1 w-1 rounded-full bg-accent self-center"></span>
-            )}
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    <div class="px-6 pb-6">
-      <a href="/cv/" data-nav-link class="nav-cta w-full justify-center py-4">
-        View CV
-      </a>
-    </div>
-
-    <footer class="px-6 py-6 border-t border-rule flex justify-between font-mono text-xs uppercase tracking-widest text-ink-faint">
-      <a href="mailto:hello@dylancollins.me" data-nav-link class="hover:text-ink transition-colors">Email</a>
-      <a href="/rss.xml" data-nav-link class="hover:text-ink transition-colors">RSS</a>
-    </footer>
   </div>
 </nav>
 
 {/* Global, not scoped: Astro's scoping cannot reach inside the React island's
     DOM, and the bar and the panels have to be styled as one thing. */}
 <style is:global>
+  /* The nav keeps one height in the layout whatever its state, so the page
+     never shifts under it: the pill below floats inside the same 5rem. */
   #site-nav {
     position: sticky;
     top: 0;
     z-index: 40;
+    height: 5rem;
     background: var(--color-paper);
     transition: background-color 0.3s ease;
   }
-
-
-  /* Scrolled: the links step aside and the bar gets out of the way of the
-     page. visibility, not just opacity, so the hidden links leave the tab
-     order too rather than becoming invisible focus traps. */
   #site-nav[data-scrolled="true"] {
     background: transparent;
   }
 
-  .nav-center {
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0s;
+  /* The bar itself. At the top of the page it is the full shell, with no
+     surface of its own. Scrolled, it draws in to a floating frosted pill
+     around the same content: narrower, shorter, dropped off the top edge.
+     Every property moves on one curve, so it reads as one shape changing.
+
+     It is always a capsule (the radius never changes), and the surface just
+     fades in, so the corners do not have to animate from square.
+
+     Positioned, so the mega menu hangs from the bottom of the pill and not
+     from the top of the page. backdrop-filter would make it the containing
+     block for fixed descendants too, which is why the mobile overlay is a
+     sibling of this element rather than inside it. */
+  .nav-bar {
+    --nav-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    z-index: 1; /* above the phone menu's scrim */
+    width: 100%;
+    max-width: var(--container-shell);
+    margin-inline: auto;
+    margin-top: 0;
+    padding-inline: 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background-color: transparent;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+    box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0);
+    transition:
+      width 0.6s var(--nav-ease),
+      max-width 0.6s var(--nav-ease),
+      margin-top 0.6s var(--nav-ease),
+      padding 0.6s var(--nav-ease),
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      box-shadow 0.4s ease,
+      -webkit-backdrop-filter 0.4s ease,
+      backdrop-filter 0.4s ease;
   }
-  #site-nav[data-scrolled="true"] .nav-center {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-4px);
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+  @media (min-width: 1024px) {
+    .nav-bar {
+      padding-inline: 2.5rem;
+    }
+  }
+  .nav-row {
+    height: 5rem;
+    transition: height 0.6s var(--nav-ease);
+  }
+
+  /* The pill's outer edge lands where the bar's content edge was, which is
+     also the edge of the hero and footer panels, so it lines up with the
+     rest of the page's frame rather than inventing a width of its own. The
+     content steps in by the pill's own padding. */
+  #site-nav[data-scrolled="true"] .nav-bar {
+    width: calc(100% - 3rem);
+    max-width: calc(var(--container-shell) - 3rem);
+    margin-top: 0.75rem;
+    padding-left: 1.25rem;
+    padding-right: calc((3.5rem - 2.25rem) / 2);
+    background-color: color-mix(in srgb, var(--color-paper-2) 78%, transparent);
+    border-color: color-mix(in srgb, var(--color-ink) 10%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  }
+  /* The last thing in the pill is a pill or a circle (the CV button on
+     desktop, the menu button on phones), so the right inset matches the space
+     above and below it. Equal gaps all round put the two curves on one
+     centre, so the button's end runs parallel to the pill's. Derived from the
+     two heights (the 3.5rem row and the 2.25rem button) so it stays
+     concentric if either changes. */
+  @media (min-width: 1024px) {
+    #site-nav[data-scrolled="true"] .nav-bar {
+      width: calc(100% - 5rem);
+      max-width: calc(var(--container-shell) - 5rem);
+    }
+  }
+  #site-nav[data-scrolled="true"] .nav-row {
+    height: 3.5rem;
+  }
+  /* Below md the pill has no room for the icons beside the links. They are
+     still in the footer, and back in the bar at the top of the page. */
+  @media (max-width: 767.98px) {
+    #site-nav[data-scrolled="true"] .nav-socials {
+      display: none;
+    }
   }
 
   .nav-mark {
@@ -194,6 +325,18 @@ const workPanel: MenuPanel = {
     align-items: center;
     margin: -0.5rem;
     padding: 0.5rem;
+    transition: transform 0.6s var(--nav-ease, ease);
+  }
+  /* In the pill, everything is centred on the pill itself rather than on a
+     shared text baseline. A baseline row puts each box wherever the fonts'
+     metrics say, and those differ between browsers, zoom levels and screen
+     scaling, so the CV button could sit low in one setup and fine in another.
+     Centred boxes cannot drift: the button and icons have equal space above
+     and below by construction, wherever it is viewed. The text items then get
+     an optical correction below. */
+  #site-nav[data-scrolled="true"] .nav-row,
+  #site-nav[data-scrolled="true"] .nav-end {
+    align-items: center;
   }
   .nav-mark-word {
     font-family: var(--font-sans);
@@ -211,13 +354,33 @@ const workPanel: MenuPanel = {
     font-weight: 800;
   }
   /* The hero's full stop, in the hero's weight and the brand colour. */
+  /* The full stop pulses while the mark is hovered or focused: it fades
+     most of the way out and back, about once a second, like a cursor
+     breathing rather than blinking. Size and position never change. Each
+     beat starts and ends fully visible, so stopping at the end of one is
+     seamless.
+
+     When the pointer leaves, the script below lets the current beat finish
+     rather than snapping the dot back mid-fade. :hover and :focus-visible
+     are here too, so it still pulses without JavaScript. Reduced motion
+     switches it off with every other animation. */
   .nav-mark-stop {
     font-weight: 900;
     color: var(--color-accent);
-    transition: color 0.2s ease;
   }
-  .nav-mark:hover .nav-mark-stop {
-    color: var(--color-accent-deep);
+  .nav-mark:hover .nav-mark-stop,
+  .nav-mark:focus-visible .nav-mark-stop,
+  .nav-mark.is-pulsing .nav-mark-stop {
+    animation: nav-stop-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes nav-stop-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.15;
+    }
   }
   .nav-mark:hover .nav-mark-word {
     color: var(--color-ink-dim);
@@ -229,6 +392,22 @@ const workPanel: MenuPanel = {
      wordmark does at the left, with the quiet links between them. Set in the
      links' own type and size: it used to be wide-tracked mono capitals, which
      made it the largest object in the bar and the odd one out. Pink on hover. */
+  /* Icon links beside the CV pill: a 36px target, dim until you reach them. */
+  .nav-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    color: var(--color-ink-dim);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  .nav-social:hover {
+    color: var(--color-ink);
+    background: var(--color-paper-2);
+  }
+
   .nav-cta {
     display: inline-flex;
     align-items: center;
@@ -262,6 +441,7 @@ const workPanel: MenuPanel = {
     position: static;
   }
   .nav-menu-list {
+    position: relative; /* the highlight positions against this */
     display: flex;
     align-items: center;
     /* Each link also carries 0.75rem of padding a side for the highlight to
@@ -271,6 +451,51 @@ const workPanel: MenuPanel = {
     margin: 0;
     padding: 0;
   }
+  .nav-menu-list > li {
+    position: relative;
+    z-index: 1; /* above the highlight */
+  }
+
+  /* One rounded highlight for the whole group. Transform and width transition,
+     so it travels from item to item instead of fading out and back in;
+     opacity only covers arriving at and leaving the group. When it arrives it
+     is placed, not slid in from wherever it last was.
+
+     The same height as the CV button, so in the pill the two line up. A tint
+     of the ink rather than the second paper colour, so it still shows against
+     the pill's frosted surface. */
+  .nav-menu-list > .nav-hover {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    z-index: 0;
+    height: 2.25rem;
+    margin-top: -1.125rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+      width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease;
+  }
+  .nav-menu-list > .nav-hover[data-visible="true"] {
+    opacity: 1;
+  }
+  /* Unmeasured, it has no width but still has a border, which would draw a
+     sliver at the left of the list. Hidden until the menu places it. */
+  .nav-menu-list:not([data-ready]) > .nav-hover {
+    display: none;
+  }
+  .nav-menu-list > .nav-hover[data-mode="place"] {
+    transition: opacity 0.18s ease;
+  }
+  /* Its first placement on load, resting on the current page: no fade, so
+     it takes over from the pre-hydration box without a flicker. */
+  .nav-menu-list > .nav-hover[data-mode="instant"] {
+    transition: none;
+  }
+
   .nav-trigger {
     display: inline-flex;
     align-items: center;
@@ -278,51 +503,41 @@ const workPanel: MenuPanel = {
     padding: 0.5rem 0.75rem;
     /* A step up from 14px, so the jump from the 19px wordmark is not so steep. */
     font-size: 0.9375rem;
-    color: var(--color-ink-dim);
-    transition: color 0.2s ease;
-  }
-  .nav-trigger:hover,
-  .nav-trigger[data-state="open"],
-  .nav-trigger.is-active {
+    /* 1.25rem of line plus the padding makes the trigger 36px tall: the
+       height of the highlight and of the CV button, so the pre-hydration box
+       below and the sliding one are the same shape. */
+    line-height: 1.25rem;
+    /* The labels are full ink at rest; hover is the highlight's job. The
+       chevrons keep their own quieter colour (below), set on the svg so it
+       does not inherit this. */
     color: var(--color-ink);
   }
 
-  /* Underline marks the current page only. Hover and open are a change of
-     colour, the same as every other link on the site. */
-  /* The underline hangs below the label rather than sitting in padding under
-     it: padding there made the label's box taller than its text and lifted
-     the word off the line the rest of the bar sits on. */
-  .nav-trigger-label {
-    position: relative;
-    display: inline-block;
+  /* The current page is marked by the highlight resting on its trigger (see
+     .nav-hover). That box is measured and placed once the menu hydrates, so
+     until then the current trigger draws the same box itself. */
+  .nav-menu-list:not([data-ready]) .nav-trigger.is-active {
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 8%, transparent);
   }
-  .nav-trigger-label::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -4px;
-    height: 1px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: center;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .nav-trigger.is-active .nav-trigger-label::after {
-    transform: scaleX(1);
+  .nav-trigger.is-active .nav-chevron {
+    color: var(--color-ink-dim);
   }
 
+  /* The up-and-down chevrons are symmetrical, so nothing turns when the panel
+     opens; they brighten with the label. The glyph sits inside its 16px box
+     with about 4.7px clear either side, which the negative margin takes back
+     so the label-to-icon gap and the right-hand padding read as they look. */
   .nav-chevron {
     flex: none;
+    margin-inline: -0.25rem;
     color: var(--color-ink-faint);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
   }
   .nav-trigger:hover .nav-chevron,
   .nav-trigger[data-state="open"] .nav-chevron {
     color: var(--color-ink-dim);
-  }
-  .nav-trigger[data-state="open"] .nav-chevron {
-    transform: rotate(180deg);
   }
 
   /* The panel surface. Full width of the bar, so the viewport can centre the
@@ -350,6 +565,10 @@ const workPanel: MenuPanel = {
     /* Radix measures each panel and publishes its box here; transitioning
        these is what makes one surface morph between Skills and Work. */
     width: var(--radix-navigation-menu-viewport-width);
+    /* Never squeezed to the slot: the slot is only as wide as the bar, and
+       the scrolled pill is narrower than the panel. Unshrunk, it overflows
+       the slot evenly on both sides and stays centred on the pill. */
+    flex-shrink: 0;
     height: var(--radix-navigation-menu-viewport-height);
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -554,9 +773,255 @@ const workPanel: MenuPanel = {
       border-left: 0;
     }
   }
+
+  /* ── Phone menu ───────────────────────────────────────────────────────
+     The desktop dropdown's vocabulary at phone size: the same surface and
+     radius, hanging below the bar, the same rounded highlight for the current
+     page and the press, the same up-and-down chevrons. */
+
+  /* Menu button: two bars that cross into an X. The tinted circle is the
+     highlight's fill, so it reads as a control without competing with the CV
+     button beside it. No display here: sm:hidden owns that. */
+  .nav-toggle {
+    position: relative;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 8%, transparent);
+    transition: background-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover: hover) {
+    .nav-toggle:hover {
+      background: color-mix(in srgb, var(--color-ink) 10%, transparent);
+    }
+  }
+  .nav-toggle-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1rem;
+    height: 1.5px;
+    margin: -0.75px 0 0 -0.5rem;
+    border-radius: 1px;
+    background: currentColor;
+    transition: transform 0.35s var(--nav-ease, ease);
+  }
+  .nav-toggle-bar:first-child {
+    transform: translateY(-3.5px);
+  }
+  .nav-toggle-bar:last-child {
+    transform: translateY(3.5px);
+  }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
+    transform: rotate(45deg);
+  }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:last-child {
+    transform: rotate(-45deg);
+  }
+
+  /* Dims the page behind the open menu. */
+  .nav-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: rgb(0 0 0 / 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+  #site-nav[data-menu="open"] .nav-scrim {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease, visibility 0s;
+  }
+
+  /* The sheet. Its edges follow the frame: at the top of the page, the hero
+     panel's (1.5rem in, less the bar's 1px border); in the pill, the pill's
+     own. They move with the pill as it changes shape. */
+  .nav-sheet {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: calc(1.5rem - 1px);
+    right: calc(1.5rem - 1px);
+    background: var(--color-paper);
+    border: 1px solid var(--color-rule);
+    border-radius: 14px;
+    box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8);
+    opacity: 0;
+    transform: translateY(-6px);
+    visibility: hidden;
+    transition: left 0.6s var(--nav-ease), right 0.6s var(--nav-ease),
+      opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+  #site-nav[data-scrolled="true"] .nav-sheet {
+    left: -1px;
+    right: -1px;
+  }
+  #site-nav[data-menu="open"] .nav-sheet {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    transition: left 0.6s var(--nav-ease), right 0.6s var(--nav-ease),
+      opacity 0.2s ease, transform 0.2s ease, visibility 0s;
+  }
+  .nav-sheet-scroll {
+    max-height: calc(100dvh - 7rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.5rem;
+  }
+  .nav-sheet-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* A top-level row: Skills, Work, Contact. 44px tall for a thumb. */
+  .nav-sheet-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-align: left;
+    color: var(--color-ink);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* The box marks the current page, and a press while the finger is down.
+     Hover only counts where there is a real pointer: touch browsers leave a
+     tapped element "hovered", which would box whatever was tapped last and
+     make it look like the current page. */
+  .nav-sheet-row:active,
+  .nav-sheet-row.is-active,
+  .nav-sheet-item:active,
+  .nav-sheet-item.is-active {
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 8%, transparent);
+  }
+  @media (hover: hover) {
+    .nav-sheet-row:hover,
+    .nav-sheet-item:hover {
+      background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 8%, transparent);
+    }
+  }
+  .nav-sheet-row[aria-expanded="true"] .nav-chevron,
+  .nav-sheet-row.is-active .nav-chevron {
+    color: var(--color-ink-dim);
+  }
+
+  /* A section's contents. Grid rows from 0fr to 1fr animate to the content's
+     real height without measuring it. */
+  .nav-sheet-sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s var(--nav-ease, ease);
+  }
+  .nav-sheet-sub[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+  .nav-sheet-sub-inner {
+    min-height: 0;
+    overflow: hidden;
+    padding-left: 0.5rem;
+  }
+  .nav-sheet-sub-inner > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0 0;
+  }
+  .nav-sheet-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-sheet-item-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .nav-sheet-item-desc {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-ink-dim);
+  }
+  .nav-sheet-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent-text);
+  }
+
+  .nav-sheet-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding: 0.875rem 0.75rem 0.375rem;
+    border-top: 1px solid var(--color-rule);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+  .nav-sheet-foot a {
+    transition: color 0.2s ease;
+  }
+  .nav-sheet-foot a:hover {
+    color: var(--color-ink);
+  }
 </style>
 
 <script>
+  // The wordmark's full stop pulses on hover (see .nav-mark-stop). Leaving
+  // mid-beat would snap the dot back, so the class holds the animation on
+  // until the current beat ends, and comes off then unless the pointer or
+  // focus has come back.
+  document.querySelectorAll<HTMLElement>(".nav-mark").forEach((mark) => {
+    const stop = mark.querySelector<HTMLElement>(".nav-mark-stop");
+    if (!stop) return;
+    let leaving = false;
+    const start = () => {
+      leaving = false;
+      mark.classList.add("is-pulsing");
+    };
+    const end = () => {
+      leaving = true;
+    };
+    const settle = () => {
+      if (leaving) {
+        mark.classList.remove("is-pulsing");
+        leaving = false;
+      }
+    };
+    mark.addEventListener("pointerenter", start);
+    mark.addEventListener("focus", start);
+    mark.addEventListener("pointerleave", end);
+    mark.addEventListener("blur", end);
+    stop.addEventListener("animationiteration", settle);
+    stop.addEventListener("animationend", settle);
+  });
+
   // Collapse the bar once you are past the top of the page. The links come
   // back at the top, so they are never permanently out of reach for anyone
   // navigating by keyboard.
@@ -582,61 +1047,86 @@ const workPanel: MenuPanel = {
     );
   }
 
-  // Mobile nav overlay. Vanilla JS, no React island needed.
+  // The phone menu. Vanilla JS: the panel is server-rendered and this only
+  // opens, closes and expands it.
   const toggle = document.getElementById("nav-toggle");
-  const overlay = document.getElementById("nav-overlay");
-  const close = document.getElementById("nav-close");
+  const sheet = document.getElementById("nav-sheet");
+  const scrim = document.querySelector<HTMLElement>(".nav-scrim");
+  const bar = document.querySelector<HTMLElement>("#site-nav .nav-bar");
 
-  if (toggle && overlay && close) {
-    let lastFocused: HTMLElement | null = null;
+  if (nav && toggle && sheet && scrim && bar) {
+    const isOpen = () => nav.dataset.menu === "open";
 
     const open = () => {
-      lastFocused = document.activeElement as HTMLElement;
-      overlay.dataset.open = "true";
-      overlay.style.visibility = "visible";
-      overlay.style.opacity = "1";
-      overlay.style.transition = "opacity 0.25s ease";
-      overlay.setAttribute("aria-hidden", "false");
+      nav.dataset.menu = "open";
+      sheet.inert = false;
       toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", "Close menu");
       document.documentElement.style.overflow = "hidden";
-      // Move focus to close button after the fade
-      window.setTimeout(() => close.focus(), 50);
     };
 
-    const closeMenu = () => {
-      overlay.dataset.open = "false";
-      overlay.style.opacity = "0";
-      overlay.style.transition = "opacity 0.25s ease, visibility 0s linear 0.25s";
-      window.setTimeout(() => {
-        overlay.style.visibility = "hidden";
-      }, 250);
-      overlay.setAttribute("aria-hidden", "true");
+    const close = (returnFocus = true) => {
+      if (!isOpen()) return;
+      nav.dataset.menu = "closed";
+      sheet.inert = true;
       toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open menu");
       document.documentElement.style.overflow = "";
-      lastFocused?.focus();
+      if (returnFocus) toggle.focus();
     };
 
-    toggle.addEventListener("click", () => {
-      if (overlay.dataset.open === "true") closeMenu();
-      else open();
-    });
-    close.addEventListener("click", closeMenu);
-
-    // Close on link click (any nav link within the overlay)
-    overlay.querySelectorAll<HTMLAnchorElement>("[data-nav-link]").forEach((a) => {
-      a.addEventListener("click", () => closeMenu());
+    toggle.addEventListener("click", () => (isOpen() ? close() : open()));
+    scrim.addEventListener("click", () => close(false));
+    sheet.querySelectorAll<HTMLAnchorElement>("[data-nav-link]").forEach((a) => {
+      a.addEventListener("click", () => close(false));
     });
 
-    // ESC to close
+    // Skills and Work open in place, one at a time. A collapsed section is
+    // inert, so its links are out of the tab order until it is open.
+    const rows = sheet.querySelectorAll<HTMLButtonElement>("[data-nav-section]");
+    rows.forEach((row) => {
+      row.addEventListener("click", () => {
+        const opening = row.getAttribute("aria-expanded") !== "true";
+        rows.forEach((other) => {
+          const on = other === row && opening;
+          other.setAttribute("aria-expanded", String(on));
+          const sub = document.getElementById(other.getAttribute("aria-controls") ?? "");
+          if (sub) {
+            sub.dataset.open = String(on);
+            sub.inert = !on;
+          }
+        });
+      });
+    });
+
+    // While open, Tab cycles through the bar and the menu, not the page
+    // behind the scrim. Escape closes it.
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && overlay.dataset.open === "true") closeMenu();
+      if (!isOpen()) return;
+      if (e.key === "Escape") {
+        close();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = [...bar.querySelectorAll<HTMLElement>("a[href], button")].filter(
+        (el) => !el.closest("[inert]") && el.offsetParent !== null
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     });
 
-    // If the viewport widens past sm (~640px), ensure overlay is closed and body is scrollable.
+    // Widening past sm swaps to the desktop menu: close this one.
     const mq = window.matchMedia("(min-width: 640px)");
-    const onChange = () => {
-      if (mq.matches && overlay.dataset.open === "true") closeMenu();
-    };
-    if ("addEventListener" in mq) mq.addEventListener("change", onChange);
+    mq.addEventListener("change", () => {
+      if (mq.matches) close(false);
+    });
   }
 </script>

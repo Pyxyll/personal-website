@@ -23,6 +23,18 @@ export interface Role {
   stack: string[];
 }
 
+export interface Award {
+  name: string;
+  /** The event or body that gave it. */
+  event: string;
+  year: string;
+  /** What it was for and where I come into it, as it should read. Keep it
+   *  exact: the award went to the organisation's platform, not to me. */
+  detail: string;
+  /** Where to read more, usually the matching case study. */
+  href?: string;
+}
+
 export interface Study {
   award: string;
   school: string;
@@ -40,7 +52,7 @@ export const cv = {
 
   /** Two short paragraphs. The first is the one a recruiter reads. */
   summary: [
-    "Software engineer with more than ten years of building websites and running the systems under them. Most recently I rebuilt a charity's learning platform from scratch in Laravel, React and PostgreSQL, wrote most of it myself, and took it to production.",
+    "Full-stack developer with more than ten years of building websites and running the systems under them. Most recently I rebuilt a charity's learning platform from scratch in Laravel, React and PostgreSQL, wrote most of it myself, and took it to production.",
     "I work with AI coding agents every day and treat them as a tool with limits: briefed properly, run in parallel, and checked line by line. First class honours in Multimedia Applications Development from SETU Waterford, on top of the years of doing it for a living.",
   ],
 
@@ -50,7 +62,7 @@ export const cv = {
       org: "The B!G Idea",
       orgUrl: "https://thebigidea.ie",
       location: "Ireland",
-      start: "Jul 2024",
+      start: "Jun 2024",
       end: "Present",
       summary:
         "An education programme run in secondary schools across Ireland. I look after the platform that students, teachers and industry mentors use to take part.",
@@ -106,6 +118,18 @@ export const cv = {
       stack: ["Web development", "Documentation", "IT support"],
     },
   ] as Role[],
+
+  /** Newest first. The hero shows the first one. */
+  awards: [
+    {
+      name: "Tech for Good Service Award",
+      event: "Technology Ireland Industry Awards",
+      year: "2026",
+      detail:
+        "Won by The B!G Idea's education platform. I'm the lead developer on its new version.",
+      href: "/work/learning-platform/",
+    },
+  ] as Award[],
 
   education: [
     {

@@ -7,6 +7,9 @@
  *
  * Flush left rather than indented: the section rails define where content
  * starts, so the copy begins on that line and nothing sits outside it.
+ *
+ * A plain-text title's closing full stop is set in the accent, as it is on
+ * the name in the hero and on every heading built from the slot.
  */
 interface Props {
   /** Plain-text title. Omit and use the default slot for markup. */
@@ -14,10 +17,12 @@ interface Props {
   class?: string;
 }
 const { title, class: className = "" } = Astro.props;
+const stop = title?.endsWith(".") ?? false;
+const words = stop ? title!.slice(0, -1) : title;
 ---
 
 <header class:list={["mb-10", className]}>
   <h2 class="text-[clamp(1.75rem,5vw,3rem)] font-bold tracking-tight leading-[0.95] m-0">
-    <slot>{title}</slot>
+    <slot>{words}{stop && <span class="text-accent">.</span>}</slot>
   </h2>
 </header>

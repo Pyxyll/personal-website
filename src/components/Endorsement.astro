@@ -1,0 +1,260 @@
+---
+/**
+ * Someone else's words about my work, set as a pull quote.
+ *
+ * It arrives the way you would pick text out in a design tool: a selection
+ * rectangle is dragged out over where the quote will sit, a pointer on its
+ * corner; on release the handles come up, and the quote is typed into the
+ * selection with a caret, pausing where a person would at commas and full
+ * stops. Then the caret blinks out, the selection lets go, and the name
+ * follows.
+ *
+ * The typed copy is drawn from the start at its full size, each character
+ * hidden until its turn, so the box is drawn to the size the quote will be
+ * and nothing reflows as it types. That copy is hidden from the
+ * accessibility tree; a plain copy beside it is what a screen reader reads,
+ * all of it, at once. Without JavaScript, or under reduced motion, the quote
+ * is simply there.
+ */
+import type { Endorsement } from "../lib/endorsements";
+
+interface Props {
+  endorsement: Endorsement;
+}
+const { endorsement } = Astro.props;
+const chars = [...endorsement.quote];
+---
+
+<figure data-reveal data-quote class="quote m-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10">
+  <span
+    class="display text-accent text-[clamp(4rem,8vw,6rem)] leading-[0.8] lg:col-span-1 lg:text-right select-none"
+    aria-hidden="true"
+  >“</span>
+  <div class="lg:col-span-10 flex flex-col gap-6">
+    <blockquote class="relative m-0 max-w-4xl text-[clamp(1.5rem,3.2vw,2.25rem)] font-medium tracking-tight leading-snug text-ink">
+      <p class="sr-only">{endorsement.quote}</p>
+      <p class="m-0 quote-typed" aria-hidden="true">
+        {chars.map((c) => <span class="ch">{c}</span>)}<span class="caret"></span>
+      </p>
+      <span class="marquee" aria-hidden="true">
+        <i class="handle tl"></i>
+        <i class="handle tr"></i>
+        <i class="handle bl"></i>
+        <i class="handle br"></i>
+        <svg class="pointer" width="16" height="20" viewBox="0 0 16 20" aria-hidden="true">
+          <path d="M1.5 1.5v14.2l3.6-3.4 2.4 5.6 2.6-1.1-2.4-5.5h5z" fill="#fafafa" stroke="#0a0a0a" stroke-width="1.25" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </blockquote>
+    <figcaption class="quote-by flex items-center gap-3 text-sm text-ink-dim">
+      <span class="h-px w-8 bg-accent" aria-hidden="true"></span>
+      <span><span class="font-medium text-ink">{endorsement.name}</span>, {endorsement.role}</span>
+    </figcaption>
+  </div>
+</figure>
+
+<style>
+  /* The selection. Sits a little outside the text, as a selection would,
+     and is not there at all until the script arms it. */
+  .marquee {
+    position: absolute;
+    left: -0.75rem;
+    top: -0.5rem;
+    width: calc(100% + 1.5rem);
+    height: calc(100% + 1rem);
+    border: 1px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity 0.4s ease,
+      background-color 0.3s ease;
+  }
+  .handle {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-accent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .handle.tl { left: -4px; top: -4px; }
+  .handle.tr { right: -4px; top: -4px; }
+  .handle.bl { left: -4px; bottom: -4px; }
+  .handle.br { right: -4px; bottom: -4px; }
+  /* The pointer doing the dragging: its tip on the moving corner. */
+  .pointer {
+    position: absolute;
+    left: calc(100% - 2px);
+    top: calc(100% - 2px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /* The caret: no width of its own, so moving it never moves the text. */
+  .caret {
+    display: none;
+    position: relative;
+    width: 0;
+  }
+  /* An empty inline-block sits on the baseline with no height, so the bar
+     is hung from there: down past the baseline, up to cap height. */
+  .caret::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    bottom: -0.2em;
+    width: 2px;
+    height: 1.05em;
+    background: var(--color-accent);
+  }
+
+  /* Armed by the script, only where it will run: everything waits. */
+  .quote.is-armed .ch {
+    visibility: hidden;
+  }
+  .quote.is-armed .ch.on {
+    visibility: visible;
+  }
+  .quote.is-armed .quote-by {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+
+  /* 1. The drag: out from the top-left corner, the width leading. */
+  .quote.is-dragging .marquee {
+    opacity: 1;
+    transition: none;
+    animation: quote-drag 0.8s cubic-bezier(0.45, 0, 0.2, 1) both;
+  }
+  .quote.is-dragging .pointer {
+    opacity: 1;
+    transition: none;
+  }
+  @keyframes quote-drag {
+    0% {
+      width: 0;
+      height: 0;
+    }
+    55% {
+      width: calc(80% + 1.2rem);
+      height: calc(55% + 0.55rem);
+    }
+    100% {
+      width: calc(100% + 1.5rem);
+      height: calc(100% + 1rem);
+    }
+  }
+
+  /* 2. Released: the fill clears, the handles come up, the pointer goes. */
+  .quote.is-selected .marquee {
+    opacity: 1;
+    background-color: transparent;
+  }
+  .quote.is-selected .handle {
+    opacity: 1;
+  }
+  .quote.is-selected .pointer {
+    opacity: 0;
+  }
+
+  /* 3. Typing: a caret after the last letter, solid while it types. */
+  .quote.is-typing .caret {
+    display: inline-block;
+  }
+  .quote.is-waiting .caret::after {
+    animation: quote-blink 0.9s steps(1) infinite;
+  }
+  @keyframes quote-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* 4. Done: the selection lets go and the name follows. */
+  .quote.is-done .marquee,
+  .quote.is-done .handle {
+    opacity: 0;
+  }
+  .quote.is-done .caret {
+    display: none;
+  }
+  .quote.is-done .quote-by {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+
+<script>
+  const figs = document.querySelectorAll<HTMLElement>("[data-quote]");
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+  /* A typist, not a metronome. The pace wanders from word to word, so some
+     come out in a quick burst and others more carefully; now and then a
+     word stalls partway through; there is a breath at commas and a longer
+     one at the full stop. Returns how long to wait after a character. */
+  const typist = () => {
+    let tempo = 1;
+    return (c: string) => {
+      if (c === " ") {
+        tempo = Math.min(1.7, Math.max(0.5, tempo + (Math.random() - 0.5) * 0.8));
+        return (10 + Math.random() * 24) * tempo + (Math.random() < 0.12 ? 90 + Math.random() * 110 : 0);
+      }
+      let ms = (9 + Math.random() * 22) * tempo;
+      if (Math.random() < 0.03) ms += 80 + Math.random() * 140;
+      if (c === "." || c === "!" || c === "?") ms += 240 + Math.random() * 120;
+      else if (c === "," || c === ";" || c === ":") ms += 120 + Math.random() * 100;
+      return ms;
+    };
+  };
+
+  async function play(fig: HTMLElement) {
+    const chars = [...fig.querySelectorAll<HTMLElement>(".ch")];
+    const caret = fig.querySelector<HTMLElement>(".caret")!;
+    const line = caret.parentElement!;
+
+    await wait(350);
+    fig.classList.add("is-dragging");
+    await wait(800);
+    fig.classList.remove("is-dragging");
+    fig.classList.add("is-selected");
+    await wait(320);
+
+    /* The caret starts at the first letter and blinks for a beat. */
+    line.insertBefore(caret, chars[0]);
+    fig.classList.add("is-typing", "is-waiting");
+    await wait(520);
+    fig.classList.remove("is-waiting");
+
+    const pace = typist();
+    for (const ch of chars) {
+      ch.classList.add("on");
+      ch.after(caret);
+      await wait(pace(ch.textContent ?? ""));
+    }
+
+    fig.classList.add("is-waiting");
+    await wait(1500);
+    fig.classList.add("is-done");
+  }
+
+  figs.forEach((fig) => {
+    if (still) return;
+    fig.classList.add("is-armed");
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        play(fig);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(fig);
+  });
+</script>

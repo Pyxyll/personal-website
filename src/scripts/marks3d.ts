@@ -130,14 +130,42 @@ function dot(r: number, color: string, at: Vec) {
   return m;
 }
 
-/** The floor of dots the object sits on. */
-function floor(color: string, y: number, extent = 130, spacing = 10) {
+/** Distances, from the camera, over which the floor fades out. Set each
+ *  frame from the camera's distance (see `place` in mount). */
+interface FloorFade {
+  uFadeNear: { value: number };
+  uFadeFar: { value: number };
+}
+
+/** The floor of dots the object sits on. It runs well past the card in every
+ *  direction, so at rest it fills the card edge to edge whatever the card's
+ *  shape, and in a hover shot it never shows an edge: it fades out with
+ *  distance from the camera instead, at distances scaled to that shot, so
+ *  every card's floor runs off into the dark the same way. The fade also
+ *  keeps the far rows, packed tight by perspective, from turning to moiré. */
+function floor(color: string, y: number, extent = 700, spacing = 10) {
   const pts: number[] = [];
   for (let x = -extent; x <= extent; x += spacing)
     for (let z = -extent; z <= extent; z += spacing) pts.push(x, y, z);
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-  return new THREE.Points(g, new THREE.PointsMaterial({ color, size: 1.4, sizeAttenuation: false, transparent: true, opacity: 0.9 }));
+  const fade: FloorFade = { uFadeNear: { value: 1e9 }, uFadeFar: { value: 2e9 } };
+  const m = new THREE.PointsMaterial({ color, size: 1.4, sizeAttenuation: false, transparent: true, opacity: 0.9 });
+  m.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, fade);
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying float vFadeDepth;")
+      .replace("#include <project_vertex>", "#include <project_vertex>\nvFadeDepth = -mvPosition.z;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform float uFadeNear;\nuniform float uFadeFar;\nvarying float vFadeDepth;")
+      .replace("#include <color_fragment>", "#include <color_fragment>\ndiffuseColor.a *= 1.0 - smoothstep(uFadeNear, uFadeFar, vFadeDepth);");
+  };
+  m.userData.fade = fade;
+  /* Positions span far beyond the object; the bounds would be right, but
+     there is nothing to gain from culling the one floor in the scene. */
+  const points = new THREE.Points(g, m);
+  points.frustumCulled = false;
+  return points;
 }
 
 /** A mono label pinned to a point in the scene, as HTML so it stays 13px. */
@@ -717,6 +745,10 @@ export function mount(fig: HTMLElement, slug: string) {
   ro.observe(sheet);
   fit();
 
+  /* The floor's fade, if this mark has a floor. */
+  const floorPoints = mark.group.getObjectByProperty("type", "Points") as THREE.Points | undefined;
+  const floorFade = (floorPoints?.material as THREE.Material | undefined)?.userData.fade as FloorFade | undefined;
+
   /* One number drives the camera: t is 0 at rest and 1 at the shot, and
      everything about the camera is a blend between the two. */
   const state = { t: 0 };
@@ -735,9 +767,18 @@ export function mount(fig: HTMLElement, slug: string) {
     const dist = (frameH / 2) / Math.tan(THREE.MathUtils.degToRad(fov / 2));
 
     camera.fov = fov;
-    camera.near = Math.max(1, dist - 500);
-    camera.far = dist + 500;
+    camera.near = Math.max(1, dist - 1200);
+    camera.far = dist * 3.2 + 1200;
     camera.updateProjectionMatrix();
+
+    /* The floor fades from a little past the object to three times its
+       distance. At rest the long lens puts the whole floor at nearly the
+       same distance, inside the near edge, so none of it fades and it fills
+       the card; as the camera comes in, the fade comes into view with it. */
+    if (floorFade) {
+      floorFade.uFadeNear.value = dist * 1.3;
+      floorFade.uFadeFar.value = dist * 3;
+    }
 
     /* Orientation first, from the angles. */
     dir.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));

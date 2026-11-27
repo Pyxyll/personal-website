@@ -4,9 +4,9 @@
 export const site = {
   name: "Dylan Collins",
   shortName: "Dylan Collins",
-  title: "Dylan Collins · Software engineer",
+  title: "Dylan Collins · Full-stack developer",
   description:
-    "Software engineer in Ireland. I build web platforms end to end, run the servers they live on, and work with AI tooling every day.",
+    "Full-stack developer in Ireland. I build web platforms end to end, run the servers they live on, and work with AI tooling every day.",
   url: "https://dylancollins.me",
   locale: "en_IE",
   language: "en-IE",
@@ -18,7 +18,7 @@ export const site = {
   author: {
     name: "Dylan Collins",
     email: "hello@dylancollins.me",
-    role: "Software engineer",
+    role: "Full-stack developer",
     country: "Ireland",
     countryCode: "IE",
   },

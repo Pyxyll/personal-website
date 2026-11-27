@@ -6,7 +6,8 @@
  * dashed rules above and below, same shader behind it — so the page opens and
  * closes on the same object.
  *
- * Below that, the full-width strip: credits, feed, profiles, secondary links.
+ * Below that, the strip on the same measure: who and where, the local time,
+ * the site's pages, profiles, a way back to the top, and the credits.
  *
  * Last, the wordmark: the name set huge in outline across the content
  * measure, cropped by the bottom of the page so it reads as rising out of
@@ -15,6 +16,8 @@
 import HeroShader from "./HeroShader";
 import FloatingIcons from "./FloatingIcons.astro";
 import OpenToWork from "./OpenToWork.astro";
+import ArrowIcon from "./ArrowIcon.astro";
+import SocialIcon from "./SocialIcon.astro";
 
 const year = new Date().getFullYear();
 ---
@@ -49,18 +52,21 @@ const year = new Date().getFullYear();
                 Let's talk<span class="text-accent">.</span>
               </p>
               <p class="text-base sm:text-lg text-ink-dim max-w-md">
-                Software engineer in Ireland. Platforms, the servers under
-                them, and the AI tooling around both.
+                Full-stack developer in Ireland, building software from
+                servers to native desktop apps.
               </p>
               <OpenToWork />
-              <div class="flex flex-wrap items-center justify-center gap-4">
-                <a href="/cv/" class="nav-cta fcta">View CV</a>
-                <a
-                  href="/contact/"
-                  class="link inline-flex items-baseline gap-2 font-mono text-xs uppercase tracking-widest text-ink-dim"
-                >
+              {/* The hero's pair of buttons, so the page closes on the same
+                  two ways on. Both carry .fcta, which sets the floating
+                  icons off on hover (FloatingIcons.astro). */}
+              <div class="flex flex-wrap items-center justify-center gap-3">
+                <a href="/cv/" class="btn btn-primary fcta">
+                  View CV
+                  <ArrowIcon />
+                </a>
+                <a href="/contact/" class="btn btn-secondary fcta">
                   Say hi
-                  <span aria-hidden="true">→</span>
+                  <ArrowIcon />
                 </a>
               </div>
             </div>
@@ -72,38 +78,86 @@ const year = new Date().getFullYear();
     <div class="rule-dashed" aria-hidden="true"></div>
   </section>
 
-  {/* ── 2. The strip ─────────────────────────────────────────────────── */}
-  <div class="mx-auto max-w-6xl px-6 lg:px-10 py-10 flex flex-col gap-8">
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 items-end">
-      <div class="font-mono text-xs text-ink-faint tracking-widest uppercase">
-        © {year} Dylan Collins
+  {/* ── 2. The strip ─────────────────────────────────────────────────
+      On the shell measure, so its edges are the panel's. Who and where on
+      the left, with the time in Ireland for anyone working out when to call;
+      the site's pages and my profiles in labelled columns; a way back up.
+      In the voice of the rest of the copy, sentence case, mono only for the
+      figures. */}
+  <div class="mx-auto w-full max-w-shell px-6 lg:px-10 pt-14 pb-8 text-sm">
+    <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-x-8 gap-y-10">
+      <div class="col-span-3 sm:col-span-6 lg:col-span-5 flex flex-col items-start gap-3">
+        <a href="/" class="nav-mark" aria-label="Dylan Collins, home">
+          <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
+        </a>
+        <p class="m-0 text-ink-dim">Full-stack developer in Ireland.</p>
+        <p class="m-0 flex items-center gap-2 text-[13px] text-ink-faint" data-local-time hidden>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.25" />
+            <path d="M8 4.75V8l2.25 1.5" />
+          </svg>
+          <span>It's <time class="font-mono text-xs text-ink-dim"></time> in Ireland</span>
+        </p>
       </div>
-      <div class="sm:text-center">
-        <a href="/rss.xml" class="link font-mono text-xs text-ink-dim tracking-widest uppercase">RSS</a>
+
+      {/* Six pages in two columns of three, so the block is as tall as
+          Elsewhere beside it. Hover is colour only, as in Elsewhere. */}
+      <nav aria-label="Site" class="col-span-2 sm:col-span-4 lg:col-span-3">
+        <p class="m-0 mb-4 text-[13px] text-ink-faint">Site</p>
+        <div class="grid grid-cols-2 gap-x-8">
+          <ul class="m-0 p-0 list-none flex flex-col gap-2.5">
+            <li><a href="/work/" class="flink">Work</a></li>
+            <li><a href="/skills/" class="flink">Skills</a></li>
+            <li><a href="/cv/" class="flink">CV</a></li>
+          </ul>
+          <ul class="m-0 p-0 list-none flex flex-col gap-2.5">
+            <li><a href="/now/" class="flink">Now</a></li>
+            <li><a href="/contact/" class="flink">Contact</a></li>
+            <li><a href="/privacy/" class="flink">Privacy</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="col-span-1 sm:col-span-2 lg:col-span-2">
+        <p class="m-0 mb-4 text-[13px] text-ink-faint">Elsewhere</p>
+        <ul class="m-0 p-0 list-none flex flex-col gap-2.5">
+          <li>
+            <a href="https://github.com/pyxyll" class="flink inline-flex items-center gap-2" target="_blank" rel="me noopener">
+              <SocialIcon name="github" class="h-3.5 w-3.5" />GitHub
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com/in/dylan-c-collins/" class="flink inline-flex items-center gap-2" target="_blank" rel="me noopener">
+              <SocialIcon name="linkedin" class="h-3.5 w-3.5" />LinkedIn
+            </a>
+          </li>
+          <li>
+            <a href="mailto:hello@dylancollins.me" class="flink inline-flex items-center gap-2" rel="author">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2.75 3.75h10.5a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1zM2 4.5l6 4.25 6-4.25" />
+              </svg>Email
+            </a>
+          </li>
+        </ul>
       </div>
-      <ul class="flex gap-6 sm:justify-end font-mono text-xs uppercase tracking-widest">
-        <li><a href="https://github.com/pyxyll" class="link text-ink-dim" target="_blank" rel="me noopener">GitHub</a></li>
-        <li><a href="https://www.linkedin.com/in/dylan-c-collins/" class="link text-ink-dim" target="_blank" rel="me noopener">LinkedIn</a></li>
-        <li><a href="mailto:hello@dylancollins.me" class="link text-ink-dim" rel="author">Email</a></li>
-      </ul>
+
+      <div class="col-span-3 sm:col-span-6 lg:col-span-2 flex lg:justify-end items-start">
+        <a href="#top" class="btn btn-secondary btn-sm" data-to-top>
+          Back to top
+          <svg class="icon-up" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 13V3M4 7l4-4 4 4" />
+          </svg>
+        </a>
+      </div>
     </div>
 
-    {/* The pages the bar does not carry. */}
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-rule pt-8">
-      <p class="font-mono text-[11px] uppercase tracking-widest text-ink-faint">
-        Built by hand in Ireland
-      </p>
-      <ul class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest">
-        <li><a href="/cv/" class="link text-ink-dim">CV</a></li>
-        <li><a href="/writing/" class="link text-ink-dim">Writing</a></li>
-        <li><a href="/now/" class="link text-ink-dim">Now</a></li>
-        <li><a href="/privacy/" class="link text-ink-dim">Privacy</a></li>
-      </ul>
+    <div class="mt-12 pt-6 border-t border-rule text-[13px] text-ink-faint">
+      <p class="m-0">© <span class="font-mono text-xs">{year}</span> Dylan Collins. Built by hand in Ireland.</p>
     </div>
   </div>
 
   {/* ── 3. The wordmark ──────────────────────────────────────────────── */}
-  <div class="wordmark-band mx-auto max-w-6xl px-6 lg:px-10 mt-6" aria-hidden="true">
+  <div class="wordmark-band mx-auto w-full max-w-shell px-6 lg:px-10 mt-6" aria-hidden="true">
     <div class="wordmark">
       <span class="ink">Dylan Collins</span>
       {/* The same word in the accent, shown only through a soft circle that
@@ -114,6 +168,22 @@ const year = new Date().getFullYear();
 </footer>
 
 <style>
+  /* The strip's links: colour only on hover, no underline. */
+  .flink {
+    color: var(--color-ink-dim);
+    transition: color 0.2s ease;
+  }
+  .flink:hover,
+  .flink:focus-visible {
+    color: var(--color-ink);
+  }
+  /* Back to top's speed lines, over everything while they last. */
+  :global(.speedlines) {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+  }
   .wordmark-band {
     container-type: inline-size;
   }
@@ -197,4 +267,175 @@ const year = new Date().getFullYear();
     window.addEventListener("scroll", queue, { passive: true });
     document.addEventListener("pointerleave", () => { px = -1e4; py = -1e4; queue(); });
   }
+</script>
+
+<script>
+  /* The time in Ireland, for the strip. Filled in here rather than at build
+     time, which would freeze it at whenever the site was built; without
+     JavaScript the line stays hidden. */
+  const line = document.querySelector<HTMLElement>("[data-local-time]");
+  const slot = line?.querySelector("time");
+  if (line && slot) {
+    const fmt = new Intl.DateTimeFormat("en-IE", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Dublin" });
+    const tick = () => {
+      const now = new Date();
+      slot.textContent = fmt.format(now);
+      slot.dateTime = now.toISOString();
+    };
+    tick();
+    line.hidden = false;
+    setInterval(tick, 30_000);
+  }
+</script>
+
+<script>
+  /* Back to top, with some flair. The page whips up to the top, faster and
+     faster, with comic-book speed lines: bold tapered wedges rising from the
+     bottom of the screen, thick at the foot and sharp at the tip, leaning in
+     a touch toward a point far above, so they all say "up". Only down the
+     two sides, the outer fifth each way: the middle, where you read, stays
+     clear. They are
+     redrawn in a new arrangement twelve times a second, on twos, which is
+     the boil of drawn lines. When it hits the top the page overshoots and springs back
+     like a rubber band. Plain script, no library: this is on every page.
+     Under reduced motion it is a plain jump. */
+  const link = document.querySelector<HTMLAnchorElement>("[data-to-top]");
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const jump = (y: number) => window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+
+  function speedLines() {
+    const canvas = document.createElement("canvas");
+    canvas.className = "speedlines";
+    canvas.setAttribute("aria-hidden", "true");
+    document.body.appendChild(canvas);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    const ctx = canvas.getContext("2d")!;
+    ctx.scale(dpr, dpr);
+    /* The point the lines lean toward: far above the middle, so they are
+       nearly vertical, with just enough perspective to read as a rush. */
+    const vx = w * 0.5;
+    const vy = -h * 4;
+    const foot = h + 24;
+
+    let level = 0;
+    let drawnAt = -Infinity;
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      if (level < 0.01) return;
+      ctx.fillStyle = "#fafafa";
+      /* More lines, and longer, the faster it goes. */
+      const count = Math.round(45 + 75 * level);
+      for (let i = 0; i < count; i++) {
+        /* Within the outer fifth on either side, thickest at the edge. */
+        const edge = Math.pow(Math.random(), 1.4) * 0.19;
+        const x = (Math.random() < 0.5 ? edge : 1 - edge) * w;
+        const len = h * (0.25 + Math.random() * 0.65) * (0.55 + 0.45 * level);
+        const tipY = foot - len;
+        const lean = (foot - tipY) / (foot - vy);
+        const tipX = x + (vx - x) * lean;
+        const half = 1 + Math.random() * 5.5;
+        ctx.globalAlpha = (0.12 + Math.random() * 0.26) * level;
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(x + half, foot);
+        ctx.lineTo(x - half, foot);
+        ctx.closePath();
+        ctx.fill();
+      }
+    };
+
+    return {
+      /** l: strength, 0 to 1. A fresh set of lines every 83ms. */
+      set(l: number, now: number) {
+        level = l;
+        if (now - drawnAt >= 83) {
+          drawnAt = now;
+          draw();
+        }
+      },
+      /** Thin out and go, still boiling. */
+      stop() {
+        const t0 = performance.now();
+        const from = level;
+        drawnAt = -Infinity;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - t0) / 240);
+          this.set(from * (1 - p), now);
+          if (p < 1) requestAnimationFrame(tick);
+          else canvas.remove();
+        };
+        requestAnimationFrame(tick);
+      },
+    };
+  }
+
+  /* The landing: the page carries on past the top, then springs back. A
+     damped spring, kicked downward, with the kick scaled to the speed it
+     arrived at. */
+  function bounce(strength: number) {
+    const body = document.body;
+    const amp = 16 + 30 * strength;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const t = (now - t0) / 1000;
+      const y = amp * Math.exp(-6.5 * t) * Math.sin(15 * t);
+      body.style.transform = `translateY(${y.toFixed(2)}px)`;
+      if (t < 0.9) requestAnimationFrame(tick);
+      else body.style.transform = "";
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function whoosh(after: () => void) {
+    const start = window.scrollY;
+    /* Quick, a little longer for a longer page, never over a second. */
+    const dur = Math.min(950, 380 + start / 14);
+    const lines = speedLines();
+    /* Timed from the first frame, not the click, so the first frame is the
+       start: nothing on screen yet, and nothing to flash. */
+    let t0 = -1;
+    const step = (now: number) => {
+      if (t0 < 0) t0 = now;
+      const p = Math.min(1, (now - t0) / dur);
+      /* Ease in: it gathers speed all the way, and hits the top flat out. */
+      jump(Math.round(start * (1 - p * p * p)));
+      /* The lines follow the run, not the frame-to-frame speed: none at
+         the start, building to full by two fifths of the way. */
+      const k = Math.min(1, Math.max(0, (p - 0.03) / 0.37));
+      lines.set(k * k * (3 - 2 * k), now);
+      if (p < 1) requestAnimationFrame(step);
+      else {
+        lines.stop();
+        /* It arrives at three times the average speed; a long way, a
+           harder landing. */
+        bounce(Math.min(1, (3 * start) / dur / 8));
+        after();
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  link?.addEventListener("click", (e) => {
+    e.preventDefault();
+    /* From the keyboard, focus goes to the top of the page with you; from a
+       click it just lets go of the button. */
+    const fromKeys = e.detail === 0;
+    const after = () => {
+      if (fromKeys) document.querySelector<HTMLElement>("#site-nav .nav-mark")?.focus({ preventScroll: true });
+      else link.blur();
+    };
+    if (still.matches || window.scrollY < 4) {
+      jump(0);
+      after();
+      return;
+    }
+    whoosh(after);
+  });
 </script>

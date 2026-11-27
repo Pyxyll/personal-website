@@ -17,8 +17,8 @@ export interface Skill {
   body: string;
   /** What that looks like in practice. Concrete, not adjectives. */
   practice: string[];
-  /** What I reach for. The first three also show in the nav menu and on the
-      homepage cards, so lead with the ones worth leading with. */
+  /** What I reach for, listed on /skills/. Lead with the ones worth leading
+      with. The homepage leaves them out: the work cards carry the stack. */
   tools: string[];
   /** Pages on this site that back the claim up. */
   proof?: { label: string; href: string }[];
@@ -30,7 +30,7 @@ export const skills: Skill[] = [
     title: "Websites and front-end",
     tagline: "Interfaces that load fast and read clearly.",
     body:
-      "I design and build front-ends by hand: semantic HTML, type and layout that hold up on a phone, and motion that earns its place. Static by default, so pages load instantly and cost almost nothing to run. The schematics on this site are the example closest to hand: three.js on a desktop, plain SVG everywhere else.",
+      "I design and build front-ends by hand: semantic HTML, type and layout that hold up on a phone, and motion that earns its place. Static where it can be, so pages load instantly. The schematics on this site are the example closest to hand: three.js on a desktop, plain SVG everywhere else.",
     practice: [
       "Design and build, mobile first",
       "Accessibility as a starting point: measured contrast, keyboard paths, reduced motion honoured",
@@ -51,7 +51,7 @@ export const skills: Skill[] = [
     title: "Web apps and platforms",
     tagline: "Software with real users, roles and data behind it.",
     body:
-      "At The B!G Idea I rebuilt the learning platform that schools across Ireland use: five kinds of user, each with their own dashboard and permissions, on Laravel, React and PostgreSQL. I wrote most of it, from the data model to the design system. I scope in phases, so there is something usable early and not a big reveal at the end.",
+      "At The B!G Idea I'm the lead developer on the platform schools across Ireland use: five kinds of user, each with their own dashboard and permissions, on Laravel, React and PostgreSQL. I wrote most of it, from the data model to the design system, and it went from first commit to live in schools in eight months, shipped in phases rather than one big reveal.",
     practice: [
       "Data modelling, and migrations off legacy systems",
       "Accounts, roles and permissions",
@@ -62,17 +62,15 @@ export const skills: Skill[] = [
     ],
     tools: ["Laravel", "React", "PostgreSQL", "TypeScript", "Inertia", "Redis"],
     proof: [
-      { label: "Learning platform", href: "/work/learning-platform/" },
-      { label: "ShiftDesk", href: "/work/shiftdesk/" },
-      { label: "Pagerr", href: "/work/pagerr/" },
+      { label: "The B!G Idea platform", href: "/work/learning-platform/" },
     ],
   },
   {
     slug: "automation",
     title: "Automation and integrations",
-    tagline: "Stop retyping the same data into two systems.",
+    tagline: "Jobs that move data on their own, and say when they fail.",
     body:
-      "If someone loses a morning a week moving data between tools, that is a script, not a job. I connect the systems a team already pays for, move the data on a schedule, and put alerts on the parts where being wrong is expensive.",
+      "I connect applications to the tools a team already uses, move data on a schedule, and put alerts where being wrong is expensive. On the platform that means its mail engine, the dry-run-first import from the old system, and the jobs that prune old data on time.",
     practice: [
       "Syncing an application with the tools a team already works in",
       "Scheduled jobs, imports and exports",
@@ -105,7 +103,7 @@ export const skills: Skill[] = [
   {
     slug: "ai",
     title: "Working with AI",
-    tagline: "A daily tool, used with its limits in view.",
+    tagline: "The agent types. I read every line.",
     body:
       "Most of what I ship now starts with a coding agent and ends with me reading every line of it. I give agents the project's conventions and its history, run several at once on reviews and large changes, and keep tests and my own review as the gate. I also build small tools on models directly, local ones included.",
     practice: [
@@ -118,25 +116,6 @@ export const skills: Skill[] = [
     ],
     tools: ["Claude Code", "Ollama", "MCP", "Local vision models"],
     proof: [{ label: "Shot In The Dark", href: "/work/shot-in-the-dark/" }],
-  },
-  {
-    slug: "audit",
-    title: "Audits and legacy systems",
-    tagline: "Reading a system I did not write, and working out what to fix first.",
-    body:
-      "I spent the best part of two years keeping an inherited WordPress platform alive while building its replacement, which teaches you to read other people's code without flinching. I can say what a system costs to keep, what is worth fixing first, and when a rebuild is the cheaper option. It is not always the rebuild.",
-    practice: [
-      "Legacy WordPress and PHP, plugins and all",
-      "Security incident response and hardening",
-      "Speed, search and accessibility checks",
-      "Data protection built in, for a product used by under-18s",
-      "Migrations planned so nobody loses a year of work",
-      "A written plan that anyone could pick up",
-    ],
-    tools: ["WordPress", "PHP", "MySQL", "PostgreSQL"],
-    proof: [
-      { label: "Why I'm moving clients off WordPress", href: "/writing/moving-clients-off-wordpress/" },
-    ],
   },
 ];
 
