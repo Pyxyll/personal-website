@@ -4,7 +4,7 @@
  * line and an optional action. Used wherever a collection has no entries yet
  * so the section reads as intentionally empty, not broken.
  *
- * The action is the site's accent text with its arrow.
+ * The action is a small secondary pill, as everywhere else.
  */
 import ArrowIcon from "./ArrowIcon.astro";
 
@@ -21,7 +21,7 @@ const { message, ctaHref, ctaLabel } = Astro.props;
   {ctaHref && ctaLabel && (
     <a
       href={ctaHref}
-      class="self-start inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text transition-colors duration-300 hover:text-ink"
+      class="self-start btn btn-secondary btn-sm"
     >
       {ctaLabel}
       <ArrowIcon />

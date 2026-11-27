@@ -1,8 +1,12 @@
-# Contact form Worker
+# Contact form Worker, and an MCP server
 
 A Cloudflare Worker that receives contact-form submissions and sends two emails
 via Resend: a notification to you (Reply-To = the sender) and a confirmation to
-the sender. The main site stays fully static — this is the only dynamic piece.
+the sender. The main site stays fully static; this is the only dynamic piece.
+
+At `/mcp` it is also an MCP server (see "MCP server" below): anyone using
+Claude, ChatGPT, Cursor or another MCP client can add the URL and ask about
+Dylan.
 
 Free on Cloudflare Workers (100k req/day, no card) and Resend (3k emails/mo).
 
@@ -68,3 +72,31 @@ npx wrangler dev          # runs the Worker locally
 - **Custom route (optional):** to use `https://contact.dylancollins.me` instead of
   the `workers.dev` URL, move the domain's DNS to Cloudflare and add a route in
   `wrangler.toml`. Not required.
+
+## MCP server
+
+`src/mcp.js`, served at `/mcp`. A remote MCP server over Streamable HTTP,
+stateless, no sign-in, no dependencies. It reads its facts from the site's
+`/ai.json` (built by `src/lib/ai.ts` in the site), cached ten minutes, so
+deploying the site updates it. Set where it reads from with `SITE_ORIGIN` in
+`wrangler.toml`.
+
+Tools: `about_dylan`, `get_cv`, `list_projects`, `get_project`, `get_skills`,
+`get_now`, `match_role` (keyword evidence for a job description, gaps
+included) and `send_message` (emails a notification only, reply-to the sender,
+same rate limit as the form).
+
+Deploy the site first, so `/ai.json` exists, then `npx wrangler deploy`.
+
+Connect to it:
+
+- Claude Code: `claude mcp add --transport http dylan-collins https://dylancollins-contact.dylan-ad3.workers.dev/mcp`
+- Claude (web or desktop): Settings, Connectors, Add custom connector, paste the URL.
+- Cursor, VS Code and others: an `mcp.json` entry with `"url": "https://dylancollins-contact.dylan-ad3.workers.dev/mcp"`.
+
+Test it locally against the site's dev server:
+
+```bash
+npx wrangler dev --port 8787 --var SITE_ORIGIN:http://127.0.0.1:4329
+npx @modelcontextprotocol/inspector   # then connect to http://127.0.0.1:8787/mcp
+```

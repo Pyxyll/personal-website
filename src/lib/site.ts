@@ -17,7 +17,7 @@ export const site = {
   contactEndpoint: "https://dylancollins-contact.dylan-ad3.workers.dev",
   author: {
     name: "Dylan Collins",
-    email: "hello@dylancollins.me",
+    email: "dylan@dylancollins.me",
     role: "Full-stack developer",
     country: "Ireland",
     countryCode: "IE",

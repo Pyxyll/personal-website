@@ -1,0 +1,81 @@
+---
+/**
+ * The top of every inner page: the homepage's hero, a size down.
+ *
+ * The same object, so a page opens the way the site does: dashed rules
+ * across the whole width above and below, and between them a rounded panel
+ * on the shell measure with the dithered shader behind a scrim. Inside, on
+ * the hero's grid, the page's name set in the display face with the brand
+ * full stop, then whatever the page has to say first, then its actions as
+ * pill buttons. Nothing above the title and nothing small under it: the
+ * name is the first thing on the page.
+ *
+ * Slots: the default slot is the lead copy (a paragraph or two); "actions"
+ * is the row of buttons; "after" is anything else that belongs in the panel
+ * under them, like a case study's stack.
+ *
+ * Off the printed page entirely: /cv/ prints, and has its own paper header.
+ */
+import HeroShader from "./HeroShader";
+
+interface Props {
+  title: string;
+  /** Size of the title. Case studies have long names. */
+  size?: "page" | "long";
+}
+const { title, size = "page" } = Astro.props;
+
+/* The brand full stop, unless the name already has one in it (a domain). */
+const stop = !title.includes(".");
+---
+
+<section class="pt-5 sm:pt-7 flex flex-col gap-3 sm:gap-4 print:hidden">
+  <div class="rule-dashed" aria-hidden="true"></div>
+
+  <div class="mx-auto w-full max-w-shell px-6 lg:px-10">
+    <div class="relative isolate flex flex-col justify-end min-h-[19rem] sm:min-h-[22rem] overflow-hidden rounded-[20px] border border-rule">
+      <HeroShader client:load />
+      <div
+        class="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-t from-paper from-0% via-paper/70 via-45% to-transparent to-85%"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative z-10 w-full px-6 sm:px-10 lg:px-14 pt-16 sm:pt-20 pb-12 sm:pb-16">
+        <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end">
+          <div class="hidden lg:block lg:col-span-2"></div>
+          <div class="col-span-12 lg:col-span-10 flex flex-col gap-6 sm:gap-8">
+            <h1
+              class:list={[
+                "display m-0 lift lift-1",
+                size === "long" ? "text-[clamp(2.5rem,6.5vw,5rem)]" : "text-[clamp(3rem,9vw,6.5rem)]",
+              ]}
+            >
+              {title}{stop && <span class="text-accent">.</span>}
+            </h1>
+
+            {Astro.slots.has("default") && (
+              <div class="flex flex-col gap-3 max-w-2xl text-base sm:text-lg text-ink-dim lift lift-2">
+                <slot />
+              </div>
+            )}
+
+            {Astro.slots.has("actions") && (
+              <div class="flex flex-wrap items-center gap-3 lift lift-3">
+                <slot name="actions" />
+              </div>
+            )}
+
+            {Astro.slots.has("after") && (
+              <div class="lift lift-4">
+                <slot name="after" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-dashed" aria-hidden="true"></div>
+</section>

@@ -2,6 +2,10 @@
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
 import OpenToWork from "../../components/OpenToWork.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
+import SocialIcon from "../../components/SocialIcon.astro";
+import ArrowIcon from "../../components/ArrowIcon.astro";
 import { contactPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 
@@ -22,79 +26,69 @@ const pageUrl = new URL("/contact/", site.url).toString();
       ]),
     ]}
   />
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    <header class="flex flex-col gap-6 mb-16 lg:mb-24">
-      <div class="flex flex-col gap-5">
-        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
-          Say hi<span class="text-accent">.</span>
-        </h1>
-        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          Hiring, got a question, or just want to say hi? All welcome. Fastest
-          by email.
-        </p>
-        <p class="text-sm text-ink-dim max-w-2xl lift lift-3">
-          After the short version of me first? <a href="/cv/" class="ilink">The CV</a> has
-          the roles, the dates and the stack, and you can download it from there.
-        </p>
-        <OpenToWork detail class="lift lift-4" />
-      </div>
-    </header>
+  <PageHero title="Say hi">
+    <p class="m-0">
+      Hiring, got a question, or just want to say hi? All welcome. Email is
+      quickest; the form below lands in the same inbox.
+    </p>
+    <Fragment slot="actions">
+      <a href={`mailto:${site.author.email}`} class="btn btn-primary" rel="author">
+        Email me
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2.75 3.75h10.5a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1zM2 4.5l6 4.25 6-4.25" />
+        </svg>
+      </a>
+      <a href="/cv/" class="btn btn-secondary">View CV<ArrowIcon /></a>
+    </Fragment>
+    {site.hiring.open && <OpenToWork detail slot="after" />}
+  </PageHero>
 
-    <div class="flex flex-col gap-6" data-reveal>
-      <h2 class="section-heading">Direct</h2>
-      <address class="flex flex-col gap-4 not-italic">
-        <a href="mailto:hello@dylancollins.me" class="text-3xl sm:text-4xl font-semibold tracking-tight link inline-block self-start" rel="author">
-          hello@dylancollins.me
-        </a>
-        <ul class="flex flex-wrap gap-x-8 gap-y-2 font-mono text-xs uppercase tracking-widest text-ink-dim">
-          <li><a href="https://github.com/pyxyll" target="_blank" rel="me noopener" class="link">GitHub <span aria-hidden="true">↗</span></a></li>
-          <li><a href="https://www.linkedin.com/in/dylan-c-collins/" target="_blank" rel="me noopener" class="link">LinkedIn <span aria-hidden="true">↗</span></a></li>
-        </ul>
-      </address>
-    </div>
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="py-20 sm:py-28" data-reveal>
+      {/* One plate: the direct ways on the left, the form on the right. */}
+      <div class="grid grid-cols-1 lg:grid-cols-12 rounded-[6px] border border-rule overflow-hidden">
+        <address class="lg:col-span-5 not-italic flex flex-col gap-8 p-6 sm:p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-rule">
+          <div class="flex flex-col gap-3">
+            <p class="m-0 text-[13px] text-ink-faint">Email</p>
+            <a
+              href={`mailto:${site.author.email}`}
+              rel="author"
+              class="self-start text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-tight leading-tight text-ink hover:text-accent-text transition-colors break-all"
+            >
+              {site.author.email}
+            </a>
+          </div>
+          <div class="flex flex-col gap-3">
+            <p class="m-0 text-[13px] text-ink-faint">Elsewhere</p>
+            <div class="flex flex-wrap gap-2">
+              <a href={site.social.github} target="_blank" rel="me noopener" class="btn btn-secondary btn-sm">
+                <SocialIcon name="github" class="h-4 w-4 icon-lead" />GitHub
+              </a>
+              <a href={site.social.linkedin} target="_blank" rel="me noopener" class="btn btn-secondary btn-sm">
+                <SocialIcon name="linkedin" class="h-4 w-4 icon-lead" />LinkedIn
+              </a>
+            </div>
+          </div>
+          <p class="m-0 mt-auto text-sm leading-relaxed text-ink-dim">
+            After the short version of me first? <a href="/cv/" class="ilink">The CV</a> has
+            the roles, the dates and the stack, and you can download it from there.
+          </p>
+        </address>
 
-    <div class="rule my-12 lg:my-16"></div>
-
-    <div class="flex flex-col gap-6" data-reveal>
-      <h2 class="section-heading">Form</h2>
-      <div>
-        <form
-          id="contact-form"
-          action={site.contactEndpoint}
-          method="POST"
-          class="grid gap-6 max-w-2xl"
-        >
+        <form id="contact-form" action={site.contactEndpoint} method="POST" class="lg:col-span-7 grid gap-6 p-6 sm:p-8 lg:p-10">
+          <div class="grid gap-6 sm:grid-cols-2">
+            <label class="grid gap-2">
+              <span class="text-[13px] text-ink-faint">Name</span>
+              <input type="text" name="name" required maxlength="100" autocomplete="name" class="field" />
+            </label>
+            <label class="grid gap-2">
+              <span class="text-[13px] text-ink-faint">Email</span>
+              <input type="email" name="email" required maxlength="200" autocomplete="email" class="field" />
+            </label>
+          </div>
           <label class="grid gap-2">
-            <span class="font-mono text-xs uppercase tracking-widest text-ink-dim">Name</span>
-            <input
-              type="text"
-              name="name"
-              required
-              maxlength="100"
-              autocomplete="name"
-              class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent transition-colors"
-            />
-          </label>
-          <label class="grid gap-2">
-            <span class="font-mono text-xs uppercase tracking-widest text-ink-dim">Email</span>
-            <input
-              type="email"
-              name="email"
-              required
-              maxlength="200"
-              autocomplete="email"
-              class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent transition-colors"
-            />
-          </label>
-          <label class="grid gap-2">
-            <span class="font-mono text-xs uppercase tracking-widest text-ink-dim">Message</span>
-            <textarea
-              name="message"
-              rows="5"
-              required
-              maxlength="5000"
-              class="bg-transparent border-b border-rule-strong py-3 text-lg focus:border-accent transition-colors resize-y"
-            ></textarea>
+            <span class="text-[13px] text-ink-faint">Message</span>
+            <textarea name="message" rows="6" required maxlength="5000" class="field resize-y"></textarea>
           </label>
 
           {/* Honeypot: hidden from humans, catches bots. Never fill this. */}
@@ -105,25 +99,17 @@ const pageUrl = new URL("/contact/", site.url).toString();
             </label>
           </div>
 
-          <div class="flex items-center gap-4">
-            <button
-              type="submit"
-              class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+          <div class="flex flex-wrap items-center gap-4">
+            <button type="submit" class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
               <span data-label>Send</span>
-              <span aria-hidden="true">→</span>
+              <ArrowIcon />
             </button>
-            <p
-              id="contact-status"
-              role="status"
-              aria-live="polite"
-              class="font-mono text-xs uppercase tracking-widest"
-            ></p>
+            <p id="contact-status" role="status" aria-live="polite" class="m-0 text-sm"></p>
           </div>
         </form>
       </div>
     </div>
-  </section>
+  </FramedSection>
 
   <script>
     // Progressive enhancement: intercept the submit, POST JSON to the Worker,
@@ -175,3 +161,29 @@ const pageUrl = new URL("/contact/", site.url).toString();
     }
   </script>
 </Base>
+
+<style>
+  /* The form's fields: hairline boxes on the page's second ground, the
+     brand pink when they have focus. */
+  .field {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--color-rule-strong);
+    background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .field:hover {
+    border-color: color-mix(in srgb, var(--color-ink) 45%, transparent);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+</style>

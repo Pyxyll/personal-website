@@ -13,7 +13,8 @@
 
 import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,12 +94,22 @@ const url = `http://127.0.0.1:${port}/cv/`;
 console.log(`cv:pdf  printing ${url}`);
 // Asynchronous on purpose. The server above lives in this process, so waiting
 // on the browser synchronously would stop it answering the browser's requests.
+// The old PDF goes first, so a print that fails is a failure rather than
+// last time's file reported as new. And the browser gets a fresh profile of
+// its own each run, so nothing left over from another run can intercept it.
+rmSync(out, { force: true });
+const profile = mkdtempSync(join(tmpdir(), "cv-pdf-"));
+
 const status = await new Promise((resolve) => {
   const child = spawn(
     browser,
     [
       "--headless=new",
+      `--user-data-dir=${profile}`,
       "--disable-gpu",
+      // No WebGL. The page's shader panels never reach paper, and rendering
+      // them in software under the virtual clock took past the time limit.
+      "--disable-3d-apis",
       "--no-pdf-header-footer",
       // Long enough for the web fonts to land before the page is captured.
       "--virtual-time-budget=5000",
@@ -118,6 +129,7 @@ const status = await new Promise((resolve) => {
   });
 });
 server.close();
+rmSync(profile, { recursive: true, force: true });
 
 if (status !== 0 || !existsSync(out)) fail("The browser did not produce a PDF.");
 

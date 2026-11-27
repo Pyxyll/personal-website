@@ -2,36 +2,35 @@
 /**
  * What I do, at length.
  *
- * The homepage plate is the summary; this is each of the five with room to
- * breathe: the schematic at full size with its labels and caption, the claim,
- * what it looks like in practice, the tools, and the pages that back it up.
+ * The homepage plate is the summary; this is each of the five with room: a
+ * heading, then a plate with the schematic on one side (3D on a desktop, as
+ * on the homepage, and turning toward you when pointed at) and on the other
+ * the line, the claim, what it looks like in practice, the tools, and the
+ * pages that back it up. The drawing swaps sides down the page so the five
+ * read as a run of spreads. In the homepage's order: the main thing first,
+ * then the one to notice. Working with AI carries its method under it.
  * Everything comes from lib/skills.ts.
  */
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
+import SectionHeader from "../../components/SectionHeader.astro";
 import SkillSketch from "../../components/SkillSketch.astro";
 import StepTrack from "../../components/StepTrack.astro";
-import OpenToWork from "../../components/OpenToWork.astro";
+import TechIcon from "../../components/TechIcon.astro";
+import ArrowIcon from "../../components/ArrowIcon.astro";
 import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 import { skills, aiLoop } from "../../lib/skills";
 
+const ORDER = ["app", "ai", "website", "automation", "hosting"];
+const ordered = [...skills].sort((a, b) => ORDER.indexOf(a.slug) - ORDER.indexOf(b.slug));
+
 const pageUrl = new URL("/skills/", site.url).toString();
 const pageTitle = "Skills · Dylan Collins";
 const pageDesc =
-  "What I do and where I have done it: web platforms, front-end, automation, infrastructure, legacy systems, and working with AI.";
-
-// Sketch and pitch swap sides down the page, so the five read as a run of
-// spreads rather than rows of the same table. Both need an explicit row, or
-// the pitch drops below the sketch on the flipped ones.
-const sketchCols = (i: number) =>
-  i % 2 === 0
-    ? "lg:col-span-5 lg:col-start-1 lg:row-start-1"
-    : "lg:col-span-5 lg:col-start-8 lg:row-start-1";
-const pitchCols = (i: number) =>
-  i % 2 === 0
-    ? "lg:col-span-6 lg:col-start-7 lg:row-start-1"
-    : "lg:col-span-6 lg:col-start-1 lg:row-start-1";
+  "What I do and where I have done it: web apps and platforms, working with AI, front-end, automation and infrastructure.";
 ---
 
 <Base title={pageTitle} description={pageDesc}>
@@ -46,115 +45,79 @@ const pitchCols = (i: number) =>
     ]}
   />
 
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    {/* ── HEADER ───────────────────────────────────────────────────── */}
-    <header class="grid grid-cols-12 gap-6 lg:gap-10 mb-20 lg:mb-28">
-      <div class="col-span-12 lg:col-span-10 flex flex-col gap-5">
-        <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
-          Skills<span class="text-accent">.</span>
-        </h1>
-        <p class="text-lg text-ink-dim max-w-2xl lift lift-2">
-          Five things I do, what each one looks like in practice, and where on
-          this site you can see it. I would sooner show the work than list the
-          buzzwords, so every claim here points at something.
-        </p>
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 lift lift-3">
-          <a
-            href="/cv/"
-            class="inline-flex items-center gap-3 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
-          >
-            View CV
-            <span aria-hidden="true">→</span>
-          </a>
-          <OpenToWork />
-        </div>
-      </div>
-    </header>
+  <PageHero title="Skills">
+    <p class="m-0">
+      Five things I do, what each one looks like in practice, and where on
+      this site you can see it. I would sooner show the work than list the
+      buzzwords, so every claim here points at something.
+    </p>
+    <Fragment slot="actions">
+      <a href="/cv/" class="btn btn-primary">View CV<ArrowIcon /></a>
+      <a href="/work/" class="btn btn-secondary">See work<ArrowIcon /></a>
+    </Fragment>
+  </PageHero>
 
-    {/* ── THE SIX ──────────────────────────────────────────────────── */}
-    {skills.map((skill, i) => (
-      <article
-        id={skill.slug}
-        aria-labelledby={`${skill.slug}-title`}
-        class="scroll-mt-8 mb-20 lg:mb-28"
-        data-reveal
-      >
-        <div class="rule mb-8"></div>
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="flex flex-col gap-24 sm:gap-32 py-20 sm:py-28">
+      {ordered.map((skill, i) => {
+        const flip = i % 2 === 1;
+        return (
+          <section id={skill.slug} aria-labelledby={`${skill.slug}-title`} class="scroll-mt-28" data-reveal>
+            <SectionHeader>
+              <span id={`${skill.slug}-title`}>{skill.title}<span class="text-accent">.</span></span>
+            </SectionHeader>
 
-        <div class="grid grid-cols-12 gap-x-6 gap-y-10 lg:gap-x-10">
-          <div class={`col-span-12 sm:col-span-8 ${sketchCols(i)}`}>
-            <div class="border border-rule bg-paper-2 p-6 sm:p-7">
-              <SkillSketch slug={skill.slug} caption />
-            </div>
-          </div>
-
-          <div class={`col-span-12 ${pitchCols(i)} flex flex-col gap-5`}>
-            <div>
-              <h2
-                id={`${skill.slug}-title`}
-                class="text-[clamp(1.625rem,3.5vw,2.25rem)] font-semibold tracking-tight leading-tight m-0"
+            <div class="grid grid-cols-1 lg:grid-cols-12 rounded-[6px] border border-rule overflow-hidden">
+              {/* The drawing. Its cell is what the 3D build draws across and
+                  turns toward the pointer on. */}
+              <div
+                class:list={[
+                  "lg:col-span-5 flex items-center p-6 sm:p-8 border-b lg:border-b-0 border-rule",
+                  flip ? "lg:order-2 lg:border-l" : "lg:border-r",
+                ]}
               >
-                {skill.title}
-              </h2>
-              <p class="text-accent-text text-base sm:text-lg mt-1.5">{skill.tagline}</p>
-            </div>
+                <SkillSketch slug={skill.slug} class="w-full" />
+              </div>
 
-            <p class="text-ink-dim text-base leading-relaxed max-w-xl">{skill.body}</p>
+              <div class="lg:col-span-7 flex flex-col gap-6 p-6 sm:p-8 lg:p-10">
+                <p class="m-0 text-lg sm:text-xl leading-snug text-ink">{skill.tagline}</p>
+                <p class="m-0 text-base leading-relaxed text-ink-dim max-w-2xl">{skill.body}</p>
 
-            {/* What it looks like in practice, as one run-on line. As a
-                bulleted list this was six more bullets on a page that already
-                had plenty. */}
-            <p class="text-sm leading-relaxed text-ink-faint max-w-xl">
-              {skill.practice.join(" · ")}
-            </p>
-
-            {/* Unlabelled on purpose: a mono run of tool names and a row of
-                links each say what they are. */}
-            <div class="flex flex-col gap-4 border-t border-rule pt-6">
-              <p class="font-mono text-[13px] leading-relaxed text-ink-dim m-0 max-w-xl">{skill.tools.join(" · ")}</p>
-
-              {skill.proof && (
-                <p class="flex flex-wrap gap-x-6 gap-y-2 text-base m-0">
-                  {skill.proof.map((p) => (
-                    <a href={p.href} class="ilink">{p.label}</a>
+                <ul class="m-0 p-0 list-none grid sm:grid-cols-2 gap-x-8 gap-y-2.5 max-w-2xl">
+                  {skill.practice.map((line) => (
+                    <li class="flex gap-3 text-sm leading-relaxed text-ink-dim">
+                      <span class="flex h-[1lh] shrink-0 items-center" aria-hidden="true"><span class="h-[5px] w-[5px] bg-accent"></span></span>
+                      <span>{line}</span>
+                    </li>
                   ))}
-                </p>
-              )}
+                </ul>
+
+                <div class="mt-auto flex flex-col gap-4 border-t border-rule pt-6">
+                  <ul class="flex flex-wrap gap-1.5 m-0 p-0 list-none" aria-label="Tools">
+                    {skill.tools.map((tool) => <li class="chip"><TechIcon name={tool} />{tool}</li>)}
+                  </ul>
+                  {skill.proof && (
+                    <div class="flex flex-wrap gap-2">
+                      {skill.proof.map((p) => (
+                        <a href={p.href} class="btn btn-secondary btn-sm">{p.label}<ArrowIcon /></a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* The AI entry carries its method with it, because "I use AI" says
-            nothing until it says how. */}
-        {skill.slug === "ai" && (
-          <div class="mt-16 flex flex-col gap-7">
-            <h3 class="text-[clamp(1.25rem,2.6vw,1.5rem)] font-semibold tracking-tight leading-snug m-0">How it goes</h3>
-            <StepTrack steps={aiLoop} />
-          </div>
-        )}
-      </article>
-    ))}
-
-    {/* ── CTA ──────────────────────────────────────────────────────── */}
-    <div class="grid grid-cols-12 gap-6 lg:gap-10 items-end pt-16 border-t border-rule" data-reveal>
-      <div class="col-span-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
-        <div class="flex flex-col gap-3">
-          <h2 class="display text-[clamp(2.25rem,6vw,3.75rem)] m-0">
-            The short version<span class="text-accent">.</span>
-          </h2>
-          <p class="text-ink-dim max-w-md">
-            Roles, dates and the stack are on <a href="/cv/" class="ilink">the CV</a>.
-            The things themselves are under <a href="/work/" class="ilink">work</a>.
-          </p>
-        </div>
-        <a
-          href="/contact/"
-          class="inline-flex items-center gap-3 self-start sm:self-end shrink-0 border border-rule-strong px-6 py-4 font-mono text-xs uppercase tracking-widest hover:border-accent hover:text-accent-text transition-colors"
-        >
-          Get in touch
-          <span aria-hidden="true">→</span>
-        </a>
-      </div>
+            {/* The AI entry carries its method with it, because "I use AI"
+                says nothing until it says how. */}
+            {skill.slug === "ai" && (
+              <div class="mt-3 rounded-[6px] border border-rule p-6 sm:p-8 lg:p-10">
+                <h3 class="m-0 mb-7 text-lg font-semibold tracking-tight">How it goes</h3>
+                <StepTrack steps={aiLoop} />
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
-  </section>
+  </FramedSection>
 </Base>

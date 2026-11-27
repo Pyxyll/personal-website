@@ -5,12 +5,15 @@
  *
  * Everything comes from lib/now.ts, which the homepage's "Right now." plate
  * also reads: that shows a line per item, this shows the paragraphs, and the
- * two can't drift apart. Laid out as the same plate, a row an item, with
- * the mark and label on the left.
+ * two can't drift apart. Opens with the page hero, then the same plate as the
+ * homepage's, a row an item with the mark and label on the left, and the
+ * date in its foot.
  */
 import Base from "../../layouts/Base.astro";
 import Schema from "../../components/Schema.astro";
 import NowMark from "../../components/NowMark.astro";
+import PageHero from "../../components/PageHero.astro";
+import FramedSection from "../../components/FramedSection.astro";
 import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 import { now } from "../../lib/now";
@@ -33,35 +36,34 @@ const description = "What I'm focused on at the moment: work, what I'm building,
       ]),
     ]}
   />
-  <section class="mx-auto max-w-6xl px-6 lg:px-10 py-16 sm:py-24">
-    <header class="flex flex-col gap-5 mb-12 lg:mb-16">
-      <h1 class="display text-[clamp(2.75rem,7vw,4.5rem)] lift lift-1">
-        Now<span class="text-accent">.</span>
-      </h1>
-      <p class="text-lg text-ink-dim max-w-2xl m-0 lift lift-2">
-        What I'm focused on at the moment, rewritten whenever it changes. It's a{" "}
-        <a href="https://nownownow.com/about" class="ilink" target="_blank" rel="noopener">now page</a>,
-        an idea from Derek Sivers.
-      </p>
-      <p class="font-mono text-xs text-ink-faint m-0 lift lift-3">
-        Updated <time datetime={now.updated}>{updated}</time>
-      </p>
-    </header>
+  <PageHero title="Now">
+    <p class="m-0">
+      What I'm focused on at the moment, rewritten whenever it changes. It's a{" "}
+      <a href="https://nownownow.com/about" class="ilink" target="_blank" rel="noopener">now page</a>,
+      an idea from Derek Sivers.
+    </p>
+  </PageHero>
 
-    <div class="rounded-[6px] border border-rule" data-reveal>
-      {now.items.map((item, i) => (
-        <div class:list={["grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-3 px-6 sm:px-8 py-7", i > 0 && "border-t border-rule"]}>
-          <h2 class="md:col-span-3 m-0 flex items-center gap-2.5 self-start text-[13px] font-normal text-ink-faint md:pt-1">
-            <NowMark kind={item.kind} />
-            {item.label}
-          </h2>
-          <div class="md:col-span-9 flex flex-col gap-3 max-w-[62ch]">
-            {item.detail.map((para) => (
-              <p class="m-0 text-base sm:text-lg leading-relaxed text-ink-dim">{para}</p>
-            ))}
+  <FramedSection class="mt-3 sm:mt-4" minHeight="0">
+    <div class="py-20 sm:py-28" data-reveal>
+      <div class="rounded-[6px] border border-rule">
+        {now.items.map((item, i) => (
+          <div class:list={["grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-3 px-6 sm:px-8 py-7", i > 0 && "border-t border-rule"]}>
+            <h2 class="md:col-span-3 m-0 flex items-center gap-2.5 self-start text-[13px] font-normal text-ink-faint md:pt-1">
+              <NowMark kind={item.kind} />
+              {item.label}
+            </h2>
+            <div class="md:col-span-9 flex flex-col gap-3 max-w-[62ch]">
+              {item.detail.map((para) => (
+                <p class="m-0 text-base sm:text-lg leading-relaxed text-ink-dim">{para}</p>
+              ))}
+            </div>
           </div>
+        ))}
+        <div class="border-t border-rule px-6 sm:px-8 py-5">
+          <span class="font-mono text-xs text-ink-faint">Updated <time datetime={now.updated}>{updated}</time></span>
         </div>
-      ))}
+      </div>
     </div>
-  </section>
+  </FramedSection>
 </Base>

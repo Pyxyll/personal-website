@@ -46,9 +46,10 @@ const chars = [...endorsement.quote];
         </svg>
       </span>
     </blockquote>
-    <figcaption class="quote-by flex items-center gap-3 text-sm text-ink-dim">
-      <span class="h-px w-8 bg-accent" aria-hidden="true"></span>
-      <span><span class="font-medium text-ink">{endorsement.name}</span>, {endorsement.role}</span>
+    {/* Who said it: the name, and under it what she does, plainly. */}
+    <figcaption class="quote-by flex flex-col gap-1">
+      <span class="text-base sm:text-lg font-semibold tracking-tight text-ink">{endorsement.name}</span>
+      <span class="text-sm sm:text-base text-ink-dim">{endorsement.role}</span>
     </figcaption>
   </div>
 </figure>

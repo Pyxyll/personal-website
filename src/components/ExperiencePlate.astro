@@ -41,6 +41,12 @@ import ArrowIcon from "./ArrowIcon.astro";
 import { cv } from "../lib/cv";
 import { FRAMES, PALETTE, SPRITE_W, SPRITE_H } from "./runnerSprite";
 
+interface Props {
+  /** The Full CV and PDF buttons in the foot. Off on /cv/ itself. */
+  actions?: boolean;
+}
+const { actions = true } = Astro.props;
+
 const hasPdf = existsSync(join(process.cwd(), "public", cv.pdf));
 
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -73,10 +79,14 @@ const lastYear = Math.ceil(Math.max(...dated.map((r) => r.to!)));
 const span = Math.max(1, lastYear - first);
 const pct = (year: number) => ((year - first) / span) * 100;
 
-/* A label every few years, however long the run is. */
+/* A label every few years, however long the run is, counted back from the
+   end of the scale rather than forward from the start: the end is now (the
+   current role runs to the day of the build), so the last label is the year
+   we are in or about to be, and the eye reads back from the present. */
 const every = span >= 12 ? 4 : span >= 6 ? 2 : 1;
 const years = Array.from({ length: span + 1 }, (_, i) => first + i);
-const labelled = (y: number) => (y - first) % every === 0;
+const labelled = (y: number) => (lastYear - y) % every === 0;
+const guides = years.filter(labelled);
 
 const period = (start: string, end: string) => `${start} to ${end === "Present" ? "present" : end}`;
 
@@ -95,7 +105,7 @@ const rects = (rows: string[]) =>
   });
 ---
 
-<div class="xp relative rounded-[6px] border border-rule" style={`--every:${(every / span) * 100}%`}>
+<div class="xp relative rounded-[6px] border border-rule">
   {roles.map((role, i) => (
     <div class:list={["row grid grid-cols-1 md:grid-cols-12 md:gap-x-8 px-6 sm:px-8", i > 0 && "border-t border-rule"]}>
       <div class="md:col-span-6 lg:col-span-5 flex flex-col gap-1.5 py-5">
@@ -107,6 +117,7 @@ const rects = (rows: string[]) =>
       </div>
 
       <div class="track hidden md:block md:col-span-6 lg:col-span-7" aria-hidden="true">
+        {guides.map((y) => <span class="guide" style={`left:${pct(y)}%`}></span>)}
         {role.from !== null && role.to !== null && (
           <span
             class:list={["bar", role.current && "is-current"]}
@@ -122,11 +133,13 @@ const rects = (rows: string[]) =>
   {/* The scale, and the way to the whole thing. */}
   <div class="grid grid-cols-1 md:grid-cols-12 md:gap-x-8 px-6 sm:px-8 border-t border-rule">
     <div class="md:col-span-6 lg:col-span-5 flex flex-wrap items-center gap-2 py-5">
-      <a href="/cv/" class="btn btn-primary btn-sm">
-        Full CV
-        <ArrowIcon />
-      </a>
-      {hasPdf && (
+      {actions && (
+        <a href="/cv/" class="btn btn-primary btn-sm">
+          Full CV
+          <ArrowIcon />
+        </a>
+      )}
+      {actions && hasPdf && (
         <a href={cv.pdf} download class="btn btn-secondary btn-sm">
           Download PDF
           <svg
@@ -178,13 +191,19 @@ const rects = (rows: string[]) =>
 </div>
 
 <style>
-  /* The span column. It fills its row top to bottom, so the guides drawn on
-     it join up from one row to the next and run the height of the plate. */
+  /* The span column. It fills its row top to bottom, so the guides drawn in
+     it join up from one row to the next and run the height of the plate.
+     Each guide stands on a labelled year, wherever the labels fall. */
   .track,
   .scale {
     position: relative;
-    background-image: linear-gradient(to right, var(--color-rule) 1px, transparent 1px);
-    background-size: var(--every) 100%;
+  }
+  .guide {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-rule);
   }
 
   /* An outlined bar, the same 1.5px line and the same proportions as the
@@ -206,7 +225,6 @@ const rects = (rows: string[]) =>
      named on the labelled ones, which are the years the guides stand on. */
   .scale {
     height: 3.25rem;
-    background-image: none;
   }
   .tick {
     position: absolute;
@@ -228,10 +246,14 @@ const rects = (rows: string[]) =>
     line-height: 1;
     color: var(--color-ink-faint);
   }
-  /* The first label would hang off the plate's left edge if it were centred
-     on its tick like the rest. */
+  /* A label on either end of the scale would hang over the edge if it were
+     centred on its tick like the rest: the first sits to its tick's right,
+     the last to its left. */
   .tick:first-child .year {
     transform: none;
+  }
+  .tick:last-child .year {
+    transform: translateX(-100%);
   }
 
   /* A landing lights the platform for a beat. */

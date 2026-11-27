@@ -1,6 +1,6 @@
 ---
 /**
- * The "open to new roles" line: a pink dot and a short mono sentence.
+ * The "open to new roles" line: a pink dot and a short sentence.
  *
  * Renders nothing unless site.hiring.open is true, so every place that might
  * say it is switched from one flag in lib/site.ts. Drop it in wherever the
@@ -17,7 +17,7 @@ const { detail = false, class: className = "" } = Astro.props;
 ---
 
 {site.hiring.open && (
-  <p class:list={["font-mono text-xs uppercase tracking-widest text-ink-dim m-0", className]}>
+  <p class:list={["text-sm text-ink-dim m-0", className]}>
     <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent mr-2 align-middle" aria-hidden="true"></span>
     {site.hiring.line}{detail && <span class="text-ink-faint"> · {site.hiring.looking}</span>}
   </p>
