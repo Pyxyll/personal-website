@@ -1,0 +1,43 @@
+---
+/**
+ * A small mark for a work entry's category, drawn in the site's monoline:
+ * 16px, 1.5px strokes, the same weight as ArrowIcon. A chip for AI, a
+ * browser window for sites, a monitor for desktop software, a server for
+ * the homelab, a dashboard for web apps, and four squares for the archive
+ * card that leads to all of them. An unknown category draws nothing.
+ * Decorative: the category's name sits beside it.
+ */
+interface Props {
+  category: string;
+  class?: string;
+}
+const { category, class: className = "" } = Astro.props;
+
+const marks: Record<string, string> = {
+  AI: "M5 4h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM6.5 1.75V4M9.5 1.75V4M6.5 12v2.25M9.5 12v2.25M1.75 6.5H4M1.75 9.5H4M12 6.5h2.25M12 9.5h2.25M6.75 6.75h2.5v2.5h-2.5z",
+  Sites: "M3.25 2.75h9.5a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-9.5a1.5 1.5 0 0 1-1.5-1.5v-7.5a1.5 1.5 0 0 1 1.5-1.5zM1.75 6h12.5M4.25 4.4h.01M6.25 4.4h.01",
+  COSMIC: "M3 2.5h10a1.25 1.25 0 0 1 1.25 1.25v6A1.25 1.25 0 0 1 13 11H3a1.25 1.25 0 0 1-1.25-1.25v-6A1.25 1.25 0 0 1 3 2.5zM8 11v2.5M5 13.5h6",
+  Homelab: "M3 2.5h10a1 1 0 0 1 1 1V6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1zM3 9h10a1 1 0 0 1 1 1v2.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM4.75 4.75h.01M4.75 11.25h.01M7.5 4.75h4M7.5 11.25h4",
+  Archive: "M3.25 2.5h3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75v-3a.75.75 0 0 1 .75-.75zM9.75 2.5h3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75v-3a.75.75 0 0 1 .75-.75zM3.25 9h3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75v-3A.75.75 0 0 1 3.25 9zM9.75 9h3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75v-3A.75.75 0 0 1 9.75 9z",
+  "Web apps": "M3.25 1.75h9.5a1.5 1.5 0 0 1 1.5 1.5v9.5a1.5 1.5 0 0 1-1.5 1.5h-9.5a1.5 1.5 0 0 1-1.5-1.5v-9.5a1.5 1.5 0 0 1 1.5-1.5zM1.75 6h12.5M6 6v8.25",
+};
+const d = marks[category];
+---
+
+{d && (
+  <svg
+    class={className}
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d={d} />
+  </svg>
+)}

@@ -15,11 +15,31 @@
  * mean anything, and the rows stand on their dates, which they carry in text
  * at every size anyway: the bars are decoration over information that is
  * already there, and are hidden from the accessibility tree.
+ *
+ * The bars are drawn like platforms, so they are platforms. When the plate
+ * comes into view a small pixel Dylan (components/runnerSprite.ts) drops
+ * onto the first role and runs the career in time order:
+ * along a role while it lasts, jumping to a new one the moment it starts,
+ * back to an older one still running when a shorter one ends, across the gap
+ * when nothing is running, and to a stop at the present end of the current
+ * role. The route is worked out from the dates on the bars, so it follows the
+ * CV wherever it changes. Each landing lights the platform, and a platform
+ * narrower than he is (a short role) takes some balancing. He only runs
+ * while the plate is pointed at: he jumps in from below its bottom edge and,
+ * at the present end of the current role, crouches and jumps up and out
+ * through the top, on to whatever is next, then comes round again while the
+ * pointer stays. Take the
+ * pointer away mid-run and he loses his footing: off the platform he is on,
+ * or short of the one he was jumping for, tumbling down out of the frame.
+ * The plate clips him, so he arrives and leaves rather than appearing. Wide
+ * screens with a chart only; without hover, or under reduced motion, he is
+ * simply standing at the end.
  */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import ArrowIcon from "./ArrowIcon.astro";
 import { cv } from "../lib/cv";
+import { FRAMES, PALETTE, SPRITE_W, SPRITE_H } from "./runnerSprite";
 
 const hasPdf = existsSync(join(process.cwd(), "public", cv.pdf));
 
@@ -59,9 +79,23 @@ const years = Array.from({ length: span + 1 }, (_, i) => first + i);
 const labelled = (y: number) => (y - first) % every === 0;
 
 const period = (start: string, end: string) => `${start} to ${end === "Present" ? "present" : end}`;
+
+/** One rect per run of same-coloured pixels in a row. */
+const rects = (rows: string[]) =>
+  rows.flatMap((row, y) => {
+    const out: { x: number; y: number; w: number; c: string }[] = [];
+    for (let x = 0; x < row.length; ) {
+      const c = row[x];
+      let w = 1;
+      while (row[x + w] === c) w++;
+      if (c !== ".") out.push({ x, y, w, c });
+      x += w;
+    }
+    return out;
+  });
 ---
 
-<div class="xp rounded-[6px] border border-rule" style={`--every:${(every / span) * 100}%`}>
+<div class="xp relative rounded-[6px] border border-rule" style={`--every:${(every / span) * 100}%`}>
   {roles.map((role, i) => (
     <div class:list={["row grid grid-cols-1 md:grid-cols-12 md:gap-x-8 px-6 sm:px-8", i > 0 && "border-t border-rule"]}>
       <div class="md:col-span-6 lg:col-span-5 flex flex-col gap-1.5 py-5">
@@ -76,6 +110,8 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
         {role.from !== null && role.to !== null && (
           <span
             class:list={["bar", role.current && "is-current"]}
+            data-from={role.from}
+            data-to={role.to}
             style={`left:${pct(role.from)}%;width:${pct(role.to) - pct(role.from)}%;--i:${i}`}
           ></span>
         )}
@@ -85,21 +121,28 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
 
   {/* The scale, and the way to the whole thing. */}
   <div class="grid grid-cols-1 md:grid-cols-12 md:gap-x-8 px-6 sm:px-8 border-t border-rule">
-    <div class="md:col-span-6 lg:col-span-5 flex flex-wrap items-center gap-x-6 gap-y-2 py-5">
-      <a
-        href="/cv/"
-        class="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text transition-colors duration-300 hover:text-ink"
-      >
+    <div class="md:col-span-6 lg:col-span-5 flex flex-wrap items-center gap-2 py-5">
+      <a href="/cv/" class="btn btn-primary btn-sm">
         Full CV
         <ArrowIcon />
       </a>
       {hasPdf && (
-        <a
-          href={cv.pdf}
-          download
-          class="text-[13px] font-medium text-ink-dim transition-colors duration-300 hover:text-ink"
-        >
-          Download as PDF
+        <a href={cv.pdf} download class="btn btn-secondary btn-sm">
+          Download PDF
+          <svg
+            class="icon-down"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M8 2.75v7.5M4.75 7 8 10.25 11.25 7M3 13.25h10" />
+          </svg>
         </a>
       )}
     </div>
@@ -111,6 +154,26 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
         </span>
       ))}
     </div>
+  </div>
+
+  <div class="runner-layer" aria-hidden="true">
+    <span class="runner">
+      <svg
+        viewBox={`0 0 ${SPRITE_W} ${SPRITE_H}`}
+        width={SPRITE_W}
+        height={SPRITE_H}
+        shape-rendering="crispEdges"
+        data-frame="idle"
+      >
+        {Object.entries(FRAMES).map(([name, rows]) => (
+          <g data-name={name}>
+            {rects(rows).map((r) => (
+              <rect x={r.x} y={r.y} width={r.w} height="1" fill={PALETTE[r.c]} />
+            ))}
+          </g>
+        ))}
+      </svg>
+    </span>
   </div>
 </div>
 
@@ -134,8 +197,6 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
     margin-top: -5px;
     border: 1.5px solid var(--color-ink-dim);
     transform-origin: 0 50%;
-    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    transition-delay: calc(0.3s + var(--i, 0) * 0.09s);
   }
   .bar.is-current {
     border-color: var(--color-accent);
@@ -173,6 +234,68 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
     transform: none;
   }
 
+  /* A landing lights the platform for a beat. */
+  .bar.is-hit {
+    border-color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 14%, transparent);
+    transition: none;
+  }
+  .bar.is-current.is-hit {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  .bar {
+    transition:
+      transform 0.7s cubic-bezier(0.4, 0, 0.2, 1) calc(0.3s + var(--i, 0) * 0.09s),
+      border-color 0.5s ease,
+      background-color 0.5s ease;
+  }
+
+  /* The runner's layer covers the plate, takes no pointer, and clips to the
+     plate's edge, so he comes in and goes out through it. He is placed by
+     transform from the script, and hidden until he is on his way in. Only
+     where the chart is drawn. */
+  .runner-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  @media (min-width: 768px) {
+    .runner-layer {
+      display: block;
+    }
+  }
+  .runner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 32px;
+    height: 36px;
+    transform-origin: 50% 55%;
+    opacity: 0;
+    will-change: transform;
+  }
+  .runner.is-on {
+    opacity: 1;
+  }
+  .runner svg {
+    display: block;
+  }
+  .runner g {
+    display: none;
+  }
+  .runner svg[data-frame="idle"] g[data-name="idle"],
+  .runner svg[data-frame="blink"] g[data-name="blink"],
+  .runner svg[data-frame="runA"] g[data-name="runA"],
+  .runner svg[data-frame="runB"] g[data-name="runB"],
+  .runner svg[data-frame="jump"] g[data-name="jump"] {
+    display: inline;
+  }
+
   /* Entry: each bar is measured out from its start date, one after another,
      once the section has arrived. */
   :global(html.js [data-reveal]:not(.is-visible)) .bar {
@@ -187,3 +310,311 @@ const period = (start: string, end: string) => `${start} to ${end === "Present" 
     }
   }
 </style>
+
+<script>
+  import { gsap } from "gsap";
+
+  /* The runner (see the header comment). Positions are measured from the
+     bars as drawn, in pixels relative to the plate, so the route matches the
+     chart at any width. */
+  const plate = document.querySelector<HTMLElement>(".xp");
+  const layer = plate?.querySelector<HTMLElement>(".runner-layer");
+  const runner = layer?.querySelector<HTMLElement>(".runner");
+  const sprite = runner?.querySelector<SVGSVGElement>("svg");
+
+  const W = 32; // sprite width
+  const H = 35; // sprite height, less the rim under the trainers, so they stand on the line
+  const SPEED = 230; // px a second along a platform
+  const HOP = 30; // px a jump rises above the higher of its two ends
+  /* The run cycle changes drawing twelve times a second, on twos, as hand
+     animation does, rather than on every frame: px travelled per drawing. */
+  const STRIDE = SPEED / 12;
+
+  interface Plat {
+    el: HTMLElement;
+    from: number;
+    to: number;
+    left: number;
+    right: number;
+    top: number;
+  }
+  type Step =
+    | { kind: "run"; x: number }
+    | { kind: "jump"; x: number; y: number; plat: Plat };
+
+  if (plate && layer && runner && sprite) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const wide = window.matchMedia("(min-width: 768px)");
+    const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const pos = { x: 0, y: 0, r: 0 };
+    let tl: gsap.core.Timeline | null = null;
+    let state: "waiting" | "running" | "falling" | "gone" | "standing" = "waiting";
+    /* Whether the pointer is on the plate, and whether the bars have finished
+       drawing in, so there is something to stand on. */
+    let hovered = false;
+    let ready = false;
+    let again: gsap.core.Tween | null = null;
+
+    const frame = (name: string) => sprite.setAttribute("data-frame", name);
+    const draw = () => {
+      runner.style.transform =
+        `translate(${Math.round(pos.x - W / 2)}px, ${Math.round(pos.y - H)}px)` + (pos.r ? ` rotate(${pos.r}deg)` : "");
+    };
+
+    const measure = (): Plat[] => {
+      const lr = layer.getBoundingClientRect();
+      return [...plate.querySelectorAll<HTMLElement>(".bar")]
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            el,
+            from: Number(el.dataset.from),
+            to: Number(el.dataset.to),
+            left: r.left - lr.left,
+            right: r.right - lr.left,
+            top: r.top - lr.top,
+          };
+        })
+        .filter((p) => Number.isFinite(p.from) && Number.isFinite(p.to) && p.right > p.left)
+        .sort((a, b) => a.from - b.from);
+    };
+
+    /* Where on a platform a moment in time falls, kept so the runner stands
+       on it rather than hanging off either end. */
+    const xAt = (p: Plat, t: number) => {
+      const x = p.left + ((t - p.from) / (p.to - p.from)) * (p.right - p.left);
+      return Math.min(Math.max(x, p.left + W / 2 - 8), Math.max(p.left + W / 2 - 8, p.right - W / 2 + 8));
+    };
+
+    /* The career as a route. Stand on the newest role still running; jump
+       to a role the moment it starts; when the current one ends, drop back
+       to an older one still running, or else cross the gap to the next. */
+    const route = (ps: Plat[]): { start: Plat; steps: Step[] } => {
+      const steps: Step[] = [];
+      const seen = new Set<Plat>();
+      let cur = ps[0];
+      let t = cur.from;
+      seen.add(cur);
+      for (let guard = 0; guard < ps.length * 3; guard++) {
+        const next = ps.find((p) => !seen.has(p) && p.from >= t && p.from < cur.to);
+        if (next) {
+          steps.push({ kind: "run", x: xAt(cur, next.from) });
+          steps.push({ kind: "jump", x: xAt(next, next.from), y: next.top, plat: next });
+          seen.add(next);
+          cur = next;
+          t = next.from;
+          continue;
+        }
+        steps.push({ kind: "run", x: xAt(cur, cur.to) });
+        const back = ps
+          .filter((p) => seen.has(p) && p !== cur && p.from <= cur.to && p.to > cur.to)
+          .sort((a, b) => b.from - a.from)[0];
+        if (back) {
+          steps.push({ kind: "jump", x: xAt(back, cur.to), y: back.top, plat: back });
+          t = cur.to;
+          cur = back;
+          continue;
+        }
+        const ahead = ps.find((p) => !seen.has(p) && p.from >= cur.to);
+        if (ahead) {
+          steps.push({ kind: "jump", x: xAt(ahead, ahead.from), y: ahead.top, plat: ahead });
+          seen.add(ahead);
+          cur = ahead;
+          t = ahead.from;
+          continue;
+        }
+        break;
+      }
+      return { start: ps[0], steps };
+    };
+
+    const land = (p: Plat) => {
+      p.el.classList.add("is-hit");
+      gsap.delayedCall(0.28, () => p.el.classList.remove("is-hit"));
+    };
+
+    /* Standing still at the end of the run, under reduced motion. */
+    const settle = () => {
+      tl?.kill();
+      const ps = measure();
+      if (!ps.length) return;
+      const { steps } = route(ps);
+      const last = [...steps].reverse().find((s) => s.kind === "jump") as Extract<Step, { kind: "jump" }> | undefined;
+      pos.x = steps[steps.length - 1].x;
+      pos.y = (last?.plat ?? ps[0]).top;
+      draw();
+      frame("idle");
+      runner.style.opacity = "";
+      runner.classList.add("is-on");
+      state = "standing";
+    };
+
+    /* Gone: off the plate. If the pointer is still there, round again. */
+    const gone = () => {
+      tl?.kill();
+      runner.classList.remove("is-on");
+      runner.style.transformOrigin = "";
+      pos.r = 0;
+      state = "gone";
+      again?.kill();
+      if (hovered) again = gsap.delayedCall(0.7, () => hovered && state === "gone" && run());
+    };
+
+    /* The pointer has gone mid-run. On a platform he pops up off it; in the
+       air he misses. Either way he tumbles down out of the bottom of the
+       frame, carried forward a little by the run he was on. */
+    const fall = () => {
+      const inAir = sprite.getAttribute("data-frame") === "jump";
+      tl?.kill();
+      runner.style.transformOrigin = "";
+      state = "falling";
+      frame("jump");
+      const out = layer.clientHeight + H + 12;
+      const pop = inAir ? 0 : 0.18;
+      const lift = inAir ? pos.y : pos.y - 14;
+      const drop = Math.sqrt(Math.max(1, out - lift)) * 0.045;
+      tl = gsap.timeline({ onUpdate: draw, onComplete: gone });
+      if (!inAir) tl.to(pos, { y: lift, duration: pop, ease: "power2.out" }, 0);
+      tl.to(pos, { y: out, duration: drop, ease: "power2.in" }, pop);
+      tl.to(pos, { x: pos.x + (inAir ? 44 : 24), duration: pop + drop, ease: "power1.out" }, 0);
+      tl.to(pos, { r: inAir ? 210 : 150, duration: pop + drop, ease: "power1.in" }, 0);
+    };
+
+    /* A jump from (x0, y0) to (x1, y1): up to a little above the higher end,
+       then down, each leg timed as a fall of that height would be, x steady
+       across. The peak is held inside the plate where it can be, so a jump
+       onto the top row does not lose his head to the clip. */
+    const jump = (t: gsap.core.Timeline, _x0: number, y0: number, x1: number, y1: number, rise = HOP) => {
+      let peak = Math.min(y0, y1) - rise;
+      if (peak < H + 2) peak = Math.min(y0, y1) > H + 6 ? H + 2 : Math.min(y0, y1) - 4;
+      const up = Math.sqrt(Math.max(1, y0 - peak)) * 0.04;
+      const down = Math.sqrt(Math.max(1, y1 - peak)) * 0.04;
+      const at = t.duration();
+      t.call(() => frame("jump"), undefined, at);
+      t.to(pos, { x: x1, duration: up + down, ease: "none" }, at);
+      t.to(pos, { y: peak, duration: up, ease: "power2.out" }, at);
+      t.to(pos, { y: y1, duration: down, ease: "power2.in" }, at + up);
+    };
+
+    /* Landing on a platform narrower than he is: he skids to the edge and
+       wobbles on his heels, arms going, before he finds his feet. Pivots on
+       his feet for this, not his middle. */
+    const teeter = (t: gsap.core.Timeline, x: number) => {
+      t.call(() => { runner.style.transformOrigin = "50% 100%"; });
+      const at = t.duration();
+      t.to(pos, { x: x + 6, duration: 0.14, ease: "power2.out" }, at);
+      const lean = [17, -12, 9, -6, 3, 0];
+      let when = at + 0.04;
+      lean.forEach((r, i) => {
+        const d = 0.12 + i * 0.025;
+        t.to(pos, { r, duration: d, ease: "sine.inOut" }, when);
+        t.call(() => frame(i === lean.length - 1 ? "idle" : i % 2 ? "runB" : "jump"), undefined, when);
+        when += d;
+      });
+      t.to(pos, { x, duration: 0.45, ease: "sine.inOut" }, at + 0.3);
+      t.call(() => { runner.style.transformOrigin = ""; pos.r = 0; frame("idle"); }, undefined, Math.max(when, at + 0.75));
+      t.to({}, { duration: 0.2 });
+    };
+
+    const run = () => {
+      const ps = measure();
+      if (!ps.length) return;
+      tl?.kill();
+      again?.kill();
+      state = "running";
+      pos.r = 0;
+      const { start, steps } = route(ps);
+      const floorY = layer.clientHeight;
+
+      /* In: from below the bottom edge, up onto the first role. */
+      const x0 = xAt(start, start.from);
+      pos.x = x0 - 56;
+      pos.y = floorY + 6;
+      draw();
+      runner.style.opacity = "";
+      runner.classList.add("is-on");
+      tl = gsap.timeline({ onUpdate: draw, onComplete: gone });
+      jump(tl, pos.x, pos.y, x0, start.top);
+      tl.call(() => { land(start); frame("idle"); });
+      tl.to({}, { duration: 0.18 });
+
+      let x = x0;
+      let y = start.top;
+      for (const step of steps) {
+        if (step.kind === "run") {
+          const d = Math.abs(step.x - x);
+          if (d < 1) continue;
+          const from = x;
+          tl.to(pos, {
+            x: step.x,
+            duration: d / SPEED,
+            ease: "none",
+            onUpdate: () => frame(Math.floor(Math.abs(pos.x - from) / STRIDE) % 2 ? "runB" : "runA"),
+          });
+          x = step.x;
+        } else {
+          jump(tl, x, y, step.x, step.y);
+          const plat = step.plat;
+          tl.call(() => { land(plat); frame("idle"); });
+          if (plat.right - plat.left < W) teeter(tl, step.x);
+          else tl.to({}, { duration: 0.08 });
+          x = step.x;
+          y = step.y;
+        }
+      }
+
+      /* Out: a beat at the present, a blink, a crouch, and up through the
+         top of the frame, still rising as he goes: there is a next step. */
+      tl.call(() => frame("idle"));
+      tl.to({}, { duration: 0.35 });
+      tl.call(() => frame("blink"));
+      tl.to({}, { duration: 0.14 });
+      tl.call(() => frame("idle"));
+      tl.to({}, { duration: 0.25 });
+      tl.to(pos, { y: y + 3, duration: 0.09, ease: "power1.out" });
+      tl.call(() => frame("jump"));
+      tl.to(pos, { y: -H - 90, x: x + 46, duration: 0.55, ease: "power2.out" });
+    };
+
+    /* Without hover there is nothing to point at, and under reduced motion
+       nothing should run: he stands at the end. Otherwise he waits, unseen,
+       for the pointer. Either way, not before the bars have drawn in. */
+    const still = reduce.matches || !hoverable.matches;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        gsap.delayedCall(1.4, () => {
+          ready = true;
+          if (!wide.matches) return;
+          if (still) settle();
+          else if (hovered && state === "waiting") run();
+        });
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(plate);
+
+    if (!still) {
+      plate.addEventListener("pointerenter", () => {
+        hovered = true;
+        if (ready && wide.matches && (state === "waiting" || state === "gone")) run();
+      });
+      plate.addEventListener("pointerleave", () => {
+        hovered = false;
+        again?.kill();
+        if (state === "running") fall();
+      });
+    }
+
+    /* A resize moves the platforms under him: mid-run he leaves, and if he
+       is standing at the end he moves with it. */
+    let lastW = plate.clientWidth;
+    new ResizeObserver(() => {
+      if (plate.clientWidth === lastW) return;
+      lastW = plate.clientWidth;
+      if (state === "running" || state === "falling") gone();
+      else if (state === "standing") settle();
+    }).observe(plate);
+  }
+</script>

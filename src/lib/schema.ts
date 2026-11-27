@@ -81,32 +81,6 @@ export function webPageSchema(args: {
   };
 }
 
-export function articleSchema(args: {
-  url: string;
-  title: string;
-  description: string;
-  publishedAt: Date;
-  updatedAt?: Date;
-  tags?: string[];
-  image?: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: args.title,
-    description: args.description,
-    image: args.image ?? DEFAULT_OG,
-    datePublished: args.publishedAt.toISOString(),
-    dateModified: (args.updatedAt ?? args.publishedAt).toISOString(),
-    author: { "@id": `${site.url}/#person` },
-    publisher: { "@id": `${site.url}/#person` },
-    keywords: args.tags?.join(", "),
-    inLanguage: site.language,
-    mainEntityOfPage: { "@type": "WebPage", "@id": args.url },
-    url: args.url,
-  };
-}
-
 export function creativeWorkSchema(args: {
   url: string;
   title: string;
@@ -144,19 +118,6 @@ export function breadcrumbSchema(items: { name: string; url: string }[]) {
       name: item.name,
       item: item.url,
     })),
-  };
-}
-
-export function blogSchema(args: { url: string }) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "@id": `${args.url}#blog`,
-    url: args.url,
-    name: `${site.name} · Writing`,
-    description: "Notes from the keyboard. Web, infra, the occasional rant.",
-    inLanguage: site.language,
-    publisher: { "@id": `${site.url}/#person` },
   };
 }
 

@@ -1,0 +1,38 @@
+---
+/**
+ * The homepage's /now: a line each on what I'm doing at the moment, from
+ * lib/now.ts (the items that have a homepage line), dated, with the way to
+ * the full page.
+ *
+ * Built like the experience plate above it, so the bottom of the page reads
+ * as one family: a hairline plate, a row per item, a label column and the
+ * line itself, and a foot row.
+ */
+import ArrowIcon from "./ArrowIcon.astro";
+import NowMark from "./NowMark.astro";
+import { now } from "../lib/now";
+
+const items = now.items.filter((item) => item.line);
+const updatedText = new Intl.DateTimeFormat("en-IE", { day: "numeric", month: "long", year: "numeric" }).format(
+  new Date(now.updated),
+);
+---
+
+<div class="rounded-[6px] border border-rule">
+  {items.map((item, i) => (
+    <div class:list={["grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-1.5 px-6 sm:px-8 py-5", i > 0 && "border-t border-rule"]}>
+      <div class="md:col-span-3 lg:col-span-2 flex items-center gap-2.5 text-[13px] text-ink-faint">
+        <NowMark kind={item.kind} />
+        {item.label}
+      </div>
+      <p class="md:col-span-9 lg:col-span-10 m-0 text-base sm:text-lg leading-snug text-ink">{item.line}</p>
+    </div>
+  ))}
+
+  <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule px-6 sm:px-8 py-5">
+    <span class="font-mono text-xs text-ink-faint">
+      Updated <time datetime={now.updated}>{updatedText}</time>
+    </span>
+    <a href="/now/" class="btn btn-secondary btn-sm">Read more<ArrowIcon /></a>
+  </div>
+</div>
