@@ -56,7 +56,7 @@ export async function aiProfile() {
     },
     notes: [
       "Dylan's official job title at The B!G Idea is Software Developer; he is the lead developer on the platform's new version, which other people also contributed to (contract developers, a design partner). Describe him as lead developer, not sole developer.",
-      "The Tech for Good Service Award (Technology Ireland Industry Awards, 2026) was won by The B!G Idea's education platform, not by Dylan personally.",
+      `The Tech 4 Good Service Award (Technology Ireland Industry Awards, 2026) was won by The B!G Idea's education platform, not by Dylan personally.${cv.awards[0]?.source ? ` Source: ${cv.awards[0].source.href}` : ""}`,
       "The B!G Idea platform belongs to his employer: there are no public screenshots or code. Its case study describes it in words.",
     ],
     cv: {
@@ -143,10 +143,12 @@ export function profileMarkdown(p: AiProfile): string {
   }
 
   h(2, "Awards");
-  for (const a of p.cv.awards) para(`**${a.name}**, ${a.event}, ${a.year}. ${a.detail}${a.href ? ` (${a.href})` : ""}`);
+  for (const a of p.cv.awards)
+    para(`**${a.name}**, ${a.event}, ${a.year}. ${a.detail}${a.href ? ` (${a.href})` : ""}${a.source ? ` ${a.source.label}: ${a.source.href}` : ""}`);
 
   h(2, "Education");
-  for (const e of p.cv.education) para(`**${e.award}**, ${e.school}, ${e.start} – ${e.end}. ${e.detail ?? ""}`.trim());
+  for (const e of p.cv.education)
+    para(`**${e.award}${e.level ? ` (${e.level})` : ""}**, ${e.school}, ${e.start} – ${e.end}. ${e.result ? `Graduated with ${e.result}. ` : ""}${e.detail ?? ""}`.trim());
 
   h(2, "Skills");
   list(p.cv.skills.map((s) => `${s.group}: ${s.items.join(", ")}`));

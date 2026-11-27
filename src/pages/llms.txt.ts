@@ -17,8 +17,8 @@ export const GET: APIRoute = async () => {
     }`,
     "",
     [
-      award && `The platform won the ${award.name} at the ${award.event}, ${award.year}.`,
-      "More than ten years of building for the web and running the systems underneath; first class honours in Multimedia Applications Development from SETU Waterford.",
+      award && `The platform won the ${award.name} at the ${award.event}, ${award.year}.${award.source ? ` ${award.source.label}: ${award.source.href}` : ""}`,
+      "More than ten years of building for the web and running the systems underneath; a BSc (Level 7) in Multimedia Applications Development from SETU Waterford, awarded with Distinction.",
     ]
       .filter(Boolean)
       .join(" "),

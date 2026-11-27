@@ -44,12 +44,12 @@ export const GET: APIRoute = async () => {
     education: p.cv.education.map((e) => ({
       institution: e.school,
       area: e.award.replace(/^BSc in /, ""),
-      studyType: "BSc (Hons)",
+      studyType: e.level ? `BSc (${e.level})` : "BSc",
       startDate: isoDate(e.start),
       endDate: isoDate(e.end),
-      score: "First class honours (1.1)",
+      ...(e.result ? { score: e.result } : {}),
     })),
-    awards: p.cv.awards.map((a) => ({ title: a.name, date: a.year, awarder: a.event, summary: a.detail })),
+    awards: p.cv.awards.map((a) => ({ title: a.name, date: a.year, awarder: a.event, summary: a.detail, ...(a.source ? { url: a.source.href } : {}) })),
     skills: p.cv.skills.map((s) => ({ name: s.group, keywords: s.items })),
     projects: p.projects.map((w) => ({
       name: w.title,

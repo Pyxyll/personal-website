@@ -89,7 +89,7 @@ const year = new Date().getFullYear();
     <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-x-8 gap-y-10">
       <div class="col-span-3 sm:col-span-6 lg:col-span-5 flex flex-col items-start gap-3">
         <a href="/" class="nav-mark" aria-label="Dylan Collins, home">
-          <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
+          <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-gap"> </span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
         </a>
         <p class="m-0 text-ink-dim">Full-stack developer in Ireland.</p>
         <p class="m-0 flex items-center gap-2 text-[13px] text-ink-faint" data-local-time hidden>
@@ -159,11 +159,13 @@ const year = new Date().getFullYear();
 
   {/* ── 3. The wordmark ──────────────────────────────────────────────── */}
   <div class="wordmark-band mx-auto w-full max-w-shell px-6 lg:px-10 mt-6" aria-hidden="true">
+    {/* The name is set by CSS from data-word, so this ornament is not text
+        on the page: read as text, the footer would say the name twice more. */}
     <div class="wordmark">
-      <span class="ink">Dylan Collins</span>
+      <span class="ink" data-word="Dylan Collins"></span>
       {/* The same word in the accent, shown only through a soft circle that
           follows the pointer and grows as it comes near. */}
-      <span class="glow">Dylan Collins</span>
+      <span class="glow" data-word="Dylan Collins"></span>
     </div>
   </div>
 </footer>
@@ -198,6 +200,9 @@ const year = new Date().getFullYear();
        descenders under the edge of the page. */
     height: 0.6em;
     overflow: hidden;
+  }
+  .wordmark span::before {
+    content: attr(data-word);
   }
   .wordmark span {
     display: block;

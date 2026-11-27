@@ -196,6 +196,9 @@ const pageDesc =
                   {award.href && (
                     <span class="print:hidden"> <a href={award.href} class="ilink">The case study</a>.</span>
                   )}
+                  {award.source && (
+                    <> <a href={award.source.href} class="ilink">{award.source.label}</a>.</>
+                  )}
                 </p>
               </li>
             ))}
@@ -211,11 +214,15 @@ const pageDesc =
             <li class:list={["plate-row flex flex-col gap-2 px-6 sm:px-8 py-6", i > 0 && "border-t border-rule"]}>
               <div class="flex flex-col gap-1.5 md:flex-row md:items-baseline md:justify-between md:gap-6 print:flex-row print:items-baseline print:justify-between print:gap-6">
                 <h3 class="role-title m-0 text-[clamp(1.125rem,2vw,1.25rem)] font-semibold tracking-tight leading-snug">
-                  {study.award}<span class="font-normal text-ink-dim"> · {study.school}</span>
+                  {study.award}{study.level && ` (${study.level})`}<span class="font-normal text-ink-dim"> · {study.school}</span>
                 </h3>
                 <span class="role-when shrink-0 font-mono text-xs text-ink-faint"><span class="print:hidden">{span(study.start, study.end)}</span><span class="hidden print:inline">{range(study.start, study.end)}</span></span>
               </div>
-              {study.detail && <p class="m-0 text-base leading-relaxed text-ink-dim max-w-4xl">{study.detail}</p>}
+              {(study.result || study.detail) && (
+                <p class="m-0 text-base leading-relaxed text-ink-dim max-w-4xl">
+                  {study.result && <>Graduated with {study.result}. </>}{study.detail}
+                </p>
+              )}
             </li>
           ))}
         </ul>

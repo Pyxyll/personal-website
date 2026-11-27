@@ -1,0 +1,86 @@
+---
+title: "bootleg"
+summary: "My own stream system: the overlays OBS shows, the Twitch chat bot, the alerts and the Discord go-live posts, in one Bun and TypeScript program, with a native OBS plugin in C++ and Qt. The main overlay is a basement of CRT sets, rendered in Blender and relit live in the browser."
+tagline: "A stream system: overlays, bots and an OBS plugin."
+category: "Streaming"
+role: "Solo"
+publishedAt: 2026-11-22
+featured: 2
+stack: ["TypeScript", "Bun", "WebGL", "C++", "Qt", "Docker"]
+---
+
+## Why it exists
+
+When I went back to streaming, I wanted the stream to look and behave like
+mine rather than like a template. Streamer.bot and StreamElements cover the
+usual jobs: alerts, a chat bot, go-live posts. bootleg does those jobs my way,
+in one program I can read end to end, and it does a few they don't.
+
+## What it does
+
+**The room.** The main overlay is a basement full of CRT sets. I rendered it
+once in Blender as separate light passes, and the browser relights it live from
+whatever the tubes are showing, then tone maps and dithers it down to a PS1
+look. The big tube carries the scene's message, the small sets loop graphics,
+and the desk follows the chat: an oscilloscope shows how busy it is and a
+terminal scrolls it. Every sound in the room is made in the page; there are no
+audio files.
+
+**One overlay, every scene.** The page follows OBS's current scene and changes
+mode without reloading, so Starting, BRB, Ending and Just Chatting are one
+browser source rather than four. The changes between them are effects of their
+own: a power cut, a camera move and a wake-up.
+
+**The chat bot** thanks people for follows, subs, gifts, bits and raids, with
+the bigger ones as Twitch announcements, and the overlay shows each thank-you
+as a card instead of a chat line, so the screen and the chat say the same
+thing. Subs, VIPs and mods can type `!clip` to clip the last 30 seconds: the bot
+posts the link in chat and on Discord, and the BRB screen credits whoever asked.
+After two minutes away, the BRB screen plays the channel's top clips.
+
+**Discord.** A bot announces the stream the moment it starts. When it ends, the
+same post becomes a summary: how long it ran, the most viewers at once, new
+followers, subs, bits, raids and chatters, and a link to watch it back. A
+restart within 15 minutes is treated as the same stream, so it isn't announced
+twice.
+
+**A native OBS plugin**, in C++ and Qt like OBS's own panels, because browser
+docks don't work for OBS on Wayland. It adds a dock with the on-air status and
+the feed of what happened, and tells bootleg the instant the stream starts or
+stops, where Twitch can take a minute or more to list it as live. It also puts
+the viewer count in OBS's status bar, applies scene rules (on BRB the mic mutes
+and the music plays; back in the game it's the reverse), moves the camera
+between six places through a VHS-jump effect, and opens a socket my Stream Deck
+driver uses to switch scenes and show what's live.
+
+## How it's built
+
+**One event core.** Twitch, Discord and OBS feed events into a single core, and
+everything else listens to it: the bot, the alerts, the Discord posts, the
+overlays. Nothing talks to anything else directly, so a new feature is a new
+listener, and one listener failing can't stop the rest. Every event is a type in
+one shared file, used by the server and the overlays alike.
+
+**Safe to put on a server.** bootleg can run on a remote machine so the bot is
+always up, and given a public address it locks itself:
+- There's no password, only passkeys, and every API route needs one.
+- Overlay addresses carry a key; without it, a page loads but is told nothing.
+- The OBS plugin pairs with a one-use, ten-minute code and gets a token that
+  can do what the plugin needs and nothing else.
+- Someone helping on a stream can be sent a link that moves the camera and
+  does nothing else.
+- No password or secret is stored, only the tokens Twitch hands back, which
+  renew themselves.
+
+It ships as a container behind Traefik.
+
+**Audio on Linux.** OBS on Linux can't capture a single program's sound, so
+bootleg builds a PipeWire capture plugin for it and keeps the game and desktop
+audio lists in step, so a game being set up during the Starting scene is never
+heard.
+
+## How it went
+
+I built it over twelve days in November 2026: about 8,800 lines of TypeScript
+and 2,100 of C++, and I stream on it. Next is DUNGEON.EXE, a dungeon the chat
+votes its way through on the BRB computer.

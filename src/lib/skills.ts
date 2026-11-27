@@ -42,8 +42,6 @@ export const skills: Skill[] = [
     tools: ["Astro", "React", "TypeScript", "Tailwind", "three.js", "GSAP"],
     proof: [
       { label: "This site", href: "/work/dylancollins-me/" },
-      { label: "Nerd-Up Collective concept", href: "/demos/nerd-up-collective/" },
-      { label: "Waterford Comics concept", href: "/demos/waterford-comics/" },
     ],
   },
   {
@@ -97,7 +95,6 @@ export const skills: Skill[] = [
     tools: ["Linux", "Docker", "GitHub Actions", "nginx", "Apache", "Coolify", "Tailscale"],
     proof: [
       { label: "VPS", href: "/work/vps/" },
-      { label: "Media server", href: "/work/media-server/" },
     ],
   },
   {

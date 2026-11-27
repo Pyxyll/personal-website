@@ -24,9 +24,9 @@ export const now = {
     {
       kind: "work",
       label: "Work",
-      line: "Lead developer on The B!G Idea's platform: live in schools since August, and a Tech for Good award in November.",
+      line: "Lead developer on The B!G Idea's platform: live in schools since August, and a Tech 4 Good award in November.",
       detail: [
-        "Lead developer on The B!G Idea's education platform. The new version went live in schools in August, and in November it won the Tech for Good Service Award at the Technology Ireland Industry Awards.",
+        "Lead developer on The B!G Idea's education platform. The new version went live in schools in August, and in November it won the Tech 4 Good Service Award at the Technology Ireland Industry Awards.",
         "These days it's the steady part after a launch: improvements, bug fixes and support.",
       ],
     },

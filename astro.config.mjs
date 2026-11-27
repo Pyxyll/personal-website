@@ -18,6 +18,13 @@ export default defineConfig({
     "/work/pagerr/demo": "/work/",
     "/work/shiftdesk": "/work/",
     "/work/shiftdesk/demo": "/work/",
+    // The colour picker grew into cosmic-toys; the small COSMIC applets and
+    // the media server came off the site to make room for bigger projects.
+    "/work/cosmic-color-picker": "/work/cosmic-toys/",
+    "/work/cosmic-govee-applet": "/work/",
+    "/work/cosmic-mediaplayer-applet": "/work/",
+    "/work/cosmic-pulsar-applet": "/work/",
+    "/work/media-server": "/work/",
     // Writing is gone for now. Its one post's link lands on the homepage.
     "/writing": "/",
     "/writing/moving-clients-off-wordpress": "/",
@@ -38,11 +45,7 @@ export default defineConfig({
       changefreq: "monthly",
       priority: 0.7,
       lastmod: new Date(),
-      // /demos/ holds noindexed spec concepts pitched to prospects — listing
-      // them here would contradict their robots tag and put them in front of
-      // the businesses they're about.
-      filter: (page) =>
-        !page.includes("/og/") && !page.includes("/og.png") && !page.includes("/demos/"),
+      filter: (page) => !page.includes("/og/") && !page.includes("/og.png"),
       serialize: (item) => {
         // Bump home + the pages a hiring manager reads; lower /contact, /now, /privacy.
         if (item.url === "https://dylancollins.me/") item.priority = 1.0;

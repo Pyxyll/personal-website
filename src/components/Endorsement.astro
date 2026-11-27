@@ -9,12 +9,13 @@
  * stops. Then the caret blinks out, the selection lets go, and the name
  * follows.
  *
- * The typed copy is drawn from the start at its full size, each character
- * hidden until its turn, so the box is drawn to the size the quote will be
- * and nothing reflows as it types. That copy is hidden from the
- * accessibility tree; a plain copy beside it is what a screen reader reads,
- * all of it, at once. Without JavaScript, or under reduced motion, the quote
- * is simply there.
+ * The page carries the quote once, as plain text, and that is all anything
+ * reading the page finds. Where the animation will run, the script sets the
+ * typed copy beside it: drawn from the start at its full size, each
+ * character hidden until its turn, so the box is drawn to the size the quote
+ * will be and nothing reflows as it types. The plain copy then becomes the
+ * screen reader's, read all at once, and the typed one is hidden from it.
+ * Without JavaScript, or under reduced motion, the quote is simply there.
  */
 import type { Endorsement } from "../lib/endorsements";
 
@@ -22,7 +23,6 @@ interface Props {
   endorsement: Endorsement;
 }
 const { endorsement } = Astro.props;
-const chars = [...endorsement.quote];
 ---
 
 <figure data-reveal data-quote class="quote m-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10">
@@ -32,10 +32,7 @@ const chars = [...endorsement.quote];
   >“</span>
   <div class="lg:col-span-10 flex flex-col gap-6">
     <blockquote class="relative m-0 max-w-4xl text-[clamp(1.5rem,3.2vw,2.25rem)] font-medium tracking-tight leading-snug text-ink">
-      <p class="sr-only">{endorsement.quote}</p>
-      <p class="m-0 quote-typed" aria-hidden="true">
-        {chars.map((c) => <span class="ch">{c}</span>)}<span class="caret"></span>
-      </p>
+      <p class="m-0 quote-text">{endorsement.quote}</p>
       <span class="marquee" aria-hidden="true">
         <i class="handle tl"></i>
         <i class="handle tr"></i>
@@ -245,9 +242,35 @@ const chars = [...endorsement.quote];
     fig.classList.add("is-done");
   }
 
+  /* The typed copy, one span a character, after the plain one, which
+     becomes the screen reader's. */
+  const arm = (fig: HTMLElement) => {
+    const plain = fig.querySelector<HTMLElement>(".quote-text")!;
+    /* Made here, so they carry the component's scope attribute by hand, or
+       its styles would not reach them. */
+    const scope = [...plain.attributes].filter((a) => a.name.startsWith("data-astro-cid"));
+    const make = (tag: string, cls: string) => {
+      const el = document.createElement(tag);
+      el.className = cls;
+      for (const a of scope) el.setAttribute(a.name, a.value);
+      return el;
+    };
+    const typed = make("p", "m-0 quote-typed");
+    typed.setAttribute("aria-hidden", "true");
+    for (const c of plain.textContent ?? "") {
+      const ch = make("span", "ch");
+      ch.textContent = c;
+      typed.append(ch);
+    }
+    typed.append(make("span", "caret"));
+    plain.classList.add("sr-only");
+    plain.after(typed);
+    fig.classList.add("is-armed");
+  };
+
   figs.forEach((fig) => {
     if (still) return;
-    fig.classList.add("is-armed");
+    arm(fig);
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
