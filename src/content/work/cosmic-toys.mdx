@@ -1,0 +1,70 @@
+---
+title: "cosmic-toys"
+summary: "A PowerToys-style toolbox for the COSMIC desktop: a colour picker, a find-my-cursor spotlight, a screen ruler and live-text OCR, behind one set of hotkeys and a shared daemon. It started as the colour picker COSMIC didn't have."
+tagline: "A PowerToys-style toolbox for COSMIC."
+category: "COSMIC"
+role: "Solo"
+publishedAt: 2026-05-06
+featured: 5
+stack: ["Rust", "Wayland", "libcosmic", "tokio"]
+repo: "https://github.com/Pyxyll/cosmic-toys"
+---
+
+## Why it exists
+
+COSMIC didn't have a working colour picker. `hyprpicker` won't run, because the
+compositor doesn't expose the `wlr-screencopy` protocol it relies on, and the
+desktop portal's own `PickColor` handler is still a stub. So I built one and
+released it as cosmic-color-picker in May 2026. The toolbox grew around it,
+under a new name.
+
+## What's in it
+
+- **Colour picker.** A magnifier on the cursor, pixel-precise sampling, the
+  result straight to the clipboard, readouts in HEX, RGB, HSL, HSV and OKLCH,
+  and a history of recent picks.
+- **Find mouse.** A brief dimmed overlay with a bright ring around the pointer,
+  for when you've lost it on a big desktop.
+- **Screen ruler.** Drag for a distance, Shift-drag for a rectangle, with a
+  loupe and angle snapping.
+- **Live text, in alpha.** Drag over text on screen to copy it, using the
+  system's Tesseract.
+
+## How it's built
+
+Three programs, one source of truth.
+
+- **The daemon**, `cosmic-toysd`, has no GUI toolkit at all: just tokio and
+  Smithay's client toolkit. It owns the IPC socket, draws each tool's overlay
+  as a layer-shell surface when asked, and keeps the state. A systemd user unit
+  starts it at login.
+- **The app**, `cosmic-toys`: one window with a page per tool, and settings
+  where you bind a hotkey by pressing it.
+- **The panel applet**: a button per tool, and the recent colours.
+
+The hotkeys, the applet and the app all go through the daemon, so a colour
+picked any of the three ways lands in the same history. The daemon writes each
+tool's state to a config file that the app and the applet both watch, so they
+stay current without the processes having to message each other.
+
+Most of the hard parts were Wayland's rules. Capture goes through `grim`, which
+only speaks COSMIC's capture protocol from version 1.5, and the first bug report
+anyone filed was exactly that error on an older one; the requirement is in the
+README now. The magnifier waits for the first movement of the mouse, because
+COSMIC doesn't tell a new overlay where the pointer is, and guessing put it on
+the wrong monitor. And when the picker became cosmic-toys, the first launch
+moved everyone's colour history to the new name on its own.
+
+## How it went
+
+Four releases from May to September 2026, packaged for the AUR, Debian, Fedora
+and as a static build. About 105 downloads of the packaged releases on GitHub,
+not counting the AUR, 16 stars, and five issues from other people, including
+requests for a Nix package and for a wiggle of the mouse to find it.
+
+## Where it stands
+
+I moved my desktop off COSMIC in September 2026, so v0.3.1 is the last release
+from me, and the repository is open to anyone who wants to take it over. The
+colour picker will be obsolete the day COSMIC's own `PickColor` lands. The rest
+of the box won't be.

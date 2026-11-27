@@ -18,7 +18,7 @@ import FramedSection from "../../components/FramedSection.astro";
 import { webPageSchema, breadcrumbSchema } from "../../lib/schema";
 import { site } from "../../lib/site";
 
-const updatedDate = new Date("2026-11-25");
+const updatedDate = new Date("2026-11-27");
 const updated = new Intl.DateTimeFormat("en-IE", {
   year: "numeric",
   month: "long",
@@ -82,12 +82,6 @@ const pageDesc =
               There is no analytics on this site, no advertising, no tracking pixels
               and no cookies set by me. I do not know who visits, only that someone
               did.
-            </p>
-            <p>
-              One exception worth naming: a couple of the concept pages under{" "}
-              <code>/demos/</code> load fonts from Google Fonts, which means your
-              browser makes a request to Google when you open them. No other page
-              does this.
             </p>
           </div>
         </section>

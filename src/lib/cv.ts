@@ -33,10 +33,18 @@ export interface Award {
   detail: string;
   /** Where to read more, usually the matching case study. */
   href?: string;
+  /** Independent confirmation: a published list of the winners. */
+  source?: { label: string; href: string };
 }
 
 export interface Study {
   award: string;
+  /** Its NFQ level, shown beside the name. A Level 7 degree is graded
+   *  Distinction, Merit or Pass; "honours" and "1.1" belong to Level 8, so
+   *  never describe this one that way. */
+  level?: string;
+  /** The classification awarded. */
+  result?: string;
   school: string;
   start: string;
   end: string;
@@ -54,9 +62,9 @@ export const cv = {
       work. The second is the person, in my own words from my designed CV.
       The third is how I work and where I trained. */
   summary: [
-    "Full-stack developer with more than ten years of building for the web and running the systems underneath, working mainly in Laravel, React, TypeScript and PostgreSQL. I'm the lead developer on The B!G Idea's education platform, which went live in schools across Ireland in August 2026 and won the Tech for Good Service Award that November.",
+    "Full-stack developer with more than ten years of building for the web and running the systems underneath, working mainly in Laravel, React, TypeScript and PostgreSQL. I'm the lead developer on The B!G Idea's education platform, which went live in schools across Ireland in August 2026 and won the Tech 4 Good Service Award that November.",
     "I'm driven by a passion for picking up new disciplines and mastering them. I have a keen eye for detail and love an interesting challenge; I'm a self-starter who thrives on personal and professional growth, and an effective collaborator with strong communication skills and a friendly, down-to-earth manner.",
-    "I work with AI coding agents every day and treat them as a tool with limits: briefed properly, run in parallel, and checked line by line. First class honours in Multimedia Applications Development from SETU Waterford, on top of the years of doing it for a living.",
+    "I work with AI coding agents every day and treat them as a tool with limits: briefed properly, run in parallel, and checked line by line. A BSc in Multimedia Applications Development from SETU Waterford, awarded with Distinction, on top of the years of doing it for a living.",
   ],
 
   experience: [
@@ -74,12 +82,13 @@ export const cv = {
         "Designed for under-18s from the start: students use team links instead of accounts, so the platform holds far less personal data about them, and I took it through an independent data protection (GDPR) and safeguarding readiness review.",
         "Built a role-themed design system and component library in React and Tailwind, so every screen in the product comes from shared components.",
         "Built the email engine (typed triggers, batching, date-anchored and scheduled sends on Redis queues) and the real-time features over WebSockets with Laravel Reverb: presence, team chat and live presentation sync.",
+        "Built the platform's Monday.com integration on Monday's GraphQL API.",
         "Set up the CI/CD pipeline: about 1,200 automated tests against PostgreSQL on every pull request, approval-gated deploys, staging, nightly backups and a locked-down document conversion service on Linux.",
         "Kept the original WordPress platform running and improving while the new one was built: about 15% faster, with issue reports down by about 92%, for the smoothest programme cycle to date. Then migrated its accounts across.",
         "Led the response to a security incident on the original platform, restoring service and hardening it against future attacks.",
         "Scoped, reviewed and onboarded the work of contract developers and an outside design partner: a shared backlog, code review, and the conventions and technical documentation they worked from.",
       ],
-      stack: ["Laravel", "PHP", "React", "TypeScript", "Inertia", "PostgreSQL", "Redis", "Tailwind", "WordPress"],
+      stack: ["Laravel", "PHP", "React", "TypeScript", "Inertia", "PostgreSQL", "Redis", "GraphQL", "Tailwind", "WordPress"],
     },
     {
       title: "Freelance Web Developer and Sysadmin",
@@ -126,31 +135,38 @@ export const cv = {
   /** Newest first. The hero shows the first one. */
   awards: [
     {
-      name: "Tech for Good Service Award",
+      name: "Tech 4 Good Service Award",
       event: "Technology Ireland Industry Awards",
       year: "2026",
       detail:
         "Won by The B!G Idea's education platform. I'm the lead developer on its new version.",
       href: "/work/learning-platform/",
+      /* Technology Ireland's own winners page stops at 2025 so far; swap
+         this for it once the 2026 list is up. */
+      source: {
+        label: "Reported by Silicon Republic",
+        href: "https://www.siliconrepublic.com/innovation/fintech-clevercards-technology-ireland-industry-awards",
+      },
     },
   ] as Award[],
 
   education: [
     {
       award: "BSc in Multimedia Applications Development",
+      level: "Level 7",
+      result: "Distinction",
       school: "South East Technological University, Waterford",
       start: "2022",
       end: "2025",
       detail:
-        "First class honours (1.1). A computing degree combining software development with creative media and UX design. Strongest modules: JavaScript (100%), Front-end Web Development (98%), UX Design (96%), Web Application Development (90%), System Administration (80%).",
+        "A computing degree combining software development with creative media and UX design. Strongest modules: JavaScript (100%), Front-end Web Development (98%), UX Design (96%), Web Application Development (90%), System Administration (80%).",
     },
   ] as Study[],
 
   /** Grouped, most-used first within each group. */
   skills: [
-    { group: "Languages", items: ["TypeScript", "JavaScript", "PHP", "SQL", "Rust", "Bash", "Dart", "HTML", "CSS"] },
+    { group: "Languages", items: ["TypeScript", "JavaScript", "PHP", "SQL", "Rust", "Bash", "HTML", "CSS"] },
     { group: "Front-end", items: ["React", "Astro", "Inertia", "Next.js", "Svelte", "Tailwind CSS", "Bootstrap", "three.js", "GSAP"] },
-    { group: "Mobile", items: ["React Native", "Flutter"] },
     { group: "Back-end", items: ["Laravel", "Node.js", "Express", "WordPress", "REST", "WebSockets", "GraphQL"] },
     { group: "Data", items: ["PostgreSQL", "MySQL", "Redis", "MongoDB"] },
     { group: "Infrastructure", items: ["Linux", "Docker", "Git", "GitHub Actions", "nginx", "Apache", "Coolify", "AWS EC2", "Cloudflare Workers"] },

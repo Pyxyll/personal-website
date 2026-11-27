@@ -86,7 +86,7 @@ const openSection = sections.find((sec) => sec.panel && pathname.startsWith(sec.
           the job the space would have. Read aloud that would come out as one
           word, so the link carries the name properly spaced. */}
       <a href="/" class="nav-mark justify-self-start" aria-label="Dylan Collins, home">
-        <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
+        <span class="nav-mark-word" aria-hidden="true"><span class="nav-mark-first">Dylan</span><span class="nav-mark-gap"> </span><span class="nav-mark-last">Collins</span><span class="nav-mark-stop">.</span></span>
       </a>
 
       {/* client:media matches the CSS breakpoint that shows this at all, so
@@ -346,6 +346,10 @@ const openSection = sections.find((sec) => sec.panel && pathname.startsWith(sec.
     white-space: nowrap;
     color: var(--color-ink);
     transition: color 0.2s ease;
+  }
+  /* A real space, for anything reading the name as text, set at no width. */
+  .nav-mark-gap {
+    font-size: 0;
   }
   .nav-mark-first {
     font-weight: 300;

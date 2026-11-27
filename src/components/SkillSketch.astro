@@ -18,7 +18,8 @@
  *   - Small mono labels can sit in the drawing ("rows 1,240", "live"). They
  *     are off unless a figure asks for them with `labels`: the drawings read
  *     without the words, and the words made them busier than they needed
- *     to be.
+ *     to be. Off, they are not in the markup at all, or anything reading the
+ *     page as text finds "03:14 200 ok x3" in the middle of it.
  *   - The accent is a signal, not a paint. One pink thing per mark, and it is
  *     the thing that moves or the thing that matters.
  *
@@ -116,8 +117,8 @@ const grid = `dots-${slug}`;
         <path class="m-rule" d="M62 62H112" />
         <rect class="m-ink" data-el="cta" x="62" y="72" width="36" height="12" rx="1.5" />
         <path class="flow lead" d="M98 78H170V96" />
-        <text class="lbl" x="50" y="14">index.html</text>
-        <text class="lbl" x="170" y="108" text-anchor="end">one action</text>
+        {labels && <text class="lbl" x="50" y="14">index.html</text>}
+        {labels && <text class="lbl" x="170" y="108" text-anchor="end">one action</text>}
         <circle class="f-sig" data-el="cursor" cx="80" cy="78" r="2" />
       </>
     )}
@@ -137,8 +138,8 @@ const grid = `dots-${slug}`;
         <path class="m-ink" data-el="bar" d="M134 76V52" />
         <path class="m-ink" data-el="spark" d="M146 72L152 66L158 69L164 58L170 62" />
         <path class="flow" d="M74 60H108" />
-        <text class="lbl" x="24" y="30">rows 1,240</text>
-        <text class="lbl" x="174" y="98" text-anchor="end">live</text>
+        {labels && <text class="lbl" x="24" y="30">rows 1,240</text>}
+        {labels && <text class="lbl" x="174" y="98" text-anchor="end">live</text>}
         <circle class="f-sig" data-el="tip" cx="170" cy="62" r="1.8" />
       </>
     )}
@@ -153,9 +154,9 @@ const grid = `dots-${slug}`;
         <circle class="m-ink node" data-el="node" cx="100" cy="18" r="3" />
         <path class="flow" d="M14 60H54" />
         <path class="flow" d="M100 14V4" />
-        <text class="lbl" x="14" y="55">in</text>
-        <text class="lbl" x="104" y="8">out</text>
-        <text class="lbl" x="100" y="114" text-anchor="middle">every 5 min</text>
+        {labels && <text class="lbl" x="14" y="55">in</text>}
+        {labels && <text class="lbl" x="104" y="8">out</text>}
+        {labels && <text class="lbl" x="100" y="114" text-anchor="middle">every 5 min</text>}
         <circle class="f-sig" data-el="job" cx="129.7" cy="89.7" r="2.6" />
       </>
     )}
@@ -173,8 +174,8 @@ const grid = `dots-${slug}`;
         <circle class="m-rule node" data-el="light" cx="57" cy="92.5" r="2" />
         <circle class="m-rule node" data-el="light" cx="57" cy="70.5" r="2" />
         <path class="flow lead" d="M57 48.5H36V20" />
-        <text class="lbl" x="28" y="14">03:14 <tspan class="lbl-strong">200 ok</tspan></text>
-        <text class="lbl" x="152" y="108">x3</text>
+        {labels && <text class="lbl" x="28" y="14">03:14 <tspan class="lbl-strong">200 ok</tspan></text>}
+        {labels && <text class="lbl" x="152" y="108">x3</text>}
         <circle class="f-sig" data-el="live" cx="57" cy="48.5" r="2" />
       </>
     )}
@@ -198,8 +199,8 @@ const grid = `dots-${slug}`;
         <path class="flow" data-el="in" d="M40 60H80" />
         <path class="flow" data-el="in" d="M38 89H62L82.7 70" />
         <path class="flow" data-el="out" d="M120 60H150" />
-        <text class="lbl" x="20" y="14">40 layouts</text>
-        <text class="lbl" x="168" y="86" text-anchor="end">1 schema</text>
+        {labels && <text class="lbl" x="20" y="14">40 layouts</text>}
+        {labels && <text class="lbl" x="168" y="86" text-anchor="end">1 schema</text>}
         <circle class="f-sig" data-el="centre" cx="100" cy="60" r="3" />
         <circle class="f-sig fx" data-el="doc" cx="0" cy="0" r="2" />
         <circle class="f-sig fx" data-el="doc" cx="0" cy="0" r="2" />
@@ -217,15 +218,15 @@ const grid = `dots-${slug}`;
         <rect class="m-ink" data-el="bar" x="56" y="70" width="28" height="10" />
         <path class="m-rule" d="M56 96H156" />
         <path class="m-rule" d="M56 96v3M76 96v3M96 96v3M116 96v3M136 96v3M156 96v3" />
-        <text class="lbl" x="56" y="16">hours lost / week</text>
-        <text class="lbl" x="40" y="37.5">01</text>
-        <text class="lbl" x="40" y="57.5">02</text>
-        <text class="lbl" x="40" y="77.5">03</text>
-        <text class="lbl lbl-strong" data-el="val" x="140" y="37.5">4.2h</text>
-        <text class="lbl" data-el="val" x="112" y="57.5">1.5h</text>
-        <text class="lbl" data-el="val" x="88" y="77.5">0.5h</text>
-        <text class="lbl" x="56" y="108">0</text>
-        <text class="lbl" x="156" y="108" text-anchor="end">5h</text>
+        {labels && <text class="lbl" x="56" y="16">hours lost / week</text>}
+        {labels && <text class="lbl" x="40" y="37.5">01</text>}
+        {labels && <text class="lbl" x="40" y="57.5">02</text>}
+        {labels && <text class="lbl" x="40" y="77.5">03</text>}
+        {labels && <text class="lbl lbl-strong" data-el="val" x="140" y="37.5">4.2h</text>}
+        {labels && <text class="lbl" data-el="val" x="112" y="57.5">1.5h</text>}
+        {labels && <text class="lbl" data-el="val" x="88" y="77.5">0.5h</text>}
+        {labels && <text class="lbl" x="56" y="108">0</text>}
+        {labels && <text class="lbl" x="156" y="108" text-anchor="end">5h</text>}
         <path class="m-sig dash fx" data-el="scan" d="M56 24V88" />
       </>
     )}
@@ -278,7 +279,9 @@ const grid = `dots-${slug}`;
      at any distance. Once it is up the SVG is hidden; it remains the
      fallback. The canvas and label rules live in global.css because they
      are appended to the card, outside this component's scope. */
-  .sketch.is-3d svg {
+  .sketch.is-3d svg,
+  /* Waiting for its still (touch screens, reduced motion). */
+  .sketch.is-pending svg {
     visibility: hidden;
   }
   .sketch svg {
@@ -365,7 +368,7 @@ const grid = `dots-${slug}`;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(html.js) .sketch.is-live:not(.is-ready) svg {
+    :global(html.js) .sketch.is-live:not(.is-ready):not(.is-pending) svg {
       visibility: visible;
     }
     .sketch .flow {

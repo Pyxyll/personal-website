@@ -121,6 +121,19 @@
   display: block;
   pointer-events: none;
 }
+/* A still (marks3d.ts: touch screens, reduced motion) fades in once drawn. */
+.has-3d > canvas.gl-still {
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.has-3d > canvas.gl-still.is-in {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .has-3d > canvas.gl-still {
+    transition: none;
+  }
+}
 .has-3d > .lbl3d {
   position: absolute;
   top: 0;

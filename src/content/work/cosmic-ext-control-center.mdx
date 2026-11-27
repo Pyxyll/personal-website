@@ -1,0 +1,84 @@
+---
+title: "cosmic-ext-control-center"
+summary: "A modular control center for the COSMIC desktop. You lay out the tiles you want in an editor, use them live from a panel popup, and add your own with a small plugin file. Packaged for Arch, Debian and Fedora."
+tagline: "A modular, pluggable control center for COSMIC."
+category: "COSMIC"
+role: "Solo"
+publishedAt: 2026-06-12
+featured: 3
+stack: ["Rust", "libcosmic", "Wayland", "D-Bus"]
+repo: "https://github.com/Pyxyll/cosmic-ext-control-center"
+---
+
+## What it is
+
+COSMIC splits its quick settings across separate panel applets: one for Wi-Fi,
+one for sound, one for Bluetooth, one for power, each with its own popup. This
+puts them in one place, laid out the way you use them, like the control centre
+on a phone.
+
+It is two programs. An editor window, where you add, remove, reorder and resize
+tiles from a palette. And a panel applet, which shows that same layout as a
+popup where every tile is live: Wi-Fi and VPN with their networks listed
+inline, Bluetooth, volume and microphone, media controls, power profiles, light
+and dark mode, CPU, GPU, RAM and disk gauges, battery, notifications, Do Not
+Disturb, and lock, sleep and shut down. The panel button itself can show a
+cluster of status icons instead of a single one.
+
+If the tile you want isn't built in, you write one. A plugin is a single RON
+file that describes a tile and binds its sliders, toggles, labels and buttons
+to shell commands, so adding one takes no Rust and no recompiling:
+
+```ron
+Manifest(
+  id: "demo.echo", name: "Echo Demo", icon: "utilities-terminal-symbolic", size: Large,
+  controls: [
+    Label(id: "clock", label: "Clock", get: Cmd("date +%H:%M:%S"), poll: 1.0),
+    Toggle(id: "flag", label: "Flag", set: Cmd("notify-send 'Echo Demo' 'flag = {value}'")),
+  ],
+)
+```
+
+## How it's built
+
+**Events, not polling.** The status icons follow NetworkManager, BlueZ and
+power-profiles-daemon through their D-Bus signals. PipeWire has no D-Bus
+interface, so audio follows the `pactl subscribe` event stream instead. Nothing
+polls while the desktop is idle, and each source only runs while its icon is
+switched on, so the applet never watches a service you aren't showing.
+
+**Off the UI thread.** Reading a module's state can mean a slow system call, so
+refreshes run in the background and the popup never waits on one.
+
+**The renderer.** On some machines the popup silently fell back to software
+rendering and felt janky. At startup the app checks whether a Vulkan driver is
+present and asks for the GPU when there is one, while leaving machines without
+one alone. COSMIC still draws applet popups in software in places, so I chose
+not to animate the inline network lists: reflowing the whole popup every frame
+was too expensive to stay smooth, and a list that snaps open beats one that
+stutters.
+
+**A shortcut for the popup.** The running applet serves a small D-Bus
+interface, so a global keyboard shortcut can open it without a click.
+
+**Packaged from day one** for the AUR, as `.deb` and `.rpm` packages, and as a
+static build. A day after the first release I renamed it from
+cosmic-control-center to cosmic-ext-control-center, to follow System76's
+trademark policy for third-party COSMIC projects.
+
+## How it went
+
+Six releases in five weeks, from 0.1.0 on 12 June 2026 to 0.1.5 on 15 July.
+Other people have filed eleven issues, and a good share of each release came
+from them: the status-icon cluster on the panel button and following the
+system's accent colour were both requests from a user, as were hover feedback
+across the whole tile and better-aligned action buttons, and the last release
+fixed a Wi-Fi status another user reported reading wrong. It reached two dozen
+stars, and about 110 downloads of the packaged releases on GitHub, not counting
+the AUR.
+
+## Where it stands
+
+I moved my desktop off COSMIC in September 2026, so 0.1.5 is the last release
+from me. It is usable day to day, and the repository is open to anyone who
+wants to take it over.

@@ -124,7 +124,10 @@ const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\
                 <dt class="text-[13px] text-ink-faint">Award</dt>
                 <dd class="m-0 flex items-start gap-2.5 text-ink">
                   <AwardIcon class="mt-0.5 h-4 w-4 shrink-0 text-accent-text" />
-                  <span>{award.name}, {award.event}, {award.year}</span>
+                  <span class="flex flex-col gap-1">
+                    <span>{award.name}, {award.event}, {award.year}</span>
+                    {award.source && <a href={award.source.href} class="ilink text-sm text-ink-dim self-start">{award.source.label}</a>}
+                  </span>
                 </dd>
               </div>
             )}

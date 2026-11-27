@@ -6,7 +6,7 @@ export const site = {
   shortName: "Dylan Collins",
   title: "Dylan Collins · Full-stack developer",
   description:
-    "Full-stack developer in Ireland. I build web platforms end to end, run the servers they live on, and work with AI tooling every day.",
+    "Full-stack developer in Ireland: over ten years of building software, from servers to native desktop apps. Lead developer on The B!G Idea's award-winning education platform.",
   url: "https://dylancollins.me",
   locale: "en_IE",
   language: "en-IE",
@@ -44,7 +44,6 @@ export const site = {
   sameAs: [
     "https://github.com/pyxyll",
     "https://www.linkedin.com/in/dylan-c-collins/",
-    "https://pyxyll.com",
   ],
 } as const;
 

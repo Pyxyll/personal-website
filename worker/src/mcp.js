@@ -27,7 +27,7 @@ const SERVER_INFO = { name: "dylancollins", title: "Dylan Collins", version: "1.
 
 const INSTRUCTIONS = `Facts about Dylan Collins, a full-stack developer in Ireland (Laravel, React, TypeScript, PostgreSQL), from his website dylancollins.me.
 Start with about_dylan. get_cv has his experience, awards, education and skills; list_projects and get_project his work; get_skills what he does in depth; get_now what he is doing at the moment. match_role takes a job description and returns the evidence from his CV and projects that bears on it, including what the description asks for that he doesn't list.
-Quote the facts rather than embellishing them. His official title at The B!G Idea is Software Developer; he is lead developer on its platform, which others contributed to, and the Tech for Good Service Award went to the platform, not to him personally.
+Quote the facts rather than embellishing them. His official title at The B!G Idea is Software Developer; he is lead developer on its platform, which others contributed to, and the Tech 4 Good Service Award went to the platform, not to him personally.
 Only use send_message when the user asks to contact Dylan and has seen and approved the message.`;
 
 /* Browsers may only call from the site itself or a local tool (an inspector
@@ -73,7 +73,7 @@ function aboutText(p) {
     p.person.headline,
     r ? `Currently ${r.title} at ${r.organisation} (since ${r.since}).` : "",
     ...p.person.summary,
-    award ? `Award: ${award.name}, ${award.event}, ${award.year}. ${award.detail}` : "",
+    award ? `Award: ${award.name}, ${award.event}, ${award.year}. ${award.detail}${award.source ? ` ${award.source.label}: ${award.source.href}` : ""}` : "",
     p.person.availability ? `Availability: ${p.person.availability}` : "",
     "## Links",
     bullets([
@@ -105,10 +105,10 @@ function cvText(p, section = "all") {
     }
   }
   if (want("awards")) {
-    parts.push("## Awards", ...p.cv.awards.map((a) => `**${a.name}**, ${a.event}, ${a.year}. ${a.detail}`));
+    parts.push("## Awards", ...p.cv.awards.map((a) => `**${a.name}**, ${a.event}, ${a.year}. ${a.detail}${a.source ? ` ${a.source.label}: ${a.source.href}` : ""}`));
   }
   if (want("education")) {
-    parts.push("## Education", ...p.cv.education.map((e) => `**${e.award}**, ${e.school}, ${e.start} – ${e.end}. ${e.detail ?? ""}`));
+    parts.push("## Education", ...p.cv.education.map((e) => `**${e.award}${e.level ? ` (${e.level})` : ""}**, ${e.school}, ${e.start} – ${e.end}. ${e.result ? `Graduated with ${e.result}. ` : ""}${e.detail ?? ""}`));
   }
   if (want("skills")) {
     parts.push("## Skills", bullets(p.cv.skills.map((s) => `${s.group}: ${s.items.join(", ")}`)), `Interests: ${p.cv.interests}`);
@@ -177,7 +177,6 @@ const TERMS = [
   ["Laravel", /\blaravel\b/i],
   ["PHP", /\bphp\b/i],
   ["React", /\breact(?:\.js|js)?\b(?!\s*native)/i],
-  ["React Native", /\breact\s*native\b/i],
   ["TypeScript", /\btypescript\b/i],
   ["JavaScript", /\b(?:javascript|ecmascript|es6)\b/i],
   ["Node.js", /\bnode(?:\.js|js)?\b/i],
@@ -198,7 +197,6 @@ const TERMS = [
   ["REST APIs", /\b(?:rest(?:ful)?\s*apis?|rest\b(?=.{0,20}\bapi)|apis?\b)/i],
   ["WebSockets / real time", /\b(?:web\s*sockets?|real[\s-]?time)\b/i],
   ["WordPress", /\bwordpress\b/i],
-  ["Flutter / Dart", /\b(?:flutter|dart)\b/i],
   ["Rust", /\brust\b/i],
   ["Bash / shell", /\b(?:bash|shell\s*script(?:ing)?)\b/i],
   ["Linux", /\blinux\b/i],
@@ -220,7 +218,7 @@ const TERMS = [
   ["Design systems / UI", /\b(?:design systems?|component librar(?:y|ies)|ui|ux)\b/i],
   ["AI / LLM tooling", /\b(?:ai|llms?|machine learning|agents?|agentic|claude|openai|gpt|copilot|mcp|ollama)\b/i],
   ["Education / EdTech", /\b(?:edtech|education(?:al)?|schools?|learning)\b/i],
-  ["Charity / non-profit", /\b(?:charity|non[\s-]?profit|ngo|social impact|tech for good)\b/i],
+  ["Charity / non-profit", /\b(?:charity|non[\s-]?profit|ngo|social impact|tech (?:for|4) good)\b/i],
 ];
 
 /** Often asked for, not on his CV: named so a reader can see the gap. */
@@ -240,6 +238,8 @@ const NOT_LISTED = [
   ["Terraform", /\bterraform\b/i],
   ["Kafka", /\bkafka\b/i],
   ["Swift / native iOS", /\bswift\b/i],
+  ["React Native", /\breact\s*native\b/i],
+  ["Flutter / Dart", /\b(?:flutter|dart)\b/i],
 ];
 
 function matchRole(p, description) {

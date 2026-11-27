@@ -95,22 +95,23 @@ const stack = entry.data.stack.slice(0, lead ? 5 : 3);
       </p>
     </div>
     {stacked && lead && <WorkStack images={images} alt={`${entry.data.title}, three views`} onAccent={lead} />}
+    {/* Figure, then what it counts, in that order in the markup too, so
+        anything reading the text gets "8 months to go-live" rather than a
+        label followed by the next card's number. */}
     {highlights.length > 0 && (
-      <dl
+      <ul
         class:list={[
-          "grid gap-x-8 gap-y-6 m-0",
+          "grid gap-x-8 gap-y-6 m-0 p-0 list-none",
           highlights.length === 3 ? "grid-cols-3 lg:grid-cols-1 lg:pr-4" : "grid-cols-2 gap-x-10",
         ]}
       >
         {highlights.map((h) => (
-          <div class="flex flex-col gap-1">
-            <dt class="order-2 text-sm">{h.label}</dt>
-            <dd class="order-1 m-0 font-semibold tracking-tight leading-none text-[clamp(2.25rem,4vw,3rem)] tabular-nums">
-              {h.value}
-            </dd>
-          </div>
+          <li class="flex flex-col gap-1">
+            <span class="font-semibold tracking-tight leading-none text-[clamp(2.25rem,4vw,3rem)] tabular-nums">{h.value}</span>
+            {" "}<span class="text-sm">{h.label}</span>
+          </li>
         ))}
-      </dl>
+      </ul>
     )}
   </div>
 

@@ -227,6 +227,45 @@ const webglOk = (() => {
 const MARKS_3D = new Set(["website", "app", "automation", "hosting", "ai", "audit"]);
 const use3d = hoverable.matches && !reduce.matches && webglOk;
 
+/* Everywhere else WebGL runs (touch screens, reduced motion), the same
+   objects as stills: each drawn once as it comes near the screen, with
+   nothing running after (still() in marks3d.ts). three.js loads on the
+   first approach, so a page never scrolled to its marks never fetches it.
+   Loading it and drawing each still are separate idle-time tasks, a screen
+   ahead of the reader, so no one of them is long enough to be felt.
+   If it fails, the figure shows the finished SVG drawing. */
+const still3d = !use3d && webglOk;
+const idle = (fn: () => void) =>
+  "requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 16);
+
+function stillFor(figs: HTMLElement[]): Set<HTMLElement> {
+  const take = figs.filter((f) => MARKS_3D.has(f.dataset.mark ?? "") && !f.classList.contains("has-labels"));
+  if (!still3d || !take.length) return new Set();
+  let lib: Promise<typeof import("./marks3d")> | null = null;
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const fig = e.target as HTMLElement;
+        io.unobserve(fig);
+        (lib ??= import("./marks3d"))
+          .then(({ still }) => new Promise<void>((done) => idle(() => (still(fig, fig.dataset.mark ?? ""), done()))))
+          .catch(() => {})
+          .finally(() => {
+            fig.classList.remove("is-pending");
+            fig.classList.add("is-ready");
+          });
+      }
+    },
+    { rootMargin: "100% 0px" },
+  );
+  for (const f of take) {
+    f.classList.add("is-pending");
+    io.observe(f);
+  }
+  return new Set(take);
+}
+
 function tiltFor(fig: HTMLElement, svg: SVGSVGElement) {
   const card = fig.closest<HTMLElement>("a") ?? fig.parentElement ?? fig;
   const grid = svg.querySelector(".grid");
@@ -281,8 +320,10 @@ const ro = new ResizeObserver((entries) => {
 });
 figures.forEach((fig) => ro.observe(fig));
 
+const stills = stillFor(figures);
+
 if (reduce.matches) {
-  for (const fig of figures) fig.classList.add("is-ready");
+  for (const fig of figures) if (!stills.has(fig)) fig.classList.add("is-ready");
 } else {
   const masters = new Map<HTMLElement, Timeline>();
 
@@ -299,6 +340,7 @@ if (reduce.matches) {
   );
 
   figures.forEach((fig, i) => {
+    if (stills.has(fig)) return;
     const slug = fig.dataset.mark ?? "";
     const svg = fig.querySelector("svg");
     const loopFor = loops[slug];

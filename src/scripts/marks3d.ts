@@ -10,10 +10,11 @@
  * grow out past its own box and across the card on the way there, behind
  * the copy, and come back when the pointer leaves.
  *
- * Loaded only when it can be used: a fine pointer that hovers, no reduced
- * motion, and WebGL available. Everything else gets the SVG schematic from
- * SkillSketch.astro and the GSAP motion in marks.ts, which is also what
- * this file falls back to if it fails to load.
+ * Live (mount) where it can be used: a fine pointer that hovers, no reduced
+ * motion, and WebGL available. Touch screens and reduced motion get the
+ * same object as a still (still), drawn once with nothing running after.
+ * Without WebGL, or if this file fails to load, marks.ts keeps the SVG
+ * schematic from SkillSketch.astro.
  *
  * ── Conventions ──────────────────────────────────────────────────────────
  *   - World units are the SVG's: a mark fits a 200 × 120 frame at rest.
@@ -689,61 +690,35 @@ export const supported = new Set(Object.keys(builders));
 const FRAME_H = 120;
 const REST = { az: 45, el: 35.264, fov: 4 };
 
-/* ── Mount ───────────────────────────────────────────────────────────────── */
+/* ── Staging ─────────────────────────────────────────────────────────────
+   What the live mark and the still share: the mark built in its figure's
+   palette, its scene and camera, the card and sheet measured, and the
+   camera placed for any blend t between rest and the shot. */
 
-export function mount(fig: HTMLElement, slug: string) {
+function stage(fig: HTMLElement, slug: string, withLabels: boolean) {
   const build = builders[slug];
   const sheet = fig.querySelector<HTMLElement>(".sheet");
-  if (!build || !sheet) return false;
+  if (!build || !sheet) return null;
 
   /* The canvas is the card, not the sheet. The sheet stays in the layout as
      the place the object is framed at rest. */
   const card = fig.closest<HTMLElement>("a") ?? fig.parentElement ?? fig;
   if (getComputedStyle(card).position === "static") card.style.position = "relative";
   card.style.isolation = "isolate";
-  card.classList.add("has-3d");
 
-  const c = paletteOf(fig);
-  const showLabels = fig.classList.contains("has-labels");
-  const mark = build(c, showLabels);
-
-  const canvas = document.createElement("canvas");
-  canvas.className = "gl";
-  card.appendChild(canvas);
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x000000, 0);
-
+  const mark = build(paletteOf(fig), withLabels);
   const scene = new THREE.Scene();
   scene.add(mark.group);
   const camera = new THREE.PerspectiveCamera(REST.fov, 1, 1, 10000);
 
-  /* Labels live in HTML over the canvas and follow their anchors. */
-  const labels: Label[] = showLabels
-    ? mark.labels.map((l) => {
-        const el = document.createElement("span");
-        el.className = "lbl3d" + (l.strong ? " lbl3d-strong" : "");
-        el.textContent = l.text;
-        card.appendChild(el);
-        return { el, anchor: new THREE.Vector3(...l.anchor).add(mark.group.position), base: 0 };
-      })
-    : [];
-
-  /* Card and sheet geometry, refreshed on resize. */
-  let cw = 1, ch = 1, sx = 0, sy = 0, sw = 1, sh = 1;
-  const fit = () => {
+  /* Card and sheet geometry, from measure(). */
+  const box = { cw: 1, ch: 1, sx: 0, sy: 0, sw: 1, sh: 1 };
+  const measure = () => {
     const cr = card.getBoundingClientRect(), sr = sheet.getBoundingClientRect();
-    cw = cr.width || 1; ch = cr.height || 1;
-    sx = sr.left - cr.left; sy = sr.top - cr.top; sw = sr.width || 1; sh = sr.height || 1;
-    renderer.setSize(cw, ch, false);
-    camera.aspect = cw / ch;
-    const dpr = renderer.getPixelRatio();
-    materials.forEach((m) => m.resolution.set(cw * dpr, ch * dpr));
+    box.cw = cr.width || 1; box.ch = cr.height || 1;
+    box.sx = sr.left - cr.left; box.sy = sr.top - cr.top; box.sw = sr.width || 1; box.sh = sr.height || 1;
+    camera.aspect = box.cw / box.ch;
   };
-  const ro = new ResizeObserver(fit);
-  ro.observe(card);
-  ro.observe(sheet);
-  fit();
 
   /* The floor's fade, if this mark has a floor. */
   const floorPoints = mark.group.getObjectByProperty("type", "Points") as THREE.Points | undefined;
@@ -757,6 +732,7 @@ export function mount(fig: HTMLElement, slug: string) {
   const right = new THREE.Vector3(), up = new THREE.Vector3(), dir = new THREE.Vector3();
   const look = new THREE.Vector3(), target = new THREE.Vector3();
   const place = () => {
+    const { cw, ch, sx, sy, sw, sh } = box;
     const t = state.t;
     const az = THREE.MathUtils.degToRad(lerp(REST.az, shot.az, t));
     const el = THREE.MathUtils.degToRad(lerp(REST.el, shot.el, t));
@@ -801,6 +777,46 @@ export function mount(fig: HTMLElement, slug: string) {
     camera.lookAt(target);
   };
 
+  return { card, sheet, mark, scene, camera, box, state, measure, place };
+}
+
+/* ── Mount: the live mark ────────────────────────────────────────────────── */
+
+export function mount(fig: HTMLElement, slug: string) {
+  const s = stage(fig, slug, fig.classList.contains("has-labels"));
+  if (!s) return false;
+  const { card, sheet, mark, scene, camera, box, state, place } = s;
+  card.classList.add("has-3d");
+
+  const canvas = document.createElement("canvas");
+  canvas.className = "gl";
+  card.appendChild(canvas);
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+
+  /* Labels live in HTML over the canvas and follow their anchors. */
+  const labels: Label[] = fig.classList.contains("has-labels")
+    ? mark.labels.map((l) => {
+        const el = document.createElement("span");
+        el.className = "lbl3d" + (l.strong ? " lbl3d-strong" : "");
+        el.textContent = l.text;
+        card.appendChild(el);
+        return { el, anchor: new THREE.Vector3(...l.anchor).add(mark.group.position), base: 0 };
+      })
+    : [];
+
+  const fit = () => {
+    s.measure();
+    renderer.setSize(box.cw, box.ch, false);
+    const dpr = renderer.getPixelRatio();
+    materials.forEach((m) => m.resolution.set(box.cw * dpr, box.ch * dpr));
+  };
+  const ro = new ResizeObserver(fit);
+  ro.observe(card);
+  ro.observe(sheet);
+  fit();
+
   /* Labels belong to the schematic view: they follow their anchors, and fade
      out as the camera moves in so they never collide with the close shot. */
   const v = new THREE.Vector3();
@@ -808,7 +824,7 @@ export function mount(fig: HTMLElement, slug: string) {
     const fade = Math.max(0, 1 - state.t * 2.5);
     for (const l of labels) {
       v.copy(l.anchor).project(camera);
-      l.el.style.transform = `translate(${((v.x + 1) / 2) * cw}px, ${((1 - v.y) / 2) * ch}px)`;
+      l.el.style.transform = `translate(${((v.x + 1) / 2) * box.cw}px, ${((1 - v.y) / 2) * box.ch}px)`;
       l.el.style.opacity = String(fade * l.base);
     }
   };
@@ -875,6 +891,82 @@ export function mount(fig: HTMLElement, slug: string) {
   ).observe(fig);
 
   fig.classList.add("is-3d");
+  return true;
+}
+
+/* ── Still: the mark as a picture ────────────────────────────────────────
+   For screens with no hover to move the camera, and for reduced motion: the
+   same object at rest, as the desktop shows it before the pointer arrives,
+   drawn once. One WebGL renderer for the whole page renders each mark and
+   the result is copied into a plain 2D canvas on its card, so nothing runs
+   per frame and the page holds one GL context however many marks it has.
+   It is drawn again only if the card changes size. */
+
+/** The moment of each mark's loop the still shows: the beat where its one
+ *  pink thing is in place, as the SVG schematic shows it at rest. */
+const POSE: Record<string, number> = {
+  /* The cursor arrived on the button, just before it presses. */
+  website: 0.7,
+  /* The packets delivered and the reading's blink over; the tip stays pink. */
+  app: 2.4,
+};
+
+let shared: THREE.WebGLRenderer | null = null;
+const offscreen = () => {
+  if (!shared) {
+    shared = new THREE.WebGLRenderer({ canvas: document.createElement("canvas"), alpha: true, antialias: true });
+    shared.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    shared.setClearColor(0x000000, 0);
+  }
+  return shared;
+};
+
+export function still(fig: HTMLElement, slug: string) {
+  /* Labels are HTML pinned to a moving camera; no figure that shows them
+     needs a still, so those keep the SVG. */
+  if (fig.classList.contains("has-labels")) return false;
+  const s = stage(fig, slug, false);
+  if (!s) return false;
+  const { card, mark, scene, camera, box, measure, place } = s;
+
+  /* The loop holds at the pose and never plays. */
+  mark.loop.pause(POSE[slug] ?? 0);
+  mark.update?.(0, 0);
+
+  const out = document.createElement("canvas");
+  out.className = "gl gl-still";
+  const ctx = out.getContext("2d");
+  if (!ctx) return false;
+
+  let drawnW = 0, drawnH = 0;
+  const paint = () => {
+    measure();
+    if (Math.abs(box.cw - drawnW) < 1 && Math.abs(box.ch - drawnH) < 1) return;
+    drawnW = box.cw; drawnH = box.ch;
+    const r = offscreen();
+    r.setSize(box.cw, box.ch, false);
+    const dpr = r.getPixelRatio();
+    materials.forEach((m) => m.resolution.set(box.cw * dpr, box.ch * dpr));
+    place();
+    r.render(scene, camera);
+    /* Copied in the same task as the render, while the drawing buffer still
+       holds it. */
+    out.width = r.domElement.width;
+    out.height = r.domElement.height;
+    ctx.drawImage(r.domElement, 0, 0);
+  };
+
+  paint();
+  card.classList.add("has-3d");
+  card.appendChild(out);
+  fig.classList.add("is-3d");
+  requestAnimationFrame(() => out.classList.add("is-in"));
+
+  let timer = 0;
+  new ResizeObserver(() => {
+    clearTimeout(timer);
+    timer = window.setTimeout(paint, 150);
+  }).observe(card);
   return true;
 }
 
