@@ -75,7 +75,7 @@ export const cv = {
         "Built a role-themed design system and component library in React and Tailwind, so every screen in the product comes from shared components.",
         "Built the email engine (typed triggers, batching, date-anchored and scheduled sends on Redis queues) and the real-time features over WebSockets with Laravel Reverb: presence, team chat and live presentation sync.",
         "Set up the CI/CD pipeline: about 1,200 automated tests against PostgreSQL on every pull request, approval-gated deploys, staging, nightly backups and a locked-down document conversion service on Linux.",
-        "Kept the original WordPress platform running and improving while the new one was built: the smoothest programme cycle to date, about 15% faster, with users growing from 900 to 1,500. Then migrated its accounts across.",
+        "Kept the original WordPress platform running and improving while the new one was built: about 15% faster, with issue reports down by about 92%, for the smoothest programme cycle to date. Then migrated its accounts across.",
         "Led the response to a security incident on the original platform, restoring service and hardening it against future attacks.",
         "Scoped, reviewed and onboarded the work of contract developers and an outside design partner: a shared backlog, code review, and the conventions and technical documentation they worked from.",
       ],
